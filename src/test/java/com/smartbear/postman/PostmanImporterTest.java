@@ -2,7 +2,6 @@ package com.smartbear.postman;
 
 import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
-import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.rest.RestRequestInterface.HttpMethod;
 import com.eviware.soapui.impl.rest.RestResource;
 import com.eviware.soapui.impl.rest.RestService;
@@ -11,15 +10,17 @@ import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.model.iface.Interface;
+import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
+import com.eviware.soapui.model.testsuite.TestProperty;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.hamcrest.CoreMatchers.instanceOf;
 
 
 public class PostmanImporterTest {
@@ -28,18 +29,31 @@ public class PostmanImporterTest {
     public static final String ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String PATH = "/WCFREST/Service.svc/ConStroka";
     public static final String PARAMETER1_NAME = "x";
-    public static final String PARAMETER1_VALUE = "{{string1}}";
+    public static final String PARAMETER1_VALUE = "${#Project#string1}";
     public static final ParameterStyle PARAMETER1_STYLE = ParameterStyle.QUERY;
     public static final String PARAMETER2_NAME = "y";
-    public static final String PARAMETER2_VALUE = "{{string2}";
+    public static final String PARAMETER2_VALUE = "${#Project#string2}";
     public static final HttpMethod REQUEST_METHOD = HttpMethod.GET;
     public static final String REQUEST_NAME = "GET Request";
+    public static final String PROPERTY1_NAME = "string1";
+    public static final String PROPERTY1_VALUE = "abc";
+    public static final String PROPERTY2_NAME = "string2";
+    public static final String PROPERTY2_VALUE = "def";
 
 
     @Test
     public void testImportRestGetRequest() {
         PostmanImporter importer = new PostmanImporter();
         WsdlProject postmanProject = importer.importPostmanCollection(REST_GET_COLLECTION_PATH);
+
+        TestProperty property1 = postmanProject.getProperty(PROPERTY1_NAME);
+        assertNotNull("Property1 is missing", property1);
+        assertEquals("Property1 has wrong value", PROPERTY1_VALUE, property1.getValue());
+
+        TestProperty property2 = postmanProject.getProperty(PROPERTY2_NAME);
+        assertNotNull("Property2 is missing", property2);
+        assertEquals("Property2 has wrong value", PROPERTY2_VALUE, property2.getValue());
+
         assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
         assertEquals("Project should have 1 interface", 1, interfaceMap.size());
@@ -67,5 +81,8 @@ public class PostmanImporterTest {
         RestRequest request = method.getRequestAt(0);
         assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Requst has wrong endpoint", ENDPOINT, request.getEndpoint());
+
+        String expandedParameter1 = PropertyExpander.expandProperties(postmanProject.getContext(), parameter1.getValue());
+        assertEquals("Expansion of parameter1 is wrong", PROPERTY1_VALUE, expandedParameter1);
     }
 }

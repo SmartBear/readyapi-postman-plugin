@@ -7,25 +7,26 @@ import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.rest.RestResource;
 import com.eviware.soapui.impl.rest.RestService;
 import com.eviware.soapui.impl.rest.RestServiceFactory;
+import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestUtils;
 import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
 import com.eviware.soapui.impl.support.HttpUtils;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlProjectPro;
+import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.JsonUtil;
 import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.StringUtils;
-import com.eviware.soapui.support.UISupport;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PostmanImporter {
     public static final String NAME = "name";
@@ -33,6 +34,9 @@ public class PostmanImporter {
     public static final String REQUESTS = "requests";
     public static final String URL = "url";
     public static final String METHOD = "method";
+    public static final String PRE_REQUEST_SCRIPT = "preRequestScript";
+    public static final String POSTMAN_OBJECT = "postman.";
+    public static final String SET_GLOBAL_VARIABLE = "setGlobalVariable(";
 
     public static final String SOAP_SUFFIX = "?wsdl";
 
@@ -59,6 +63,12 @@ public class PostmanImporter {
                             String uri = getValue(request, URL);
                             String method = getValue(request, METHOD);
                             String serviceName = getValue(request, DESCRIPTION);
+                            String preRequestScript = getValue(request, PRE_REQUEST_SCRIPT);
+
+                            if (StringUtils.hasContent(preRequestScript)) {
+                                processPreRequestScript(preRequestScript, project);
+                            }
+
                             if (isSoapRequest(uri)) {
 
                             } else {
@@ -72,19 +82,23 @@ public class PostmanImporter {
                                     String host = HttpUtils.extractHost(uri);
                                     currentEndpoint = uri.substring(0, uri.indexOf("://") + 3) + host;
                                 }
-                                XmlBeansRestParamsTestPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null, RestParametersConfig.Factory.newInstance());
+                                XmlBeansRestParamsTestPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
+                                        RestParametersConfig.Factory.newInstance());
                                 String path = RestUtils.extractParams(uri, params, false);
+                                convertParameters(params);
                                 if (path.isEmpty()) {
                                     path = "/";
                                 }
                                 RestResource restResource = restService.addNewResource(path, path);
                                 RestUtils.extractParams(uri, restResource.getParams(), false,
                                         RestUtils.TemplateExtractionOption.EXTRACT_TEMPLATE_PARAMETERS, true);
+                                convertParameters(restResource.getParams());
                                 RestMethod restMethod = restResource.addNewMethod(method);
                                 restMethod.setMethod(httpMethod);
                                 RestRequest currentRequest = restMethod.addNewRequest(method + " Request");
                                 currentRequest.setEndpoint(currentEndpoint);
                             }
+
                         }
                     }
                 }
@@ -93,6 +107,62 @@ public class PostmanImporter {
         } else {
         }
         return project;
+    }
+
+    private void processPreRequestScript(String preRequestScript, WsdlProject project) {
+        String[] commands = preRequestScript.split(";");
+        for (String commandLine : commands) {
+            String command = commandLine.trim();
+            if (command.startsWith(POSTMAN_OBJECT)) {
+                if (command.startsWith(SET_GLOBAL_VARIABLE, POSTMAN_OBJECT.length())) {
+                    int methodNameLength = POSTMAN_OBJECT.length() + SET_GLOBAL_VARIABLE.length();
+                    int closeBracketPosition = command.indexOf(")", methodNameLength);
+                    if (closeBracketPosition > 0) {
+                        String argumentsString = command.substring(methodNameLength, closeBracketPosition);
+                        String[] arguments = argumentsString.split(",");
+                        if (arguments.length == 2) {
+                            TestProperty property = project.addProperty(StringUtils.unquote(arguments[0].trim()));
+                            property.setValue(StringUtils.unquote(arguments[1].trim()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private String convertVariables(String postmanString, WsdlProject project) {
+        if (StringUtils.isNullOrEmpty(postmanString)) {
+            return postmanString;
+        }
+
+        final String POSTMAN_VARIABLE_BEGIN = "{{";
+        final String POSTMAN_VARIABLE_END = "}}";
+        final String READYAPI_VARIABLE_BEGIN = "\\${#Project#";
+        final String READYAPI_VARIABLE_END = "}";
+        final Pattern variableRegExp = Pattern.compile("\\{\\{.+\\}\\}");
+
+        StringBuffer readyApiStringBuffer = new StringBuffer();
+        Matcher matcher = variableRegExp.matcher(postmanString);
+        while (matcher.find()) {
+            String postmanVariable = matcher.group();
+            String readyApiVariable = postmanVariable
+                    .replace(POSTMAN_VARIABLE_BEGIN, READYAPI_VARIABLE_BEGIN)
+                    .replace(POSTMAN_VARIABLE_END, READYAPI_VARIABLE_END);
+            matcher.appendReplacement(readyApiStringBuffer, readyApiVariable);
+        }
+        if (readyApiStringBuffer.length() > 0) {
+            matcher.appendTail(readyApiStringBuffer);
+            return readyApiStringBuffer.toString();
+        } else {
+            return postmanString;
+        }
+    }
+
+    private void convertParameters(RestParamsPropertyHolder propertyHolder) {
+        for (TestProperty property : propertyHolder.getPropertyList()) {
+            String convertedValue = convertVariables(property.getValue(), null);
+            property.setValue(convertedValue);
+        }
     }
 
     private boolean isSoapRequest(String url) {
