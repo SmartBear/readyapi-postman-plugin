@@ -9,9 +9,14 @@ import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
+import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
+import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
+import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
+import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
 import org.junit.Test;
 
 import java.util.List;
@@ -84,5 +89,12 @@ public class PostmanImporterTest {
 
         String expandedParameter1 = PropertyExpander.expandProperties(postmanProject.getContext(), parameter1.getValue());
         assertEquals("Expansion of parameter1 is wrong", PROPERTY1_VALUE, expandedParameter1);
+
+        WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
+        WsdlTestCase testCase = testSuite.getTestCaseAt(0);
+        RestTestRequestStep testStep = (RestTestRequestStep) testCase.getTestStepAt(0);
+        TestAssertion assertion = testStep.getAssertionAt(0);
+        assertThat(assertion, instanceOf(ValidHttpStatusCodesAssertion.class));
     }
+
 }

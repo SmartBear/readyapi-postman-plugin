@@ -25,7 +25,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
     }
 
     @Override
-    public void perform(Workspace workspace, Object o) {
+    public void perform(Workspace workspace, Object param) {
         if (dialog == null) {
             dialog = ADialogBuilder.buildDialog(Form.class);
 //            dialog.setValue(Form.TYPE, RESOURCE_LISTING_TYPE);
