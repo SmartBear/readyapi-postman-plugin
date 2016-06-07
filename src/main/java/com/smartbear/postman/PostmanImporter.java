@@ -20,10 +20,14 @@ import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestProperty;
-import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
 import com.eviware.soapui.support.JsonUtil;
 import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.StringUtils;
+import com.smartbear.postman.script.PostmanScriptParser;
+import com.smartbear.postman.script.PostmanScriptTokenizer;
+import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
+import com.smartbear.postman.script.ScriptContext;
+import com.smartbear.ready.core.exception.ReadyApiException;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
@@ -32,6 +36,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,9 +48,6 @@ public class PostmanImporter {
     public static final String METHOD = "method";
     public static final String PRE_REQUEST_SCRIPT = "preRequestScript";
     public static final String TESTS = "tests";
-    public static final String POSTMAN_OBJECT = "postman.";
-    public static final String TEST_LIST = "tests[";
-    public static final String SET_GLOBAL_VARIABLE = "setGlobalVariable(";
 
     public static final String SOAP_SUFFIX = "?wsdl";
 
@@ -88,13 +90,15 @@ public class PostmanImporter {
                                     AddRestRequestToTestCaseAction addRestRequestToTestCaseAction = new AddRestRequestToTestCaseAction();
                                     addRestRequestToTestCaseAction.perform(restRequest, null);
 
-                                    WsdlTestSuite testSuite = project.getTestSuiteAt(project.getTestSuiteCount() - 1);
-                                    if (testSuite != null) {
-                                        WsdlTestCase testCase = testSuite.getTestCaseAt(testSuite.getTestCaseCount() - 1);
-                                        if (testCase != null) {
-                                            WsdlTestStep testStep = testCase.getTestStepAt(testCase.getTestStepCount() - 1);
-                                            if (testStep instanceof RestTestRequestStep) {
-                                                addAssertions(tests, (RestTestRequestStep) testStep);
+                                    if (project.getTestSuiteCount() > 0) {
+                                        WsdlTestSuite testSuite = project.getTestSuiteAt(project.getTestSuiteCount() - 1);
+                                        if (testSuite != null && testSuite.getTestCaseCount() > 0) {
+                                            WsdlTestCase testCase = testSuite.getTestCaseAt(testSuite.getTestCaseCount() - 1);
+                                            if (testCase != null && testCase.getTestStepCount() > 0) {
+                                                WsdlTestStep testStep = testCase.getTestStepAt(testCase.getTestStepCount() - 1);
+                                                if (testStep instanceof RestTestRequestStep) {
+                                                    addAssertions(tests, project, (RestTestRequestStep) testStep);
+                                                }
                                             }
                                         }
                                     }
@@ -112,48 +116,29 @@ public class PostmanImporter {
         return project;
     }
 
-    void addAssertions(String tests, Assertable assertable) {
-        final Pattern statusCodePattern = Pattern.compile("(?<=responseCode\\.code\\s*===)\\s*d+");
-        String[] commands = tests.split(";");
-        for (String commandLine : commands) {
-            String command = commandLine.trim();
-            if (command.startsWith(TEST_LIST)) {
-                int closeBracketPosition = command.indexOf(")", TEST_LIST.length());
-                if (closeBracketPosition > 0) {
-                    String assertionName = StringUtils.unquote(command.substring(TEST_LIST.length(), closeBracketPosition));
-                    int equalsPosition = command.indexOf("=", closeBracketPosition);
-                    if (equalsPosition > 0) {
-                        String assertionString = command.substring(equalsPosition);
-                        Matcher matcher = statusCodePattern.matcher(assertionString);
-                        if (matcher.find()) {
-                            ValidHttpStatusCodesAssertion assertion = (ValidHttpStatusCodesAssertion)
-                                    assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL);
-                            assertion.setCodes(matcher.group().trim());
-                        }
-                    }
-                }
-            }
+    void addAssertions(String tests, WsdlProject project, Assertable assertable) {
+        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+        PostmanScriptParser parser = new PostmanScriptParser();
+        try {
+            LinkedList<Token> tokens = tokenizer.tokenize(tests);
+
+            ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+            parser.parse(tokens, context);
+        } catch (ReadyApiException e) {
+            e.printStackTrace();
         }
     }
 
     private void processPreRequestScript(String preRequestScript, WsdlProject project) {
-        String[] commands = preRequestScript.split(";");
-        for (String commandLine : commands) {
-            String command = commandLine.trim();
-            if (command.startsWith(POSTMAN_OBJECT)) {
-                if (command.startsWith(SET_GLOBAL_VARIABLE, POSTMAN_OBJECT.length())) {
-                    int methodNameLength = POSTMAN_OBJECT.length() + SET_GLOBAL_VARIABLE.length();
-                    int closeBracketPosition = command.indexOf(")", methodNameLength);
-                    if (closeBracketPosition > 0) {
-                        String argumentsString = command.substring(methodNameLength, closeBracketPosition);
-                        String[] arguments = argumentsString.split(",");
-                        if (arguments.length == 2) {
-                            TestProperty property = project.addProperty(StringUtils.unquote(arguments[0].trim()));
-                            property.setValue(StringUtils.unquote(arguments[1].trim()));
-                        }
-                    }
-                }
-            }
+        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+        PostmanScriptParser parser = new PostmanScriptParser();
+        try {
+            LinkedList<Token> tokens = tokenizer.tokenize(preRequestScript);
+
+            ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
+            parser.parse(tokens, context);
+        } catch (ReadyApiException e) {
+            e.printStackTrace();
         }
     }
 

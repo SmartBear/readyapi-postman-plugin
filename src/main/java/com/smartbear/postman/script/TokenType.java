@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public enum TokenType {
     OBJECT("(postman|tests|responseCode)"),
-    METHOD_OR_FIELD("(\\.setGlobalVariable|\\.code)"),
+    METHOD_OR_FIELD("(setGlobalVariable|code)"),
     DOT("\\."),
     COMMA("\\,"),
     NEW_LINE("\\\\n"),
@@ -13,10 +13,12 @@ public enum TokenType {
     OPEN_SQUARE_BRACKET("\\["),
     CLOSE_SQUARE_BRACKET("\\]"),
     ASSIGN("=[^=]"),
-    EQUALS("==="),
-    STRING("\\\\\"[^\\\\\"]*\\\\\""),
-    NUMBER("\\d"),
-    END_OF_COMMAND (";");
+    EQUALS("(===|!==|>|<)"),
+    LOGIC("(&&|\\|\\|)"),
+    STRING("\"[^\"]*\""),
+    NUMBER("\\d+"),
+    END_OF_COMMAND(";"),
+    END_OF_SCRIPT("");
 
     TokenType(String regex) {
         pattern = Pattern.compile("^\\s*" + regex);
