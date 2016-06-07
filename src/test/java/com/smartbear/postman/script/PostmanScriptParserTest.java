@@ -1,6 +1,8 @@
 package com.smartbear.postman.script;
 
 import com.eviware.soapui.impl.wsdl.WsdlProject;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.ResponseSLAAssertion;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
@@ -49,7 +51,6 @@ public class PostmanScriptParserTest {
     @Test
     public void parsesResponseValidCodeAssertion() throws ReadyApiException {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        //String script = "tests[\"Response time is less than 200ms\"] = responseTime < 200;";
         String script = "tests[\"Status code is 200\"] = responseCode.code === 200;";
         LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
 
@@ -119,18 +120,36 @@ public class PostmanScriptParserTest {
     @Test
     public void parsesResponseTimeAssertion() throws ReadyApiException {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        String script = "tests[\"Response time is less than 200ms\"] = responseTime < 200;";
+        String script = "tests[\"Response time is less than 300ms\"] = responseTime < 300;";
         LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
 
         WsdlProject project = new WsdlProject();
         Assertable assertable = mock(Assertable.class);
-        ValidHttpStatusCodesAssertion assertion = mock(ValidHttpStatusCodesAssertion.class);
-        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(assertion);
+        ResponseSLAAssertion assertion = mock(ResponseSLAAssertion.class);
+        when(assertable.addAssertion(ResponseSLAAssertion.LABEL)).thenReturn(assertion);
 
         ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
         PostmanScriptParser parser = new PostmanScriptParser();
         parser.parse(tokens, context);
 
-        verify(assertion).setCodes("200");
+        verify(assertion).setSLA("300");
+    }
+
+    @Test
+    public void parsesResponseBodyEqualsAssertion() throws ReadyApiException {
+        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+        String script = "tests[\"Body is correct\"] = responseBody === \"\\\"abc def\\\"\";";
+        LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
+
+        WsdlProject project = new WsdlProject();
+        Assertable assertable = mock(Assertable.class);
+        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
+        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        PostmanScriptParser parser = new PostmanScriptParser();
+        parser.parse(tokens, context);
+
+        verify(assertion).setToken("\"\\\"abc def\\\"\"");
     }
 }

@@ -6,6 +6,10 @@ import com.eviware.soapui.model.testsuite.Assertable;
 import java.util.HashMap;
 
 public class ScriptContext {
+    public static final String RESPONSE_CODE = "responseCode";
+    public static final String RESPONSE_TIME = "responseTime";
+    public static final String RESPONSE_BODY = "responseBody";
+
     private HashMap<String, PostmanObject> objects = new HashMap<>();
 
     public void addObject(String name, PostmanObject postmanObject) {
@@ -33,7 +37,10 @@ public class ScriptContext {
         AddHttpCodeAssertionCommand addHttpCodeAssertionCommand = new AddHttpCodeAssertionCommand(assertable);
         PostmanObject responseCodeObject = new PostmanObject();
         responseCodeObject.addCommand(addHttpCodeAssertionCommand);
-        context.addObject(PostmanScriptParser.RESPONSE_CODE, responseCodeObject);
+        context.addObject(RESPONSE_CODE, responseCodeObject);
+
+        context.addObject(RESPONSE_TIME, new PostmanObject(new AddSlaAssertionCommand(assertable)));
+        context.addObject(RESPONSE_BODY, new PostmanObject(new AddSimpleEqualsAssertionCommand(assertable)));
 
         return context;
     }

@@ -8,8 +8,6 @@ import java.util.LinkedList;
 public class PostmanScriptParser {
     public static final String POSTMAN_OBJECT = "postman";
     public static final String TEST_LIST = "tests";
-    public static final String RESPONSE_CODE = "responseCode";
-    public static final String RESPONSE_TIME = "responseTime";
 
     private LinkedList<Token> tokens;
     private ScriptContext context;
@@ -61,15 +59,21 @@ public class PostmanScriptParser {
             memberName();
             argumentList();
             return executeCurrentCommand();
+        } else {
+            if (currentObject != null && currentObject.hasDefaultCommand()) {
+                currentCommand = currentObject.getDefaultCommand();
+                currentCommand.prepare();
+            }
         }
         return null;
     }
 
     private Object executeCurrentCommand() {
+        Object result = null;
         if (currentCommand != null && currentCommand.validate()) {
-            return currentCommand.execute();
+            result = currentCommand.execute();
         }
-        return null;
+        return result;
     }
 
     private void memberName() {
