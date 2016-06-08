@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import java.util.Stack;
 
 public class PostmanScriptParser {
-    public static final String POSTMAN_OBJECT = "postman";
     public static final String TEST_LIST = "tests";
 
     private LinkedList<Token> tokens;

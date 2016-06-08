@@ -2,6 +2,7 @@ package com.smartbear.postman.script;
 
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.GroovyScriptAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.ResponseSLAAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.testsuite.Assertable;
@@ -188,5 +189,23 @@ public class PostmanScriptParserTest {
         parser.parse(tokens, context);
 
         verify(assertion).setToken("\\${#Project#string1}");
+    }
+
+    @Test
+    public void parsesResponseHeaderExistsAssertion() throws ReadyApiException {
+        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+        String script = "tests[\"Content Type is present\"] = postman.getResponseHeader(\"Content-Type\");";
+        LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
+
+        WsdlProject project = new WsdlProject();
+        Assertable assertable = mock(Assertable.class);
+        GroovyScriptAssertion assertion = mock(GroovyScriptAssertion.class);
+        when(assertable.addAssertion(GroovyScriptAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        PostmanScriptParser parser = new PostmanScriptParser();
+        parser.parse(tokens, context);
+
+        verify(assertion).setScriptText("messageExchange.responseHeaders.hasValues(\"Content-Type\")");
     }
 }

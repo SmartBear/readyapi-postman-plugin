@@ -6,6 +6,7 @@ import com.eviware.soapui.model.testsuite.Assertable;
 import java.util.HashMap;
 
 public class ScriptContext {
+    public static final String POSTMAN_OBJECT = "postman";
     public static final String RESPONSE_CODE = "responseCode";
     public static final String RESPONSE_TIME = "responseTime";
     public static final String RESPONSE_BODY = "responseBody";
@@ -27,7 +28,7 @@ public class ScriptContext {
         postmanObject.addCommand(setGlobalVariableCommand);
 
         ScriptContext context = new ScriptContext();
-        context.addObject(PostmanScriptParser.POSTMAN_OBJECT, postmanObject);
+        context.addObject(POSTMAN_OBJECT, postmanObject);
 
         return context;
     }
@@ -49,6 +50,9 @@ public class ScriptContext {
         PostmanObject globalsObject = new PostmanObject();
         globalsObject.addCommand(new GetGlobalVariableCommand());
         context.addObject(GLOBALS, globalsObject);
+
+        PostmanObject postmanObject = context.getObject(POSTMAN_OBJECT);
+        postmanObject.addCommand(new AddHeaderExistsAssertionCommand(assertable));
 
         return context;
     }
