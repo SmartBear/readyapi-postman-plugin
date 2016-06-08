@@ -1,6 +1,7 @@
 package com.smartbear.postman.script;
 
 import com.eviware.soapui.impl.wsdl.WsdlProject;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.ResponseSLAAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.testsuite.Assertable;
@@ -143,6 +144,24 @@ public class PostmanScriptParserTest {
 
         WsdlProject project = new WsdlProject();
         Assertable assertable = mock(Assertable.class);
+        EqualsAssertion assertion = mock(EqualsAssertion.class);
+        when(assertable.addAssertion(EqualsAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        PostmanScriptParser parser = new PostmanScriptParser();
+        parser.parse(tokens, context);
+
+        verify(assertion).setPatternText("\"\\\"abc def\\\"\"");
+    }
+
+    @Test
+    public void parsesResponseBodyContainsAssertion() throws ReadyApiException {
+        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+        String script = "tests[\"Body matches string\"] = responseBody.has(\"abc\")";
+        LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
+
+        WsdlProject project = new WsdlProject();
+        Assertable assertable = mock(Assertable.class);
         SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
         when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
 
@@ -150,6 +169,6 @@ public class PostmanScriptParserTest {
         PostmanScriptParser parser = new PostmanScriptParser();
         parser.parse(tokens, context);
 
-        verify(assertion).setToken("\"\\\"abc def\\\"\"");
+        verify(assertion).setToken("\"abc\"");
     }
 }

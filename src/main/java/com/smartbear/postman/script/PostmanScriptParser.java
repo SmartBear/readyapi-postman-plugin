@@ -72,6 +72,7 @@ public class PostmanScriptParser {
         Object result = null;
         if (currentCommand != null && currentCommand.validate()) {
             result = currentCommand.execute();
+            currentCommand = null;
         }
         return result;
     }

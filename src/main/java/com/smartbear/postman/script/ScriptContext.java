@@ -40,7 +40,10 @@ public class ScriptContext {
         context.addObject(RESPONSE_CODE, responseCodeObject);
 
         context.addObject(RESPONSE_TIME, new PostmanObject(new AddSlaAssertionCommand(assertable)));
-        context.addObject(RESPONSE_BODY, new PostmanObject(new AddSimpleEqualsAssertionCommand(assertable)));
+
+        PostmanObject responseBodyObject = new PostmanObject(new AddEqualsAssertionCommand(assertable));
+        responseBodyObject.addCommand(new AddSimpleContainsAssertionCommand(assertable));
+        context.addObject(RESPONSE_BODY, responseBodyObject);
 
         return context;
     }

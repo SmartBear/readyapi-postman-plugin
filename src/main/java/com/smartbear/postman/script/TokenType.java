@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public enum TokenType {
     OBJECT("(postman|tests|responseCode|responseTime|responseBody)"),
-    METHOD_OR_FIELD("(setGlobalVariable|code)"),
+    METHOD_OR_FIELD("(setGlobalVariable|code|has)"),
     DOT("\\."),
     COMMA("\\,"),
     NEW_LINE("\\\\n"),

@@ -1,14 +1,14 @@
 package com.smartbear.postman.script;
 
-import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.support.StringUtils;
 
-public class AddSimpleEqualsAssertionCommand implements AddAssertionCommand {
+public class AddEqualsAssertionCommand implements AddAssertionCommand {
     private final Assertable assertable;
     private String value;
 
-    public AddSimpleEqualsAssertionCommand(Assertable assertable) {
+    public AddEqualsAssertionCommand(Assertable assertable) {
         this.assertable = assertable;
     }
 
@@ -39,8 +39,8 @@ public class AddSimpleEqualsAssertionCommand implements AddAssertionCommand {
 
     @Override
     public Object execute() {
-        SimpleContainsAssertion assertion = (SimpleContainsAssertion) assertable.addAssertion(SimpleContainsAssertion.LABEL);
-        assertion.setToken(value);
+        EqualsAssertion assertion = (EqualsAssertion) assertable.addAssertion(EqualsAssertion.LABEL);
+        assertion.setPatternText(value);
         return null;
     }
 }
