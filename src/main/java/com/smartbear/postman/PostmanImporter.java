@@ -37,8 +37,6 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class PostmanImporter {
     public static final String NAME = "name";
@@ -172,37 +170,9 @@ public class PostmanImporter {
         return currentRequest;
     }
 
-    private String convertVariables(String postmanString, WsdlProject project) {
-        if (StringUtils.isNullOrEmpty(postmanString)) {
-            return postmanString;
-        }
-
-        final String POSTMAN_VARIABLE_BEGIN = "{{";
-        final String POSTMAN_VARIABLE_END = "}}";
-        final String READYAPI_VARIABLE_BEGIN = "\\${#Project#";
-        final String READYAPI_VARIABLE_END = "}";
-        final Pattern variableRegExp = Pattern.compile("\\{\\{.+\\}\\}");
-
-        StringBuffer readyApiStringBuffer = new StringBuffer();
-        Matcher matcher = variableRegExp.matcher(postmanString);
-        while (matcher.find()) {
-            String postmanVariable = matcher.group();
-            String readyApiVariable = postmanVariable
-                    .replace(POSTMAN_VARIABLE_BEGIN, READYAPI_VARIABLE_BEGIN)
-                    .replace(POSTMAN_VARIABLE_END, READYAPI_VARIABLE_END);
-            matcher.appendReplacement(readyApiStringBuffer, readyApiVariable);
-        }
-        if (readyApiStringBuffer.length() > 0) {
-            matcher.appendTail(readyApiStringBuffer);
-            return readyApiStringBuffer.toString();
-        } else {
-            return postmanString;
-        }
-    }
-
     private void convertParameters(RestParamsPropertyHolder propertyHolder) {
         for (TestProperty property : propertyHolder.getPropertyList()) {
-            String convertedValue = convertVariables(property.getValue(), null);
+            String convertedValue = VariableUtils.convertVariables(property.getValue(), null);
             property.setValue(convertedValue);
         }
     }

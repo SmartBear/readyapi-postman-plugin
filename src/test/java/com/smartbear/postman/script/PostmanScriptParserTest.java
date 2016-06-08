@@ -157,7 +157,7 @@ public class PostmanScriptParserTest {
     @Test
     public void parsesResponseBodyContainsAssertion() throws ReadyApiException {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        String script = "tests[\"Body matches string\"] = responseBody.has(\"abc\")";
+        String script = "tests[\"Body matches string\"] = responseBody.has(\"abc\");";
         LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
 
         WsdlProject project = new WsdlProject();
@@ -170,5 +170,23 @@ public class PostmanScriptParserTest {
         parser.parse(tokens, context);
 
         verify(assertion).setToken("\"abc\"");
+    }
+
+    @Test
+    public void parsesGlobalVariableReference() throws ReadyApiException {
+        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+        String script = "tests[\"Body matches string\"] = responseBody.has(globals[\"string1\"]);";
+        LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
+
+        WsdlProject project = new WsdlProject();
+        Assertable assertable = mock(Assertable.class);
+        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
+        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        PostmanScriptParser parser = new PostmanScriptParser();
+        parser.parse(tokens, context);
+
+        verify(assertion).setToken("\\${#Project#string1}");
     }
 }

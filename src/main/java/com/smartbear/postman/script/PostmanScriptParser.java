@@ -4,6 +4,7 @@ import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.ready.core.exception.ReadyApiException;
 
 import java.util.LinkedList;
+import java.util.Stack;
 
 public class PostmanScriptParser {
     public static final String POSTMAN_OBJECT = "postman";
@@ -11,9 +12,7 @@ public class PostmanScriptParser {
 
     private LinkedList<Token> tokens;
     private ScriptContext context;
-    private PostmanObject currentObject;
-    private ScriptCommand currentCommand;
-    private String currentAssertionName;
+    private Stack<ParserState> stateStack = new Stack<>();
     private Token lookahead;
 
     public void parse(LinkedList<Token> tokens, ScriptContext context) throws ReadyApiException {
@@ -48,7 +47,8 @@ public class PostmanScriptParser {
     }
 
     private Object object() {
-        currentObject = context.getObject(lookahead.getSequence());
+        pushState();
+        setCurrentObject(context.getObject(lookahead.getSequence()));
         nextToken();
         return memberCall();
     }
@@ -59,31 +59,52 @@ public class PostmanScriptParser {
             memberName();
             argumentList();
             return executeCurrentCommand();
-        } else {
-            if (currentObject != null && currentObject.hasDefaultCommand()) {
-                currentCommand = currentObject.getDefaultCommand();
-                currentCommand.prepare();
+        } else if (TokenType.OPEN_SQUARE_BRACKET == lookahead.getType()) {
+            prepareCommand(lookahead.getSequence());
+            nextToken();
+            argument();
+            if (TokenType.CLOSE_SQUARE_BRACKET == lookahead.getType()) {
+                nextToken();
+                return executeCurrentCommand();
             }
+        } else {
+            prepareDefaultCommand();
         }
         return null;
     }
 
     private Object executeCurrentCommand() {
         Object result = null;
-        if (currentCommand != null && currentCommand.validate()) {
-            result = currentCommand.execute();
-            currentCommand = null;
+        ScriptCommand command = getCurrentCommand();
+        if (command != null && command.validate()) {
+            result = command.execute();
+            popState();
         }
         return result;
     }
 
     private void memberName() {
         if (TokenType.METHOD_OR_FIELD == lookahead.getType()) {
-            if (currentObject != null) {
-                currentCommand = currentObject.getCommand(lookahead.getSequence());
-                currentCommand.prepare();
-            }
+            prepareCommand(lookahead.getSequence());
             nextToken();
+        }
+    }
+
+    private void prepareCommand(String commandName) {
+        PostmanObject object = getCurrentObject();
+        if (object != null) {
+            ScriptCommand command = object.getCommand(commandName);
+            setCurrentCommand(command);
+            command.prepare();
+        }
+    }
+
+    private void prepareDefaultCommand() {
+        PostmanObject object = getCurrentObject();
+        if (object != null && object.hasDefaultCommand()) {
+            ScriptCommand command = object.getDefaultCommand();
+            setCurrentCommand(command);
+            command.prepare();
         }
     }
 
@@ -104,8 +125,13 @@ public class PostmanScriptParser {
 
     private void argument() {
         if (TokenType.STRING == lookahead.getType() || TokenType.NUMBER == lookahead.getType()) {
-            if (currentCommand != null) {
-                currentCommand.addArgument(lookahead.getType(), lookahead.getSequence());
+            if (getCurrentCommand() != null) {
+                getCurrentCommand().addArgument(lookahead.getType(), lookahead.getSequence());
+            }
+        } else if (TokenType.OBJECT == lookahead.getType()) {
+            Object result = object();
+            if (getCurrentCommand() != null && result != null) {
+                getCurrentCommand().addArgument(lookahead.getType(), result.toString());
             }
         }
         nextToken();
@@ -134,7 +160,7 @@ public class PostmanScriptParser {
 
     private void assertionName() {
         if (TokenType.STRING == lookahead.getType()) {
-            currentAssertionName = lookahead.getSequence();
+            setCurrentAssertionName(lookahead.getSequence());
             nextToken();
         }
     }
@@ -154,8 +180,8 @@ public class PostmanScriptParser {
 
     private void condition() {
         if (TokenType.EQUALS == lookahead.getType()) {
-            if (currentCommand instanceof AddAssertionCommand) {
-                ((AddAssertionCommand) currentCommand).addCondition(lookahead.getSequence());
+            if (getCurrentCommand() instanceof AddAssertionCommand) {
+                ((AddAssertionCommand) getCurrentCommand()).addCondition(lookahead.getSequence());
             }
             nextToken();
             argument();
@@ -179,5 +205,66 @@ public class PostmanScriptParser {
                 lookahead = tokens.getFirst();
             }
         } while (lookahead.getType() == TokenType.NEW_LINE);
+    }
+
+    private void pushState() {
+        stateStack.push(new ParserState());
+    }
+
+    private ParserState popState() {
+        return stateStack.pop();
+    }
+
+    public PostmanObject getCurrentObject() {
+        if (stateStack.isEmpty()) {
+            return null;
+        }
+        return stateStack.peek().object;
+    }
+
+    public void setCurrentObject(PostmanObject currentObject) {
+        if (!stateStack.isEmpty()) {
+            stateStack.peek().object = currentObject;
+        }
+    }
+
+    public ScriptCommand getCurrentCommand() {
+        if (stateStack.isEmpty()) {
+            return null;
+        }
+        return stateStack.peek().command;
+    }
+
+    public void setCurrentCommand(ScriptCommand currentCommand) {
+        if (!stateStack.isEmpty()) {
+            ParserState currentState = stateStack.peek();
+            if (currentState.command == null) {
+                currentState.command = currentCommand;
+            } else {
+                ParserState state = new ParserState();
+                state.object = currentState.object;
+                state.command = currentCommand;
+                stateStack.push(state);
+            }
+        }
+    }
+
+    public String getCurrentAssertionName() {
+        if (stateStack.isEmpty()) {
+            return null;
+        }
+        return stateStack.peek().currentAssertionName;
+    }
+
+    public void setCurrentAssertionName(String currentAssertionName) {
+        if (!stateStack.isEmpty()) {
+            stateStack.peek().currentAssertionName = currentAssertionName;
+        }
+    }
+
+    private static class ParserState {
+        public PostmanObject object;
+        public ScriptCommand command;
+        public String currentAssertionName;
     }
 }

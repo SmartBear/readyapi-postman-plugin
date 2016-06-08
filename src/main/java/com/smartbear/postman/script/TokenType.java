@@ -3,7 +3,7 @@ package com.smartbear.postman.script;
 import java.util.regex.Pattern;
 
 public enum TokenType {
-    OBJECT("(postman|tests|responseCode|responseTime|responseBody)"),
+    OBJECT("(postman|tests|responseCode|responseTime|responseBody|globals)"),
     METHOD_OR_FIELD("(setGlobalVariable|code|has)"),
     DOT("\\."),
     COMMA("\\,"),

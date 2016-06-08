@@ -9,6 +9,7 @@ public class ScriptContext {
     public static final String RESPONSE_CODE = "responseCode";
     public static final String RESPONSE_TIME = "responseTime";
     public static final String RESPONSE_BODY = "responseBody";
+    public static final String GLOBALS = "globals";
 
     private HashMap<String, PostmanObject> objects = new HashMap<>();
 
@@ -44,6 +45,10 @@ public class ScriptContext {
         PostmanObject responseBodyObject = new PostmanObject(new AddEqualsAssertionCommand(assertable));
         responseBodyObject.addCommand(new AddSimpleContainsAssertionCommand(assertable));
         context.addObject(RESPONSE_BODY, responseBodyObject);
+
+        PostmanObject globalsObject = new PostmanObject();
+        globalsObject.addCommand(new GetGlobalVariableCommand());
+        context.addObject(GLOBALS, globalsObject);
 
         return context;
     }
