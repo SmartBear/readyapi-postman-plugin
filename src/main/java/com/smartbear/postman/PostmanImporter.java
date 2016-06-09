@@ -8,6 +8,7 @@ import com.eviware.soapui.impl.rest.RestResource;
 import com.eviware.soapui.impl.rest.RestService;
 import com.eviware.soapui.impl.rest.RestServiceFactory;
 import com.eviware.soapui.impl.rest.actions.request.AddRestRequestToTestCaseAction;
+import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestUtils;
 import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
@@ -49,6 +50,12 @@ public class PostmanImporter {
 
     public static final String SOAP_SUFFIX = "?wsdl";
 
+    private final TestCreator testCreator;
+
+    public PostmanImporter(TestCreator testCreator) {
+        this.testCreator = testCreator;
+    }
+
     public WsdlProject importPostmanCollection(String filePath) {
         WsdlProject project = new WsdlProjectPro();
         File jsonFile = new File(filePath);
@@ -85,8 +92,7 @@ public class PostmanImporter {
                                 RestRequest restRequest = addRestRequest(project, serviceName, method, uri);
 
                                 if (StringUtils.hasContent(tests)) {
-                                    AddRestRequestToTestCaseAction addRestRequestToTestCaseAction = new AddRestRequestToTestCaseAction();
-                                    addRestRequestToTestCaseAction.perform(restRequest, null);
+                                    testCreator.createTest(restRequest);
 
                                     if (project.getTestSuiteCount() > 0) {
                                         WsdlTestSuite testSuite = project.getTestSuiteAt(project.getTestSuiteCount() - 1);

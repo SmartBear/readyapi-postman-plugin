@@ -1,8 +1,6 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.impl.wsdl.WsdlProject;
-import com.eviware.soapui.impl.wsdl.WsdlProjectPro;
-import com.eviware.soapui.model.ModelItem;
 import com.eviware.soapui.model.workspace.Workspace;
 import com.eviware.soapui.plugins.ActionConfiguration;
 import com.eviware.soapui.support.StringUtils;
@@ -45,7 +43,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
 
                         // if this is a file - convert it to a file URL
                         if (new File(filePath).exists()) {
-                            PostmanImporter importer = new PostmanImporter();
+                            PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
                             WsdlProject project = importer.importPostmanCollection(filePath);
                             workspace.addProject(project);
                         }

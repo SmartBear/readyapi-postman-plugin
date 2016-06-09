@@ -12,11 +12,14 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.TestAssertionRegistry;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -45,10 +48,15 @@ public class PostmanImporterTest {
     public static final String PROPERTY2_NAME = "string2";
     public static final String PROPERTY2_VALUE = "def";
 
+    @Before
+    public void setUp() throws Exception {
+        TestAssertionRegistry wsdlAssertionRegistry = TestAssertionRegistry.getInstance();
+        wsdlAssertionRegistry.addAssertion(new EqualsAssertion.Factory());
+    }
 
     @Test
     public void testImportRestGetRequest() {
-        PostmanImporter importer = new PostmanImporter();
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(REST_GET_COLLECTION_PATH);
 
         TestProperty property1 = postmanProject.getProperty(PROPERTY1_NAME);
@@ -71,13 +79,8 @@ public class PostmanImporterTest {
         RestResource resource = resources.get(0);
         assertEquals("Resource has wrong name", PATH, resource.getName());
         assertEquals("Resource has wrong path", PATH, resource.getPath());
-        RestParamsPropertyHolder propertyHolder = resource.getParams();
-        assertEquals("Resource should have 2 params", 2, propertyHolder.getPropertyCount());
-        RestParamProperty parameter1 = propertyHolder.getProperty(PARAMETER1_NAME);
-        assertNotNull("Property 1 has not found", parameter1);
-        ParameterStyle style = parameter1.getStyle();
-        assertEquals("Parameter has wrong style", PARAMETER1_STYLE, style);
-        assertEquals("Property has wrong value", PARAMETER1_VALUE, parameter1.getValue());
+        checkParams(postmanProject, resource.getParams());
+
 
         assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
         RestMethod method = resource.getRestMethodAt(0);
@@ -85,16 +88,27 @@ public class PostmanImporterTest {
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
         assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
-        assertEquals("Requst has wrong endpoint", ENDPOINT, request.getEndpoint());
-
-        String expandedParameter1 = PropertyExpander.expandProperties(postmanProject.getContext(), parameter1.getValue());
-        assertEquals("Expansion of parameter1 is wrong", PROPERTY1_VALUE, expandedParameter1);
+        assertEquals("Request has wrong endpoint", ENDPOINT, request.getEndpoint());
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
         RestTestRequestStep testStep = (RestTestRequestStep) testCase.getTestStepAt(0);
         TestAssertion assertion = testStep.getAssertionAt(0);
         assertThat(assertion, instanceOf(ValidHttpStatusCodesAssertion.class));
+
+        checkParams(postmanProject, testStep.getTestRequest().getParams());
+    }
+
+    private void checkParams(WsdlProject postmanProject, RestParamsPropertyHolder propertyHolder) {
+        assertEquals("Resource should have 2 params", 2, propertyHolder.getPropertyCount());
+        RestParamProperty parameter1 = propertyHolder.getProperty(PARAMETER1_NAME);
+        assertNotNull("Property 1 has not found", parameter1);
+        ParameterStyle style = parameter1.getStyle();
+        assertEquals("Parameter has wrong style", PARAMETER1_STYLE, style);
+        assertEquals("Property has wrong value", PARAMETER1_VALUE, parameter1.getValue());
+
+        String expandedParameter1 = PropertyExpander.expandProperties(postmanProject.getContext(), parameter1.getValue());
+        assertEquals("Expansion of parameter1 is wrong", PROPERTY1_VALUE, expandedParameter1);
     }
 
 }
