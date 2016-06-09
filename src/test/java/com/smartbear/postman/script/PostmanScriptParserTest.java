@@ -44,9 +44,18 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesSettingGlobalVariable() throws ReadyApiException {
+     public void parsesSettingGlobalVariable() throws ReadyApiException {
         String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
+        parseSettingGlobalVariables(script);
+    }
 
+    @Test
+    public void skipsUnknownCommands() throws ReadyApiException {
+        String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\nvar jsonObject = xml2Json(responseBody);\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
+        parseSettingGlobalVariables(script);
+    }
+
+    private void parseSettingGlobalVariables(String script) throws ReadyApiException {
         ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
 
         parseScript(script, context);

@@ -2,17 +2,22 @@ package com.smartbear.postman.script;
 
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.ready.core.exception.ReadyApiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.Stack;
 
 public class PostmanScriptParser {
+    public static Logger log = LoggerFactory.getLogger(PostmanScriptParser.class);
+
     public static final String TEST_LIST = "tests";
 
     private LinkedList<Token> tokens;
     private ScriptContext context;
     private Stack<ParserState> stateStack = new Stack<>();
     private Token lookahead;
+    private StringBuffer currentCommand = new StringBuffer();
 
     public void parse(LinkedList<Token> tokens, ScriptContext context) throws ReadyApiException {
         this.tokens = (LinkedList<Token>) tokens.clone();
@@ -20,12 +25,13 @@ public class PostmanScriptParser {
 
         lookahead = tokens.getFirst();
 
-        while (!tokens.isEmpty()) {
+        while (lookahead.getType() != TokenType.END_OF_SCRIPT && !tokens.isEmpty()) {
+            currentCommand.setLength(0);
             command();
             if (lookahead.getType() == TokenType.END_OF_COMMAND) {
                 nextToken();
             } else {
-                break;
+                scrollToNextCommand();
             }
         }
 
@@ -34,8 +40,19 @@ public class PostmanScriptParser {
         }
     }
 
+    private void scrollToNextCommand() {
+        while (lookahead.getType() != TokenType.END_OF_COMMAND &&
+                lookahead.getType() != TokenType.END_OF_SCRIPT) {
+            nextToken();
+        }
+        if (lookahead.getType() == TokenType.END_OF_COMMAND) {
+            nextToken();
+        }
+        log.warn("Failed to parse command: " + currentCommand);
+    }
+
     private void command() {
-        if (TokenType.OBJECT == lookahead.getType()) {
+        if (TokenType.NAME == lookahead.getType()) {
             if (TEST_LIST.equals(lookahead.getSequence())) {
                 nextToken();
                 assertionDeclaration();
@@ -83,7 +100,7 @@ public class PostmanScriptParser {
     }
 
     private void memberName() {
-        if (TokenType.METHOD_OR_FIELD == lookahead.getType()) {
+        if (TokenType.NAME == lookahead.getType()) {
             prepareCommand(lookahead.getSequence());
             nextToken();
         }
@@ -93,8 +110,10 @@ public class PostmanScriptParser {
         PostmanObject object = getCurrentObject();
         if (object != null) {
             ScriptCommand command = object.getCommand(commandName);
-            setCurrentCommand(command);
-            command.prepare();
+            if (command != null) {
+                setCurrentCommand(command);
+                command.prepare();
+            }
         }
     }
 
@@ -102,8 +121,10 @@ public class PostmanScriptParser {
         PostmanObject object = getCurrentObject();
         if (object != null && object.hasDefaultCommand()) {
             ScriptCommand command = object.getDefaultCommand();
-            setCurrentCommand(command);
-            command.prepare();
+            if (command != null) {
+                setCurrentCommand(command);
+                command.prepare();
+            }
         }
     }
 
@@ -127,7 +148,7 @@ public class PostmanScriptParser {
             if (getCurrentCommand() != null) {
                 getCurrentCommand().addArgument(lookahead.getType(), lookahead.getSequence());
             }
-        } else if (TokenType.OBJECT == lookahead.getType()) {
+        } else if (TokenType.NAME == lookahead.getType()) {
             Object result = object();
             if (getCurrentCommand() != null && result != null) {
                 getCurrentCommand().addArgument(lookahead.getType(), result.toString());
@@ -170,7 +191,7 @@ public class PostmanScriptParser {
     }
 
     private void assertion() {
-        if (TokenType.OBJECT == lookahead.getType()) {
+        if (TokenType.NAME == lookahead.getType()) {
             object();
             condition();
             executeCurrentCommand();
@@ -196,14 +217,19 @@ public class PostmanScriptParser {
 
     private void nextToken() {
         do {
-            tokens.pop();
-            // at the end of input we return an epsilon token
+            tokenProcessed();
             if (tokens.isEmpty()) {
                 lookahead = new Token(TokenType.END_OF_SCRIPT, "");
             } else {
                 lookahead = tokens.getFirst();
             }
         } while (lookahead.getType() == TokenType.NEW_LINE);
+    }
+
+    private void tokenProcessed() {
+        Token token = tokens.pop();
+        currentCommand.append(" ");
+        currentCommand.append(token.getSequence());
     }
 
     private void pushState() {
