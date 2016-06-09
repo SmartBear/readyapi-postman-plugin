@@ -152,7 +152,7 @@ public class PostmanScriptParserTest {
         PostmanScriptParser parser = new PostmanScriptParser();
         parser.parse(tokens, context);
 
-        verify(assertion).setPatternText("\"\\\"abc def\\\"\"");
+        verify(assertion).setPatternText("\"abc def\"");
     }
 
     @Test

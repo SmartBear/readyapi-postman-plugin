@@ -3,6 +3,7 @@ package com.smartbear.postman.script;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.support.StringUtils;
+import groovy.json.StringEscapeUtils;
 
 public class AddEqualsAssertionCommand implements AddAssertionCommand {
     private final Assertable assertable;
@@ -40,7 +41,7 @@ public class AddEqualsAssertionCommand implements AddAssertionCommand {
     @Override
     public Object execute() {
         EqualsAssertion assertion = (EqualsAssertion) assertable.addAssertion(EqualsAssertion.LABEL);
-        assertion.setPatternText(value);
+        assertion.setPatternText(StringUtils.unquote(StringEscapeUtils.unescapeJava(value)));
         return null;
     }
 }
