@@ -8,12 +8,18 @@ import com.eviware.soapui.impl.rest.RestService;
 import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle;
+import com.eviware.soapui.impl.wsdl.WsdlInterface;
+import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
+import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
+import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.TestAssertionRegistry;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.GroovyScriptAssertion;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.testsuite.TestAssertion;
@@ -33,20 +39,26 @@ import static org.junit.Assert.assertThat;
 
 public class PostmanImporterTest {
     public static final String REST_GET_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Get_Collection.postman_collection";
+    public static final String REST_POST_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Post_Collection.postman_collection";
+    public static final String WSDL_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\SOAP_Collection.postman_collection";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
-    public static final String ENDPOINT = "http://rapis02.aqa.com.ru";
-    public static final String PATH = "/WCFREST/Service.svc/ConStroka";
+    public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
+    public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
+    public static final String GET_PATH = "/WCFREST/Service.svc/ConStroka";
+    public static final String POST_PATH = "/WCFREST/Service.svc/testComplexClass";
     public static final String PARAMETER1_NAME = "x";
     public static final String PARAMETER1_VALUE = "${#Project#string1}";
     public static final ParameterStyle PARAMETER1_STYLE = ParameterStyle.QUERY;
     public static final String PARAMETER2_NAME = "y";
     public static final String PARAMETER2_VALUE = "${#Project#string2}";
-    public static final HttpMethod REQUEST_METHOD = HttpMethod.GET;
-    public static final String REQUEST_NAME = "GET Request";
+    public static final String GET_REQUEST_NAME = "GET Request";
+    public static final String POST_REQUEST_NAME = "POST Request";
+    public static final String WSDL_REQUEST_NAME = "Request 1";
     public static final String PROPERTY1_NAME = "string1";
     public static final String PROPERTY1_VALUE = "abc";
     public static final String PROPERTY2_NAME = "string2";
     public static final String PROPERTY2_VALUE = "def";
+    private static final String OPERATION_NAME = "Con_Stroka";
 
     @Before
     public void setUp() throws Exception {
@@ -77,18 +89,18 @@ public class PostmanImporterTest {
         List<RestResource> resources = restService.getResourceList();
         assertEquals("Service should have 1 resource", 1, resources.size());
         RestResource resource = resources.get(0);
-        assertEquals("Resource has wrong name", PATH, resource.getName());
-        assertEquals("Resource has wrong path", PATH, resource.getPath());
+        assertEquals("Resource has wrong name", GET_PATH, resource.getName());
+        assertEquals("Resource has wrong path", GET_PATH, resource.getPath());
         checkParams(postmanProject, resource.getParams());
 
 
         assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
         RestMethod method = resource.getRestMethodAt(0);
-        assertEquals("Wrong method", REQUEST_METHOD, method.getMethod());
+        assertEquals("Wrong method", HttpMethod.GET, method.getMethod());
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
-        assertEquals("Request has wrong endpoint", ENDPOINT, request.getEndpoint());
+        assertEquals("Request has wrong name", GET_REQUEST_NAME, request.getName());
+        assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
@@ -109,6 +121,72 @@ public class PostmanImporterTest {
 
         String expandedParameter1 = PropertyExpander.expandProperties(postmanProject.getContext(), parameter1.getValue());
         assertEquals("Expansion of parameter1 is wrong", PROPERTY1_VALUE, expandedParameter1);
+    }
+
+    @Test
+    public void testImportRestPostRequest() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(REST_POST_COLLECTION_PATH);
+
+        assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
+        Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
+        assertEquals("Project should have 1 interface", 1, interfaceMap.size());
+        Interface service = postmanProject.getInterfaceAt(0);
+        assertThat(service, instanceOf(RestService.class));
+
+        RestService restService = (RestService) service;
+        List<RestResource> resources = restService.getResourceList();
+        assertEquals("Service should have 1 resource", 1, resources.size());
+        RestResource resource = resources.get(0);
+        assertEquals("Resource has wrong name", POST_PATH, resource.getName());
+        assertEquals("Resource has wrong path", POST_PATH, resource.getPath());
+        assertEquals("Resource should have 0 params", 0, resource.getParams().getPropertyCount());
+
+
+        assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
+        RestMethod method = resource.getRestMethodAt(0);
+        assertEquals("Wrong method", HttpMethod.POST, method.getMethod());
+        assertEquals("Method should have 1 request", 1, method.getRequestCount());
+        RestRequest request = method.getRequestAt(0);
+        assertEquals("Request has wrong name", POST_REQUEST_NAME, request.getName());
+        assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
+
+        WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
+        WsdlTestCase testCase = testSuite.getTestCaseAt(0);
+        RestTestRequestStep testStep = (RestTestRequestStep) testCase.getTestStepAt(0);
+        TestAssertion assertion = testStep.getAssertionAt(0);
+        assertThat(assertion, instanceOf(SimpleContainsAssertion.class));
+
+        assertEquals("Resource should have 0 params", 0, testStep.getTestRequest().getParams().getPropertyCount());
+    }
+
+    @Test
+    public void testImportWsdlRequest() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(WSDL_COLLECTION_PATH);
+
+        assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
+        Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
+        assertEquals("Project should have 2 interface", 2, interfaceMap.size());
+        Interface service = postmanProject.getInterfaceAt(0);
+        assertThat(service, instanceOf(WsdlInterface.class));
+
+        WsdlInterface wsdlInterface = (WsdlInterface) service;
+        WsdlOperation operation = wsdlInterface.getOperationByName(OPERATION_NAME);
+        assertNotNull("Operation is missing", operation);
+
+        assertEquals("Operation should have 1 request", 1, operation.getRequestCount());
+        WsdlRequest request = operation.getRequestAt(0);
+        assertEquals("Request has wrong name", WSDL_REQUEST_NAME, request.getName());
+        assertEquals("Request has wrong endpoint", SOAP_ENDPOINT, request.getEndpoint());
+        
+        WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
+        WsdlTestCase testCase = testSuite.getTestCaseAt(0);
+        WsdlTestRequestStep testStep = (WsdlTestRequestStep) testCase.getTestStepAt(0);
+        TestAssertion assertion = testStep.getAssertionAt(0);
+        assertThat(assertion, instanceOf(GroovyScriptAssertion.class));
+
+//        assertEquals("Resource should have 0 params", 0, testStep.getTestRequest().getParams().getPropertyCount());
     }
 
 }
