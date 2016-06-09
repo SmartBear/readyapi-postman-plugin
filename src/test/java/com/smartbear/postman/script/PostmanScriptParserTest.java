@@ -188,7 +188,7 @@ public class PostmanScriptParserTest {
         PostmanScriptParser parser = new PostmanScriptParser();
         parser.parse(tokens, context);
 
-        verify(assertion).setToken("\\${#Project#string1}");
+        verify(assertion).setToken("${#Project#string1}");
     }
 
     @Test

@@ -7,7 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VariableUtils {
-    private static final String READYAPI_VARIABLE_BEGIN = "\\${#Project#";
+    private static final String READYAPI_VARIABLE_BEGIN = "${#Project#";
     private static final String READYAPI_VARIABLE_END = "}";
 
     public static String convertVariables(String postmanString) {
@@ -17,6 +17,7 @@ public class VariableUtils {
 
         final String POSTMAN_VARIABLE_BEGIN = "{{";
         final String POSTMAN_VARIABLE_END = "}}";
+        final String ESCAPING_PREFIX = "\\";
 
         final Pattern variableRegExp = Pattern.compile("\\{\\{.+\\}\\}");
 
@@ -25,7 +26,7 @@ public class VariableUtils {
         while (matcher.find()) {
             String postmanVariable = matcher.group();
             String readyApiVariable = postmanVariable
-                    .replace(POSTMAN_VARIABLE_BEGIN, READYAPI_VARIABLE_BEGIN)
+                    .replace(POSTMAN_VARIABLE_BEGIN, ESCAPING_PREFIX + READYAPI_VARIABLE_BEGIN)
                     .replace(POSTMAN_VARIABLE_END, READYAPI_VARIABLE_END);
             matcher.appendReplacement(readyApiStringBuffer, readyApiVariable);
         }
