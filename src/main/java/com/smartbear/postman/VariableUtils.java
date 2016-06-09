@@ -10,7 +10,7 @@ public class VariableUtils {
     private static final String READYAPI_VARIABLE_BEGIN = "\\${#Project#";
     private static final String READYAPI_VARIABLE_END = "}";
 
-    public static String convertVariables(String postmanString, WsdlProject project) {
+    public static String convertVariables(String postmanString) {
         if (StringUtils.isNullOrEmpty(postmanString)) {
             return postmanString;
         }

@@ -154,7 +154,6 @@ public class PostmanImporter {
         XmlBeansRestParamsTestPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
                 RestParametersConfig.Factory.newInstance());
         String path = RestUtils.extractParams(uri, params, false);
-        convertParameters(params);
         if (path.isEmpty()) {
             path = "/";
         }
@@ -172,8 +171,12 @@ public class PostmanImporter {
 
     private void convertParameters(RestParamsPropertyHolder propertyHolder) {
         for (TestProperty property : propertyHolder.getPropertyList()) {
-            String convertedValue = VariableUtils.convertVariables(property.getValue(), null);
+            String convertedValue = VariableUtils.convertVariables(property.getValue());
             property.setValue(convertedValue);
+            if (property instanceof RestParamProperty && StringUtils.hasContent(property.getDefaultValue())) {
+                convertedValue = VariableUtils.convertVariables(property.getDefaultValue());
+                ((RestParamProperty) property).setDefaultValue(convertedValue);
+            }
         }
     }
 
