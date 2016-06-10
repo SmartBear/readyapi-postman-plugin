@@ -12,6 +12,7 @@ import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestUtils;
 import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
+import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.support.HttpUtils;
 import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
@@ -29,6 +30,7 @@ import com.eviware.soapui.support.JsonUtil;
 import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
+import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
@@ -57,6 +59,7 @@ public class PostmanImporter {
     public static final String RAW_MODE_DATA = "rawModeData";
     public static final String PRE_REQUEST_SCRIPT = "preRequestScript";
     public static final String TESTS = "tests";
+    public static final String HEADERS = "headers";
 
     public static final String SOAP_SUFFIX = "?WSDL";
 
@@ -91,6 +94,7 @@ public class PostmanImporter {
                             String serviceName = getValue(request, DESCRIPTION);
                             String preRequestScript = getValue(request, PRE_REQUEST_SCRIPT);
                             String tests = getValue(request, TESTS);
+                            String headers = getValue(request, HEADERS);
 
                             if (StringUtils.hasContent(preRequestScript)) {
                                 processPreRequestScript(preRequestScript, project);
@@ -103,12 +107,20 @@ public class PostmanImporter {
                                 WsdlRequest wsdlRequest = addWsdlRequest(project, serviceName, method, uri,
                                         operationName, rawModeData);
 
+                                if (StringUtils.hasContent(headers)) {
+                                    addHeaders(wsdlRequest, VariableUtils.convertVariables(headers));
+                                }
+
                                 if (StringUtils.hasContent(tests)) {
                                     testCreator.createTest(wsdlRequest);
                                     assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                                 }
                             } else {
                                 RestRequest restRequest = addRestRequest(project, serviceName, method, uri);
+
+                                if (StringUtils.hasContent(headers)) {
+                                    addHeaders(restRequest, VariableUtils.convertVariables(headers));
+                                }
 
                                 if (StringUtils.hasContent(tests)) {
                                     testCreator.createTest(restRequest);
@@ -128,6 +140,18 @@ public class PostmanImporter {
         } else {
         }
         return project;
+    }
+
+    private void addHeaders(AbstractHttpRequest request, String headersString) {
+        String[] headers = headersString.split("\\n");
+        for (String header : headers) {
+            String[] headerParts = header.split(":");
+            if (headerParts.length == 2) {
+                StringToStringsMap headersMap = request.getRequestHeaders();
+                headersMap.add(headerParts[0].trim(), headerParts[1].trim());
+                request.setRequestHeaders(headersMap);
+            }
+        }
     }
 
     private String getOperationName(String xml) {

@@ -25,6 +25,7 @@ import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
+import com.eviware.soapui.support.types.StringToStringsMap;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,6 +60,11 @@ public class PostmanImporterTest {
     public static final String PROPERTY2_NAME = "string2";
     public static final String PROPERTY2_VALUE = "def";
     private static final String OPERATION_NAME = "Con_Stroka";
+    private static final String HEADER1_NAME = "header1";
+    private static final String HEADER1_VALUE = "af";
+    private static final String HEADER2_NAME = "header2";
+    private static final String HEADER2_VALUE = "er";
+
 
     @Before
     public void setUp() throws Exception {
@@ -101,6 +107,14 @@ public class PostmanImporterTest {
         RestRequest request = method.getRequestAt(0);
         assertEquals("Request has wrong name", GET_REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
+        StringToStringsMap headers = request.getRequestHeaders();
+        assertEquals("Request must have 2 headers", 2, headers.size());
+        List<String> values = headers.get(HEADER1_NAME);
+        assertEquals("Header1 value must have 1 element", 1, values.size());
+        assertEquals("Header1 has wrong value", HEADER1_VALUE, values.get(0));
+        values = headers.get(HEADER2_NAME);
+        assertEquals("Header2 value must have 1 element", 1, values.size());
+        assertEquals("Header2 has wrong value", HEADER2_VALUE, values.get(0));
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
