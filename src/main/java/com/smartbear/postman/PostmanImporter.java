@@ -1,19 +1,15 @@
 package com.smartbear.postman;
 
-import com.eviware.soapui.config.RestParametersConfig;
 import com.eviware.soapui.impl.WsdlInterfaceFactory;
+import com.eviware.soapui.impl.actions.ProRestServiceBuilder;
+import com.eviware.soapui.impl.actions.ProRestServiceBuilder.RequestInfo;
 import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.rest.RestResource;
-import com.eviware.soapui.impl.rest.RestService;
-import com.eviware.soapui.impl.rest.RestServiceFactory;
 import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
-import com.eviware.soapui.impl.rest.support.RestUtils;
-import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
-import com.eviware.soapui.impl.support.HttpUtils;
 import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
@@ -27,7 +23,6 @@ import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.JsonUtil;
-import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.types.StringToStringsMap;
@@ -48,6 +43,7 @@ import org.apache.xmlbeans.XmlOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.LinkedList;
 
 public class PostmanImporter {
@@ -195,31 +191,14 @@ public class PostmanImporter {
     }
 
     private RestRequest addRestRequest(WsdlProject project, String serviceName, String method, String uri) {
-        RestRequestInterface.HttpMethod httpMethod = RestRequestInterface.HttpMethod.valueOf(method);
-        RestService restService = (RestService) project.addNewInterface(
-                ModelItemNamer.createName(serviceName, project.getInterfaceList()),
-                RestServiceFactory.REST_TYPE);
-
-        String currentEndpoint = null;
-        if (uri.matches("http(s)?://.+")) {
-            String host = HttpUtils.extractHost(uri);
-            currentEndpoint = uri.substring(0, uri.indexOf("://") + 3) + host;
+        RestRequest currentRequest = null;
+        RequestInfo requestInfo = new RequestInfo(uri, RestRequestInterface.HttpMethod.valueOf(method));
+        PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
+        try {
+            currentRequest = builder.createRestServiceFromPostman(project, requestInfo);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
-        XmlBeansRestParamsTestPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
-                RestParametersConfig.Factory.newInstance());
-        String path = RestUtils.extractParams(uri, params, false);
-        if (path.isEmpty()) {
-            path = "/";
-        }
-        RestResource restResource = restService.addNewResource(path, path);
-        RestUtils.extractParams(uri, restResource.getParams(), false,
-                RestUtils.TemplateExtractionOption.EXTRACT_TEMPLATE_PARAMETERS, true);
-        convertParameters(restResource.getParams());
-        RestMethod restMethod = restResource.addNewMethod(method);
-        restMethod.setMethod(httpMethod);
-        RestRequest currentRequest = restMethod.addNewRequest(method + " Request");
-        currentRequest.setEndpoint(currentEndpoint);
-
         return currentRequest;
     }
 
@@ -287,5 +266,16 @@ public class PostmanImporter {
             }
         }
         return defaultValue;
+    }
+
+    private class PostmanRestServiceBuilder extends ProRestServiceBuilder {
+        public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject, RequestInfo paramRequestInfo) throws MalformedURLException {
+            RestResource restResource = createResource(ModelCreationStrategy.REUSE_MODEL, paramWsdlProject, paramRequestInfo.getUri());
+            copyParameters(extractParams(paramRequestInfo.getUri()), restResource.getParams());
+            convertParameters(restResource.getParams());
+            RestMethod restMethod = addNewMethod(ModelCreationStrategy.REUSE_MODEL, restResource, paramRequestInfo.getRequestMethod());
+            RestRequest restRequest = addNewRequest(restMethod);
+            return restRequest;
+        }
     }
 }

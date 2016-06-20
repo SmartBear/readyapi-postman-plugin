@@ -52,8 +52,7 @@ public class PostmanImporterTest {
     public static final ParameterStyle PARAMETER1_STYLE = ParameterStyle.QUERY;
     public static final String PARAMETER2_NAME = "y";
     public static final String PARAMETER2_VALUE = "${#Project#string2}";
-    public static final String GET_REQUEST_NAME = "GET Request";
-    public static final String POST_REQUEST_NAME = "POST Request";
+    public static final String REQUEST_NAME = "Request 1";
     public static final String WSDL_REQUEST_NAME = "Request 1";
     public static final String PROPERTY1_NAME = "string1";
     public static final String PROPERTY1_VALUE = "abc";
@@ -95,7 +94,7 @@ public class PostmanImporterTest {
         List<RestResource> resources = restService.getResourceList();
         assertEquals("Service should have 1 resource", 1, resources.size());
         RestResource resource = resources.get(0);
-        assertEquals("Resource has wrong name", GET_PATH, resource.getName());
+        assertEquals("Resource has wrong name", makeResourceName(GET_PATH), resource.getName());
         assertEquals("Resource has wrong path", GET_PATH, resource.getPath());
         checkParams(postmanProject, resource.getParams());
 
@@ -105,7 +104,7 @@ public class PostmanImporterTest {
         assertEquals("Wrong method", HttpMethod.GET, method.getMethod());
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", GET_REQUEST_NAME, request.getName());
+        assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
         StringToStringsMap headers = request.getRequestHeaders();
         assertEquals("Request must have 2 headers", 2, headers.size());
@@ -152,7 +151,8 @@ public class PostmanImporterTest {
         List<RestResource> resources = restService.getResourceList();
         assertEquals("Service should have 1 resource", 1, resources.size());
         RestResource resource = resources.get(0);
-        assertEquals("Resource has wrong name", POST_PATH, resource.getName());
+
+        assertEquals("Resource has wrong name", makeResourceName(POST_PATH), resource.getName());
         assertEquals("Resource has wrong path", POST_PATH, resource.getPath());
         assertEquals("Resource should have 0 params", 0, resource.getParams().getPropertyCount());
 
@@ -162,7 +162,7 @@ public class PostmanImporterTest {
         assertEquals("Wrong method", HttpMethod.POST, method.getMethod());
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", POST_REQUEST_NAME, request.getName());
+        assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
@@ -172,6 +172,11 @@ public class PostmanImporterTest {
         assertThat(assertion, instanceOf(SimpleContainsAssertion.class));
 
         assertEquals("Resource should have 0 params", 0, testStep.getTestRequest().getParams().getPropertyCount());
+    }
+
+    private String makeResourceName(String resourcePath) {
+        String resourceName = resourcePath.substring(resourcePath.lastIndexOf("/") + 1);
+        return resourceName.substring(0, 1).toUpperCase() + resourceName.substring(1);
     }
 
     @Test
