@@ -40,6 +40,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,6 +49,8 @@ import java.net.MalformedURLException;
 import java.util.LinkedList;
 
 public class PostmanImporter {
+    private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
+
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
     public static final String REQUESTS = "requests";
@@ -92,6 +96,8 @@ public class PostmanImporter {
                             String tests = getValue(request, TESTS);
                             String headers = getValue(request, HEADERS);
 
+                            logger.info("Importing a request with URI [" + uri + "] - started");
+
                             if (StringUtils.hasContent(preRequestScript)) {
                                 processPreRequestScript(preRequestScript, project);
                             }
@@ -103,13 +109,15 @@ public class PostmanImporter {
                                 WsdlRequest wsdlRequest = addWsdlRequest(project, serviceName, method, uri,
                                         operationName, rawModeData);
 
-                                if (StringUtils.hasContent(headers)) {
-                                    addHeaders(wsdlRequest, VariableUtils.convertVariables(headers));
-                                }
+                                if (wsdlRequest != null) {
+                                    if (StringUtils.hasContent(headers)) {
+                                        addHeaders(wsdlRequest, VariableUtils.convertVariables(headers));
+                                    }
 
-                                if (StringUtils.hasContent(tests)) {
-                                    testCreator.createTest(wsdlRequest);
-                                    assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
+                                    if (StringUtils.hasContent(tests)) {
+                                        testCreator.createTest(wsdlRequest);
+                                        assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
+                                    }
                                 }
                             } else {
                                 RestRequest restRequest = addRestRequest(project, serviceName, method, uri);
@@ -128,6 +136,7 @@ public class PostmanImporter {
                                 addAssertions(tests, project, assertable);
                             }
 //                                    GenericAddRequestToTestCaseAction.perform
+                            logger.info("Importing a request with URI [" + uri + "] - done");
                         }
                     }
                 }
