@@ -222,8 +222,6 @@ public class PostmanImporterTest {
         WsdlTestRequestStep testStep = (WsdlTestRequestStep) testCase.getTestStepAt(0);
         TestAssertion assertion = testStep.getAssertionAt(0);
         assertThat(assertion, instanceOf(GroovyScriptAssertion.class));
-
-//        assertEquals("Resource should have 0 params", 0, testStep.getTestRequest().getParams().getPropertyCount());
     }
 
     @Test

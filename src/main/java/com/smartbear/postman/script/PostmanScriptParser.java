@@ -195,8 +195,16 @@ public class PostmanScriptParser {
     }
 
     private void assertions() {
+        boolean inBrackets = false;
+        if (TokenType.OPEN_ROUND_BRACKET == lookahead.getType()) {
+            inBrackets = true;
+            nextToken();
+        }
         assertion();
         moreAssertions();
+        if (inBrackets && TokenType.CLOSE_ROUND_BRACKET == lookahead.getType()) {
+            nextToken();
+        }
     }
 
     private void assertion() {

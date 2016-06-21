@@ -239,6 +239,20 @@ public class PostmanScriptParserTest {
         verify(groovyAssertion).setScriptText("assert messageExchange.responseHeaders.hasValues('Content-Type')");
     }
 
+    @Test
+    public void parsesExpressionsInRoundBrackets() throws ReadyApiException {
+        String script = "tests[\"response code is 200\"] = (responseCode.code === 200);";
+
+        ValidHttpStatusCodesAssertion statusAssertion = mock(ValidHttpStatusCodesAssertion.class);
+        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(statusAssertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+
+        parseScript(script, context);
+
+        verify(statusAssertion).setCodes("200");
+    }
+
     private void parseScript(String script, ScriptContext context) throws ReadyApiException {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
         PostmanScriptParser parser = new PostmanScriptParser();
