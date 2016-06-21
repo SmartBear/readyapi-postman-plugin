@@ -223,16 +223,20 @@ public class PostmanScriptParserTest {
 
     @Test
     public void parsesStringInSingleQuotes() throws ReadyApiException {
-        String script = "tests[\"Content Type is present\"] = postman.getResponseHeader('Content-Type');";
+        String script = "tests[\"response code is 200\"] = responseCode.code === 200;tests[\"Content Type is present\"] = postman.getResponseHeader('Content-Type');";
 
-        GroovyScriptAssertion assertion = mock(GroovyScriptAssertion.class);
-        when(assertable.addAssertion(GroovyScriptAssertion.LABEL)).thenReturn(assertion);
+        ValidHttpStatusCodesAssertion statusAssertion = mock(ValidHttpStatusCodesAssertion.class);
+        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(statusAssertion);
+
+        GroovyScriptAssertion groovyAssertion = mock(GroovyScriptAssertion.class);
+        when(assertable.addAssertion(GroovyScriptAssertion.LABEL)).thenReturn(groovyAssertion);
 
         ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
 
         parseScript(script, context);
 
-        verify(assertion).setScriptText("assert messageExchange.responseHeaders.hasValues('Content-Type')");
+        verify(statusAssertion).setCodes("200");
+        verify(groovyAssertion).setScriptText("assert messageExchange.responseHeaders.hasValues('Content-Type')");
     }
 
     private void parseScript(String script, ScriptContext context) throws ReadyApiException {
