@@ -16,7 +16,7 @@ public enum TokenType {
     ASSIGN("=[^=]"),
     EQUALS("(===|!==|>|<)"),
     LOGIC("(&&|\\|\\|)"),
-    STRING("\"(?:[^\"\\\\]|\\\\.)*\"|'\\S*'"),
+    STRING("(\"(?:[^\"\\\\]|\\\\.)*\"|'\\S*')"),
     NUMBER("\\d+"),
     END_OF_COMMAND(";"),
     END_OF_SCRIPT("");
