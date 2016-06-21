@@ -5,6 +5,7 @@ import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.support.StringUtils;
 
 public abstract class AddScriptAssertionCommand implements AddAssertionCommand {
+    private static final String ASSERT_COMMAND = "assert ";
     private final Assertable assertable;
     private String script;
 
@@ -30,7 +31,7 @@ public abstract class AddScriptAssertionCommand implements AddAssertionCommand {
     @Override
     public Object execute() {
         GroovyScriptAssertion assertion = (GroovyScriptAssertion) assertable.addAssertion(GroovyScriptAssertion.LABEL);
-        assertion.setScriptText(script);
+        assertion.setScriptText(ASSERT_COMMAND + script);
         return null;
     }
 }

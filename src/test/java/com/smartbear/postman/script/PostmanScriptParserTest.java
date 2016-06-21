@@ -218,7 +218,7 @@ public class PostmanScriptParserTest {
 
         parseScript(script, context);
 
-        verify(assertion).setScriptText("messageExchange.responseHeaders.hasValues(\"Content-Type\")");
+        verify(assertion).setScriptText("assert messageExchange.responseHeaders.hasValues(\"Content-Type\")");
     }
 
     @Test
@@ -232,7 +232,7 @@ public class PostmanScriptParserTest {
 
         parseScript(script, context);
 
-        verify(assertion).setScriptText("messageExchange.responseHeaders.hasValues('Content-Type')");
+        verify(assertion).setScriptText("assert messageExchange.responseHeaders.hasValues('Content-Type')");
     }
 
     private void parseScript(String script, ScriptContext context) throws ReadyApiException {

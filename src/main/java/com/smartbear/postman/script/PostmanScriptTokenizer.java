@@ -19,7 +19,7 @@ public class PostmanScriptTokenizer {
 
         while (nextTokenPosition < script.length()) {
             String remainedScript = script.substring(nextTokenPosition);
-            
+
             for (TokenType tokenType : TokenType.values()) {
                 Matcher matcher = tokenType.getPattern().matcher(remainedScript);
                 if (matcher.find()) {
