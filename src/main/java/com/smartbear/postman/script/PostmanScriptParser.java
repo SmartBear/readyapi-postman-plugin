@@ -28,7 +28,7 @@ public class PostmanScriptParser {
         while (lookahead.getType() != TokenType.END_OF_SCRIPT && !tokens.isEmpty()) {
             currentCommand.setLength(0);
             command();
-            if (lookahead.getType() == TokenType.END_OF_COMMAND) {
+            if (isEndOfCommand()) {
                 nextToken();
             } else {
                 scrollToNextCommand();
@@ -40,12 +40,17 @@ public class PostmanScriptParser {
         }
     }
 
+    private boolean isEndOfCommand() {
+        return lookahead.getType() == TokenType.END_OF_COMMAND ||
+                lookahead.getType() == TokenType.OPEN_CURLY_BRACKET ||
+                lookahead.getType() == TokenType.CLOSE_CURLY_BRACKET;
+    }
+
     private void scrollToNextCommand() {
-        while (lookahead.getType() != TokenType.END_OF_COMMAND &&
-                lookahead.getType() != TokenType.END_OF_SCRIPT) {
+        while (!isEndOfCommand() && lookahead.getType() != TokenType.END_OF_SCRIPT) {
             nextToken();
         }
-        if (lookahead.getType() == TokenType.END_OF_COMMAND) {
+        if (isEndOfCommand()) {
             nextToken();
         }
         log.warn("Failed to parse command: " + currentCommand);
@@ -63,10 +68,14 @@ public class PostmanScriptParser {
     }
 
     private Object object() {
-        pushState();
-        setCurrentObject(context.getObject(lookahead.getSequence()));
-        nextToken();
-        return memberCall();
+        PostmanObject object = context.getObject(lookahead.getSequence());
+        if (object != null) {
+            pushState();
+            setCurrentObject(object);
+            nextToken();
+            return memberCall();
+        }
+        return null;
     }
 
     private Object memberCall() {

@@ -18,24 +18,22 @@ public class PostmanScriptTokenizer {
         int lastTokenPosition = -1;
 
         while (nextTokenPosition < script.length()) {
-            boolean hadMatch = false;
-
+            String remainedScript = script.substring(nextTokenPosition);
+            
             for (TokenType tokenType : TokenType.values()) {
-                Matcher matcher = tokenType.getPattern().matcher(script.substring(nextTokenPosition));
+                Matcher matcher = tokenType.getPattern().matcher(remainedScript);
                 if (matcher.find()) {
-                    hadMatch = true;
                     lastTokenPosition = nextTokenPosition;
 
                     String sequence = matcher.group().trim();
                     tokens.add(new Token(tokenType, sequence));
 
                     nextTokenPosition = lastTokenPosition + matcher.end();
+                    if (nextTokenPosition == lastTokenPosition) {
+                        throw new ReadyApiException("Unexpected character in input: " + script);
+                    }
                     break;
                 }
-            }
-
-            if (!hadMatch) {
-                throw new ReadyApiException("Unexpected character in input: " + script);
             }
         }
 

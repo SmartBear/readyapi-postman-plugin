@@ -11,10 +11,12 @@ public enum TokenType {
     CLOSE_ROUND_BRACKET("\\)"),
     OPEN_SQUARE_BRACKET("\\["),
     CLOSE_SQUARE_BRACKET("\\]"),
+    OPEN_CURLY_BRACKET("\\{"),
+    CLOSE_CURLY_BRACKET("\\}"),
     ASSIGN("=[^=]"),
     EQUALS("(===|!==|>|<)"),
     LOGIC("(&&|\\|\\|)"),
-    STRING("\"(?:[^\"\\\\]|\\\\.)*\""),
+    STRING("\"(?:[^\"\\\\]|\\\\.)*\"|'\\S*'"),
     NUMBER("\\d+"),
     END_OF_COMMAND(";"),
     END_OF_SCRIPT("");

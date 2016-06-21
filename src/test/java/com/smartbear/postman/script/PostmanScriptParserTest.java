@@ -182,6 +182,32 @@ public class PostmanScriptParserTest {
     }
 
     @Test
+    public void parsesCommandInTry() throws ReadyApiException {
+        String script = "try { tests[\"Body matches string\"] = responseBody.has(\"abc\"); }\ncatch (e) { }";
+        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
+        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+
+        parseScript(script, context);
+
+        verify(assertion).setToken("\"abc\"");
+    }
+
+    @Test
+    public void parsesCommandAfterCatch() throws ReadyApiException {
+        String script = "try { responseJSON = JSON.parse(responseBody); }\ncatch (e) { }\n\ntests[\"Body matches string\"] = responseBody.has(\"abc\");";
+        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
+        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+
+        parseScript(script, context);
+
+        verify(assertion).setToken("\"abc\"");
+    }
+
+    @Test
     public void parsesResponseHeaderExistsAssertion() throws ReadyApiException {
         String script = "tests[\"Content Type is present\"] = postman.getResponseHeader(\"Content-Type\");";
 
@@ -193,6 +219,20 @@ public class PostmanScriptParserTest {
         parseScript(script, context);
 
         verify(assertion).setScriptText("messageExchange.responseHeaders.hasValues(\"Content-Type\")");
+    }
+
+    @Test
+    public void parsesStringInSingleQuotes() throws ReadyApiException {
+        String script = "tests[\"Content Type is present\"] = postman.getResponseHeader('Content-Type');";
+
+        GroovyScriptAssertion assertion = mock(GroovyScriptAssertion.class);
+        when(assertable.addAssertion(GroovyScriptAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+
+        parseScript(script, context);
+
+        verify(assertion).setScriptText("messageExchange.responseHeaders.hasValues('Content-Type')");
     }
 
     private void parseScript(String script, ScriptContext context) throws ReadyApiException {

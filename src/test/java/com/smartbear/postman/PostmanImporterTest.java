@@ -42,6 +42,7 @@ public class PostmanImporterTest {
     public static final String REST_GET_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Get_Collection.postman_collection";
     public static final String REST_POST_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Post_Collection.postman_collection";
     public static final String WSDL_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\SOAP_Collection.postman_collection";
+    public static final String SAMPLE_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\Postman_Echo.postman_collection";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
@@ -198,7 +199,7 @@ public class PostmanImporterTest {
         WsdlRequest request = operation.getRequestAt(0);
         assertEquals("Request has wrong name", WSDL_REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", SOAP_ENDPOINT, request.getEndpoint());
-        
+
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
         WsdlTestRequestStep testStep = (WsdlTestRequestStep) testCase.getTestStepAt(0);
@@ -206,6 +207,12 @@ public class PostmanImporterTest {
         assertThat(assertion, instanceOf(GroovyScriptAssertion.class));
 
 //        assertEquals("Resource should have 0 params", 0, testStep.getTestRequest().getParams().getPropertyCount());
+    }
+
+    @Test
+    public void testImporterSampleCollection() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(SAMPLE_COLLECTION_PATH);
     }
 
 }
