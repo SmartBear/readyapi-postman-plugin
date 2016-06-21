@@ -27,6 +27,8 @@ import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
+import com.smartbear.analytics.Analytics;
+import com.smartbear.analytics.AnalyticsManager;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
@@ -127,14 +129,13 @@ public class PostmanImporter {
                             if (assertable != null) {
                                 addAssertions(tests, project, assertable);
                             }
-//                                    GenericAddRequestToTestCaseAction.perform
                         }
                     }
                 }
             } catch (JSONException e) {
             }
-        } else {
         }
+        Analytics.getAnalyticsManager().trackAction(AnalyticsManager.Category.CUSTOM_PLUGIN_ACTION, "CreatedProjectBasedOnPostmanCollection", null);
         return project;
     }
 
