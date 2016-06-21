@@ -9,6 +9,7 @@ import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.rest.RestResource;
 import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
+import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
@@ -25,7 +26,6 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.JsonUtil;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
-import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
@@ -135,7 +135,6 @@ public class PostmanImporter {
                             if (assertable != null) {
                                 addAssertions(tests, project, assertable);
                             }
-//                                    GenericAddRequestToTestCaseAction.perform
                             logger.info("Importing a request with URI [" + uri + "] - done");
                         }
                     }
@@ -152,9 +151,12 @@ public class PostmanImporter {
         for (String header : headers) {
             String[] headerParts = header.split(":");
             if (headerParts.length == 2) {
-                StringToStringsMap headersMap = request.getRequestHeaders();
-                headersMap.add(headerParts[0].trim(), headerParts[1].trim());
-                request.setRequestHeaders(headersMap);
+                if (request instanceof RestRequest) {
+                    RestParamsPropertyHolder params = ((RestRequest) request).getParams();
+                    RestParamProperty property = params.addProperty(headerParts[0].trim());
+                    property.setStyle(ParameterStyle.HEADER);
+                    property.setValue(headerParts[1].trim());
+                }
             }
         }
     }

@@ -25,10 +25,10 @@ import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
-import com.eviware.soapui.support.types.StringToStringsMap;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -107,14 +107,15 @@ public class PostmanImporterTest {
         RestRequest request = method.getRequestAt(0);
         assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
-        StringToStringsMap headers = request.getRequestHeaders();
+        List<RestParamProperty> headers = getParamsOfStyle(request.getParams(), ParameterStyle.HEADER);
         assertEquals("Request must have 2 headers", 2, headers.size());
-        List<String> values = headers.get(HEADER1_NAME);
-        assertEquals("Header1 value must have 1 element", 1, values.size());
-        assertEquals("Header1 has wrong value", HEADER1_VALUE, values.get(0));
-        values = headers.get(HEADER2_NAME);
-        assertEquals("Header2 value must have 1 element", 1, values.size());
-        assertEquals("Header2 has wrong value", HEADER2_VALUE, values.get(0));
+        for (RestParamProperty header : headers) {
+            if (header.getName().equals(HEADER1_NAME)) {
+                assertEquals("Header1 has wrong value", HEADER1_VALUE, header.getValue());
+            } else {
+                assertEquals("Header2 has wrong value", HEADER2_VALUE, header.getValue());
+            }
+        }
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
@@ -126,7 +127,8 @@ public class PostmanImporterTest {
     }
 
     private void checkParams(WsdlProject postmanProject, RestParamsPropertyHolder propertyHolder) {
-        assertEquals("Resource should have 2 params", 2, propertyHolder.getPropertyCount());
+        List<RestParamProperty> params = getParamsOfStyle(propertyHolder, ParameterStyle.QUERY);
+        assertEquals("Object should have 2 params", 2, params != null ? params.size() : 0);
         RestParamProperty parameter1 = propertyHolder.getProperty(PARAMETER1_NAME);
         assertNotNull("Property 1 has not found", parameter1);
         ParameterStyle style = parameter1.getStyle();
@@ -135,6 +137,19 @@ public class PostmanImporterTest {
 
         String expandedParameter1 = PropertyExpander.expandProperties(postmanProject.getContext(), parameter1.getValue());
         assertEquals("Expansion of parameter1 is wrong", PROPERTY1_VALUE, expandedParameter1);
+    }
+
+    private List<RestParamProperty> getParamsOfStyle(RestParamsPropertyHolder propertyHolder, ParameterStyle style) {
+        ArrayList<RestParamProperty> params = new ArrayList<>();
+        for (TestProperty param : propertyHolder.values()) {
+            if (param instanceof RestParamProperty) {
+                RestParamProperty restParam = (RestParamProperty) param;
+                if (restParam.getStyle() == style) {
+                    params.add(restParam);
+                }
+            }
+        }
+        return params;
     }
 
     @Test
@@ -155,7 +170,8 @@ public class PostmanImporterTest {
 
         assertEquals("Resource has wrong name", makeResourceName(POST_PATH), resource.getName());
         assertEquals("Resource has wrong path", POST_PATH, resource.getPath());
-        assertEquals("Resource should have 0 params", 0, resource.getParams().getPropertyCount());
+        List<RestParamProperty> params = getParamsOfStyle(resource.getParams(), ParameterStyle.QUERY);
+        assertEquals("Resource should have 0 query params", 0, params != null ? params.size() : 0);
 
 
         assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
@@ -172,7 +188,8 @@ public class PostmanImporterTest {
         TestAssertion assertion = testStep.getAssertionAt(0);
         assertThat(assertion, instanceOf(SimpleContainsAssertion.class));
 
-        assertEquals("Resource should have 0 params", 0, testStep.getTestRequest().getParams().getPropertyCount());
+        List<RestParamProperty> requestParams = getParamsOfStyle(testStep.getTestRequest().getParams(), ParameterStyle.QUERY);
+        assertEquals("Request should have 0 query params", 0, requestParams != null ? requestParams.size() : 0);
     }
 
     private String makeResourceName(String resourcePath) {
