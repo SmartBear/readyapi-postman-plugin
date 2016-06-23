@@ -137,7 +137,7 @@ public class PostmanImporter {
                             if (assertable != null) {
                                 addAssertions(tests, project, assertable);
                             }
-                            
+
                             logger.info("Importing a request with URI [" + uri + "] - done");
                         }
                     }

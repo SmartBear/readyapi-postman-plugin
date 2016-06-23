@@ -5,6 +5,6 @@ import com.eviware.soapui.plugins.PluginConfiguration;
 
 @PluginConfiguration(groupId = "com.smartbear.soapui.plugins", name = "Postman Plugin", version = "1.0",
         autoDetect = true, description = "Imports Postman collections",
-        infoUrl = "https://github.com/antone-sb/soapui-swagger-plugin")
+        infoUrl = "https://github.com/SmartBear/readyapi-postman-plugin")
 public class PluginConfig extends PluginAdapter {
 }
