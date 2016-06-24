@@ -1,5 +1,6 @@
 package com.smartbear.postman;
 
+import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface.HttpMethod;
@@ -25,9 +26,11 @@ import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +42,9 @@ import static org.junit.Assert.assertThat;
 
 
 public class PostmanImporterTest {
+    private static final String OUTPUT_FOLDER_PATH = PostmanImporter.class.getResource("/").getPath();
+    private static final String TEST_WORKSPACE_FILE_PATH = OUTPUT_FOLDER_PATH + "test-workspace.xml";
+
     public static final String REST_GET_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Get_Collection.postman_collection";
     public static final String REST_POST_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Post_Collection.postman_collection";
     public static final String WSDL_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\SOAP_Collection.postman_collection";
@@ -65,9 +71,14 @@ public class PostmanImporterTest {
     private static final String HEADER2_NAME = "header2";
     private static final String HEADER2_VALUE = "er";
 
+    private File workspaceFile;
+    private WorkspaceImpl workspace;
 
     @Before
     public void setUp() throws Exception {
+        workspaceFile = new File(TEST_WORKSPACE_FILE_PATH);
+        workspace = new WorkspaceImpl(workspaceFile.getAbsolutePath(), null);
+
         TestAssertionRegistry wsdlAssertionRegistry = TestAssertionRegistry.getInstance();
         wsdlAssertionRegistry.addAssertion(new EqualsAssertion.Factory());
     }
@@ -75,7 +86,7 @@ public class PostmanImporterTest {
     @Test
     public void testImportRestGetRequest() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(REST_GET_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace, REST_GET_COLLECTION_PATH);
 
         TestProperty property1 = postmanProject.getProperty(PROPERTY1_NAME);
         assertNotNull("Property1 is missing", property1);
@@ -155,7 +166,7 @@ public class PostmanImporterTest {
     @Test
     public void testImportRestPostRequest() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(REST_POST_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace, REST_POST_COLLECTION_PATH);
 
         assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
@@ -200,7 +211,7 @@ public class PostmanImporterTest {
     @Test
     public void testImportWsdlRequest() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(WSDL_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace, WSDL_COLLECTION_PATH);
 
         assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
@@ -227,7 +238,14 @@ public class PostmanImporterTest {
     @Test
     public void testImporterSampleCollection() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(SAMPLE_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace, SAMPLE_COLLECTION_PATH);
+    }
+
+    @After
+    public void tearDown() {
+        if (workspaceFile.exists()) {
+            workspaceFile.delete();
+        }
     }
 
 }

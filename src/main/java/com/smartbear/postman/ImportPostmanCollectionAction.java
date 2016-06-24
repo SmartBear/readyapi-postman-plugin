@@ -1,5 +1,6 @@
 package com.smartbear.postman;
 
+import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.model.workspace.Workspace;
 import com.eviware.soapui.plugins.ActionConfiguration;
@@ -15,7 +16,7 @@ import com.eviware.x.form.support.AForm;
 import java.io.File;
 
 @ActionConfiguration(actionGroup = "WorkspaceImplActions", afterAction = "ImportProjectFromVcsAction", separatorBefore = true)
-public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspace> {
+public class ImportPostmanCollectionAction extends AbstractSoapUIAction<WorkspaceImpl> {
     private XFormDialog dialog;
 
     public ImportPostmanCollectionAction() {
@@ -23,7 +24,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
     }
 
     @Override
-    public void perform(Workspace workspace, Object param) {
+    public void perform(WorkspaceImpl workspace, Object param) {
         if (dialog == null) {
             dialog = ADialogBuilder.buildDialog(Form.class);
         } else {
@@ -38,8 +39,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                     if (StringUtils.hasContent(filePath)) {
                         if (new File(filePath).exists()) {
                             PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
-                            WsdlProject project = importer.importPostmanCollection(filePath);
-                            workspace.addProject(project);
+                            importer.importPostmanCollection(workspace, filePath);
                         }
                         break;
                     }
