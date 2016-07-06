@@ -15,6 +15,7 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequest;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
@@ -70,6 +71,7 @@ public class PostmanImporterTest {
     private static final String HEADER1_VALUE = "af";
     private static final String HEADER2_NAME = "header2";
     private static final String HEADER2_VALUE = "er";
+    private static final String REST_POST_BODY_VALUE = "{\"assd\":\"qwe\"}";
 
     private File workspaceFile;
     private WorkspaceImpl workspace;
@@ -199,8 +201,10 @@ public class PostmanImporterTest {
         TestAssertion assertion = testStep.getAssertionAt(0);
         assertThat(assertion, instanceOf(SimpleContainsAssertion.class));
 
-        List<RestParamProperty> requestParams = getParamsOfStyle(testStep.getTestRequest().getParams(), ParameterStyle.QUERY);
+        RestTestRequest testRequest = testStep.getTestRequest();
+        List<RestParamProperty> requestParams = getParamsOfStyle(testRequest.getParams(), ParameterStyle.QUERY);
         assertEquals("Request should have 0 query params", 0, requestParams != null ? requestParams.size() : 0);
+        assertEquals("Request should have test body", REST_POST_BODY_VALUE, request.getRequestContent());
     }
 
     private String makeResourceName(String resourcePath) {

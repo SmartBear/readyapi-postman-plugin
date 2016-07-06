@@ -7,6 +7,7 @@ import com.eviware.soapui.impl.actions.ProRestServiceBuilder.RequestInfo;
 import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
+import com.eviware.soapui.impl.rest.RestRequestInterface.HttpMethod;
 import com.eviware.soapui.impl.rest.RestResource;
 import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
@@ -105,6 +106,7 @@ public class PostmanImporter {
                         String preRequestScript = getValue(request, PRE_REQUEST_SCRIPT);
                         String tests = getValue(request, TESTS);
                         String headers = getValue(request, HEADERS);
+                        String rawModeData = getValue(request, RAW_MODE_DATA);
 
                         logger.info("Importing a request with URI [" + uri + "] - started");
 
@@ -114,7 +116,6 @@ public class PostmanImporter {
 
                         Assertable assertable = null;
                         if (isSoapRequest(uri)) {
-                            String rawModeData = getValue(request, RAW_MODE_DATA);
                             String operationName = getOperationName(rawModeData);
                             WsdlRequest wsdlRequest = addWsdlRequest(project, serviceName, method, uri,
                                     operationName, rawModeData);
@@ -134,6 +135,10 @@ public class PostmanImporter {
 
                             if (StringUtils.hasContent(headers)) {
                                 addHeaders(restRequest, VariableUtils.convertVariables(headers));
+                            }
+
+                            if (restRequest.getMethod() == HttpMethod.POST && StringUtils.hasContent(rawModeData)) {
+                                restRequest.setRequestContent(rawModeData);
                             }
 
                             if (StringUtils.hasContent(tests)) {
