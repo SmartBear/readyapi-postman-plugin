@@ -3,6 +3,7 @@ package com.smartbear.postman.script;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.support.StringUtils;
+import groovy.json.StringEscapeUtils;
 
 public class AddSimpleContainsAssertionCommand implements AddAssertionCommand {
     private static final String NAME = "has";
@@ -41,7 +42,7 @@ public class AddSimpleContainsAssertionCommand implements AddAssertionCommand {
     @Override
     public Object execute() {
         SimpleContainsAssertion assertion = (SimpleContainsAssertion) assertable.addAssertion(SimpleContainsAssertion.LABEL);
-        assertion.setToken(value);
+        assertion.setToken(StringUtils.unquote(StringEscapeUtils.unescapeJava(value)));
         return null;
     }
 }

@@ -164,6 +164,20 @@ public class PostmanScriptParserTest {
 
         parseScript(script, context);
 
+        verify(assertion).setToken("abc");
+    }
+
+    @Test
+    public void parsesResponseBodyContainsAssertionWithQuotes() throws ReadyApiException {
+        String script = "tests[\"Body matches string\"] = responseBody.has(\"\\\"abc\\\"\");";
+
+        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
+        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+
+        parseScript(script, context);
+
         verify(assertion).setToken("\"abc\"");
     }
 
@@ -191,7 +205,7 @@ public class PostmanScriptParserTest {
 
         parseScript(script, context);
 
-        verify(assertion).setToken("\"abc\"");
+        verify(assertion).setToken("abc");
     }
 
     @Test
@@ -204,7 +218,7 @@ public class PostmanScriptParserTest {
 
         parseScript(script, context);
 
-        verify(assertion).setToken("\"abc\"");
+        verify(assertion).setToken("abc");
     }
 
     @Test
