@@ -111,7 +111,6 @@ public class PostmanImporterTest {
         RestResource resource = resources.get(0);
         assertEquals("Resource has wrong name", makeResourceName(GET_PATH), resource.getName());
         assertEquals("Resource has wrong path", GET_PATH, resource.getPath());
-        checkParams(postmanProject, resource.getParams());
 
 
         assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
@@ -121,6 +120,7 @@ public class PostmanImporterTest {
         RestRequest request = method.getRequestAt(0);
         assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
+        checkParams(postmanProject, request.getParams());
         List<RestParamProperty> headers = getParamsOfStyle(request.getParams(), ParameterStyle.HEADER);
         assertEquals("Request must have 2 headers", 2, headers.size());
         for (RestParamProperty header : headers) {
