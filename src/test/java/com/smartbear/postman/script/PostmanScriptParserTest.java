@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -219,6 +220,20 @@ public class PostmanScriptParserTest {
         parseScript(script, context);
 
         verify(assertion).setToken("abc");
+    }
+
+    @Test
+    public void ignoresCommentedLines() throws ReadyApiException {
+        String script = "//tests[\"Body matches string\"] = responseBody.has(\"def\");\ntests[\"Body matches string\"] = responseBody.has(\"abc\");";
+        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
+        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+
+        parseScript(script, context);
+
+        verify(assertion).setToken("abc");
+        verify(assertion, never()).setToken("def");
     }
 
     @Test

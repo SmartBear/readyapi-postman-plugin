@@ -3,6 +3,7 @@ package com.smartbear.postman.script;
 import java.util.regex.Pattern;
 
 public enum TokenType {
+    COMMENT("//"),
     NAME("[a-zA-Z]\\w*"),
     DOT("\\."),
     COMMA("\\,"),

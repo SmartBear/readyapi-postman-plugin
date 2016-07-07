@@ -27,11 +27,16 @@ public class PostmanScriptParser {
 
         while (lookahead.getType() != TokenType.END_OF_SCRIPT && !tokens.isEmpty()) {
             currentCommand.setLength(0);
+            if (lookahead.getType() == TokenType.COMMENT) {
+                scrollToNextCommand();
+                continue;
+            }
             command();
             if (isEndOfCommand()) {
                 nextToken();
             } else {
                 scrollToNextCommand();
+                log.warn("Failed to parse command: " + currentCommand);
             }
         }
 
@@ -53,7 +58,6 @@ public class PostmanScriptParser {
         if (isEndOfCommand()) {
             nextToken();
         }
-        log.warn("Failed to parse command: " + currentCommand);
     }
 
     private void command() {
