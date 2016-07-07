@@ -1,0 +1,35 @@
+{
+	"id": "ee93ff24-74f6-e630-8b0d-dba155fe7d9c",
+	"name": "REST Service 1 collection",
+	"description": "",
+	"order": [
+		"b25f2fa7-3ce9-dfc3-2033-50851f3871d7"
+	],
+	"folders": [],
+	"timestamp": 1464170009203,
+	"owner": "",
+	"remoteLink": "",
+	"public": false,
+	"requests": [
+		{
+			"id": "317f424f-fd52-ea55-5a42-4e53987ceee9",
+			"headers": "Content-Type: application/json\nAuthorization: Basic Og==\n",
+			"url": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
+			"preRequestScript": null,
+			"pathVariables": {},
+			"method": "POST",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "tests[\"Body matches string\"] = responseBody.has(\"test_complex_classResult\");",
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1464176510698,
+			"name": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
+			"description": "Request 2",
+			"collectionId": "ee93ff24-74f6-e630-8b0d-dba155fe7d9c",
+			"responses": [],
+			"rawModeData": "{\"assd\":\"qwe\"}"
+		}
+	]
+}

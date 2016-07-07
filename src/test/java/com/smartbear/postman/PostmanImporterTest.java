@@ -43,13 +43,13 @@ import static org.junit.Assert.assertThat;
 
 
 public class PostmanImporterTest {
-    private static final String OUTPUT_FOLDER_PATH = PostmanImporter.class.getResource("/").getPath();
+    private static final String OUTPUT_FOLDER_PATH = PostmanImporterTest.class.getResource("/").getPath();
     private static final String TEST_WORKSPACE_FILE_PATH = OUTPUT_FOLDER_PATH + "test-workspace.xml";
 
-    public static final String REST_GET_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Get_Collection.postman_collection";
-    public static final String REST_POST_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\REST_Post_Collection.postman_collection";
-    public static final String WSDL_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\SOAP_Collection.postman_collection";
-    public static final String SAMPLE_COLLECTION_PATH = "D:\\issues\\SOAP-5525\\Postman_Echo.postman_collection";
+    public static final String REST_GET_COLLECTION_PATH = "/REST_Get_Collection.postman_collection";
+    public static final String REST_POST_COLLECTION_PATH = "/REST_Post_Collection.postman_collection";
+    public static final String WSDL_COLLECTION_PATH = "/SOAP_Collection.postman_collection";
+    public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
@@ -88,7 +88,8 @@ public class PostmanImporterTest {
     @Test
     public void testImportRestGetRequest() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(workspace, REST_GET_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(REST_GET_COLLECTION_PATH).getPath());
 
         TestProperty property1 = postmanProject.getProperty(PROPERTY1_NAME);
         assertNotNull("Property1 is missing", property1);
@@ -168,7 +169,8 @@ public class PostmanImporterTest {
     @Test
     public void testImportRestPostRequest() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(workspace, REST_POST_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(REST_POST_COLLECTION_PATH).getPath());
 
         assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
@@ -215,7 +217,8 @@ public class PostmanImporterTest {
     @Test
     public void testImportWsdlRequest() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(workspace, WSDL_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(WSDL_COLLECTION_PATH).getPath());
 
         assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
@@ -240,9 +243,10 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImporterSampleCollection() {
+    public void testImportSampleCollectionDoesNotHangUp() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(workspace, SAMPLE_COLLECTION_PATH);
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
     }
 
     @After
