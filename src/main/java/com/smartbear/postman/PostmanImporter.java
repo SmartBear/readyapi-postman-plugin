@@ -296,7 +296,7 @@ public class PostmanImporter {
     private class PostmanRestServiceBuilder extends ProRestServiceBuilder {
         public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject, RequestInfo paramRequestInfo) throws MalformedURLException {
             RestResource restResource = createResource(ModelCreationStrategy.REUSE_MODEL, paramWsdlProject, paramRequestInfo.getUri());
-            RestMethod restMethod = addNewMethod(ModelCreationStrategy.REUSE_MODEL, restResource, paramRequestInfo.getRequestMethod());
+            RestMethod restMethod = addNewMethod(ModelCreationStrategy.CREATE_NEW_MODEL, restResource, paramRequestInfo.getRequestMethod());
             RestRequest restRequest = addNewRequest(restMethod);
             RestParamsPropertyHolder params = extractParams(paramRequestInfo.getUri());
             convertParameters(params);
