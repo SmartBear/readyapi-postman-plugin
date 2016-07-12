@@ -30,4 +30,4 @@ To import the collection:
 
 ## Additional Information
 
-You can find more information about importing the plugin and conversion from Postman collection to Ready! API project in the [documentation](/features/postman/start).
+You can find more information about importing the plugin and conversion from Postman collection to Ready! API project in the [documentation](http://readyapi.smartbear.com/features/postman/start).
