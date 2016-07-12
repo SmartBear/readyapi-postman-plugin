@@ -1,5 +1,6 @@
 package com.smartbear.postman;
 
+import com.eviware.soapui.config.RestParametersConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.WsdlInterfaceFactory;
 import com.eviware.soapui.impl.actions.ProRestServiceBuilder;
@@ -9,9 +10,11 @@ import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.rest.RestRequestInterface.HttpMethod;
 import com.eviware.soapui.impl.rest.RestResource;
+import com.eviware.soapui.impl.rest.actions.support.NewRestResourceActionBase.ParamLocation;
 import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle;
+import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
@@ -131,11 +134,7 @@ public class PostmanImporter {
                                 }
                             }
                         } else {
-                            RestRequest restRequest = addRestRequest(project, serviceName, method, uri);
-
-                            if (StringUtils.hasContent(headers)) {
-                                addHeaders(restRequest, VariableUtils.convertVariables(headers));
-                            }
+                            RestRequest restRequest = addRestRequest(project, serviceName, method, uri, headers);
 
                             if (restRequest.getMethod() == HttpMethod.POST && StringUtils.hasContent(rawModeData)) {
                                 restRequest.setRequestContent(rawModeData);
@@ -168,9 +167,26 @@ public class PostmanImporter {
                 if (request instanceof RestRequest) {
                     RestParamsPropertyHolder params = ((RestRequest) request).getParams();
                     RestParamProperty property = params.addProperty(headerParts[0].trim());
+                    property.setParamLocation(ParamLocation.METHOD);
                     property.setStyle(ParameterStyle.HEADER);
                     property.setValue(headerParts[1].trim());
                 }
+            }
+        }
+    }
+
+    private void addRestHeaders(RestParamsPropertyHolder params, String headersString) {
+        if (StringUtils.isNullOrEmpty(headersString)) {
+            return;
+        }
+
+        String[] headers = headersString.split("\\n");
+        for (String header : headers) {
+            String[] headerParts = header.split(":");
+            if (headerParts.length == 2) {
+                RestParamProperty property = params.addProperty(headerParts[0].trim());
+                property.setStyle(ParameterStyle.HEADER);
+                property.setValue(headerParts[1].trim());
             }
         }
     }
@@ -215,12 +231,12 @@ public class PostmanImporter {
         }
     }
 
-    private RestRequest addRestRequest(WsdlProject project, String serviceName, String method, String uri) {
+    private RestRequest addRestRequest(WsdlProject project, String serviceName, String method, String uri, String headers) {
         RestRequest currentRequest = null;
         RequestInfo requestInfo = new RequestInfo(uri, RestRequestInterface.HttpMethod.valueOf(method));
         PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
         try {
-            currentRequest = builder.createRestServiceFromPostman(project, requestInfo);
+            currentRequest = builder.createRestServiceFromPostman(project, requestInfo, headers);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -294,14 +310,26 @@ public class PostmanImporter {
     }
 
     private class PostmanRestServiceBuilder extends ProRestServiceBuilder {
-        public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject, RequestInfo paramRequestInfo) throws MalformedURLException {
+        public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject, RequestInfo paramRequestInfo, String headers) throws MalformedURLException {
             RestResource restResource = createResource(ModelCreationStrategy.REUSE_MODEL, paramWsdlProject, paramRequestInfo.getUri());
             RestMethod restMethod = addNewMethod(ModelCreationStrategy.CREATE_NEW_MODEL, restResource, paramRequestInfo.getRequestMethod());
             RestRequest restRequest = addNewRequest(restMethod);
             RestParamsPropertyHolder params = extractParams(paramRequestInfo.getUri());
+            addRestHeaders(params, headers);
             convertParameters(params);
-            copyParameters(params, restRequest.getParams());
+
+            RestParamsPropertyHolder requestPropertyHolder = restMethod.getParams();
+            copyParameters(params, requestPropertyHolder);
+
             return restRequest;
+        }
+
+        protected RestParamsPropertyHolder extractParams(String URI)
+        {
+            RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
+                    RestParametersConfig.Factory.newInstance(), ParamLocation.METHOD);
+            extractAndFillParameters(URI, params);
+            return params;
         }
     }
 }
