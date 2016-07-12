@@ -32,6 +32,7 @@ import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.ModelItemNamer.NumberSuffixStrategy;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
+import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
 import com.smartbear.analytics.Analytics;
 import com.smartbear.analytics.AnalyticsManager;
@@ -125,7 +126,7 @@ public class PostmanImporter {
 
                             if (wsdlRequest != null) {
                                 if (StringUtils.hasContent(headers)) {
-                                    addHeaders(wsdlRequest, VariableUtils.convertVariables(headers));
+                                    addSoapHeaders(wsdlRequest, VariableUtils.convertVariables(headers));
                                 }
 
                                 if (StringUtils.hasContent(tests)) {
@@ -159,18 +160,15 @@ public class PostmanImporter {
         return project;
     }
 
-    private void addHeaders(AbstractHttpRequest request, String headersString) {
+    private void addSoapHeaders(AbstractHttpRequest request, String headersString) {
         String[] headers = headersString.split("\\n");
         for (String header : headers) {
             String[] headerParts = header.split(":");
+
             if (headerParts.length == 2) {
-                if (request instanceof RestRequest) {
-                    RestParamsPropertyHolder params = ((RestRequest) request).getParams();
-                    RestParamProperty property = params.addProperty(headerParts[0].trim());
-                    property.setParamLocation(ParamLocation.METHOD);
-                    property.setStyle(ParameterStyle.HEADER);
-                    property.setValue(headerParts[1].trim());
-                }
+                StringToStringsMap headersMap = request.getRequestHeaders();
+                headersMap.add(headerParts[0].trim(), headerParts[1].trim());
+                request.setRequestHeaders(headersMap);
             }
         }
     }
