@@ -28,6 +28,16 @@ To import the collection:
 - Select **File | Import Postman Collection**.
 - In the **Import Postman Collection** dialog, click Browse and select the Postman collection to import.
 
+### Building the plugin
+
+If you want to build the plugin yourself all you need to do is clone this repository locally and run
+
+```
+mvn clean install
+```
+
+which will create the plugin jar in the target folder
+
 ## Additional Information
 
 You can find more information about importing the plugin and conversion from Postman collection to Ready! API project in the [documentation](http://readyapi.smartbear.com/features/postman/start).
