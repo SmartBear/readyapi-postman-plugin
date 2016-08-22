@@ -85,7 +85,7 @@ public class PostmanImporter {
     public static final String TESTS = "tests";
     public static final String HEADERS = "headers";
 
-    public static final String SOAP_SUFFIX = "?WSDL";
+    public static final String WSDL_SUFFIX = "?WSDL";
 
     private final TestCreator testCreator;
 
@@ -135,7 +135,7 @@ public class PostmanImporter {
                         }
 
                         Assertable assertable = null;
-                        if (isSoapRequest(uri)) {
+                        if (isWsdlRequest(uri)) {
                             String operationName = getOperationName(rawModeData);
                             WsdlRequest wsdlRequest = addWsdlRequest(project, serviceName, method, uri,
                                     operationName, rawModeData);
@@ -302,8 +302,8 @@ public class PostmanImporter {
         }
     }
 
-    private boolean isSoapRequest(String url) {
-        return StringUtils.hasContent(url) && url.toUpperCase().endsWith(SOAP_SUFFIX);
+    private boolean isWsdlRequest(String url) {
+        return StringUtils.hasContent(url) && url.toUpperCase().endsWith(WSDL_SUFFIX);
     }
 
     private String getValue(JSONObject jsonObject, String name) {

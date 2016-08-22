@@ -5,9 +5,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.smartbear</groupId>
+    <groupId>com.smartbear.soapui.plugins</groupId>
     <artifactId>readyapi-postman-plugin</artifactId>
     <version>1.0.1-SNAPSHOT</version>
+
+    <name>Ready! API Postman Plugin</name>
+    <description>Creates Ready! API projects and tests based on Postman collections</description>
+    <url>https://github.com/SmartBear/readyapi-postman-plugin</url>
 
     <repositories>
         <repository>
@@ -22,7 +26,6 @@
         </repository>
     </repositories>
 
-    <name>Ready! API Postman Plugin</name>
     <properties>
         <ready-api-version>1.7.0</ready-api-version>
     </properties>
@@ -65,6 +68,23 @@
     </dependencies>
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>templating-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>filter-src</id>
+                        <goals>
+                            <goal>filter-sources</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${basedir}/src/main/templates</sourceDirectory>
+                            <outputDirectory>${project.build.directory}/generated-sources/java</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>

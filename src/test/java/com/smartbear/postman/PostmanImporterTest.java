@@ -29,6 +29,7 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -52,7 +53,7 @@ public class PostmanImporterTest {
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
-    public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
+    public static final String SOAP_ENDPOINT = "http://www.webservicex.com/globalweather.asmx";
     public static final String GET_PATH = "/WCFREST/Service.svc/ConStroka";
     public static final String POST_PATH = "/WCFREST/Service.svc/testComplexClass";
     public static final String PARAMETER1_NAME = "x";
@@ -66,7 +67,7 @@ public class PostmanImporterTest {
     public static final String PROPERTY1_VALUE = "abc";
     public static final String PROPERTY2_NAME = "string2";
     public static final String PROPERTY2_VALUE = "def";
-    private static final String OPERATION_NAME = "Con_Stroka";
+    private static final String OPERATION_NAME = "GetWeather";
     private static final String HEADER1_NAME = "header1";
     private static final String HEADER1_VALUE = "af";
     private static final String HEADER2_NAME = "header2";

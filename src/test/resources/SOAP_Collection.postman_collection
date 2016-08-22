@@ -14,14 +14,14 @@
 		{
 			"id": "efdb9c1d-aea1-5f20-809b-c4d6b2faa73f",
 			"headers": "Content-Type: text/xml\n",
-			"url": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL",
+			"url": "http://www.webservicex.com/globalweather.asmx?WSDL",
 			"pathVariables": {},
 			"preRequestScript": "",
 			"method": "POST",
 			"collectionId": "ee93ff24-74f6-e630-8b0d-dba155fe7d9c",
 			"data": [],
 			"dataMode": "raw",
-			"name": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL",
+			"name": "http://www.webservicex.com/globalweather.asmx?WSDL",
 			"description": "SOAP Request",
 			"descriptionFormat": "html",
 			"time": 1464190296492,
@@ -30,12 +30,12 @@
 			"tests": "tests[\"Content-Type is present\"] = postman.getResponseHeader(\"Content-Type\");\n\ntests[\"Status code is 200\"] = responseCode.code === 200;",
 			"currentHelper": "normal",
 			"helperAttributes": {},
-			"rawModeData": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://localhost/test_service/Service1.asmx\">\r\n   <soap:Header/>\r\n   <soap:Body>\r\n      <ser:Con_Stroka>\r\n         <!--Optional:-->\r\n         <ser:x>qwe</ser:x>\r\n         <!--Optional:-->\r\n         <ser:y>asd</ser:y>\r\n      </ser:Con_Stroka>\r\n   </soap:Body>\r\n</soap:Envelope>"
+			"rawModeData": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:web=\"http://www.webserviceX.NET\"> <soapenv:Header/> <soapenv:Body> <web:GetWeather> <web:CityName>?</web:CityName> <web:CountryName>?</web:CountryName> </web:GetWeather> </soapenv:Body> </soapenv:Envelope>"
 		},
 		{
 			"id": "42a682a2-4783-9fd5-f399-8535ee424524",
 			"headers": "Content-Type: text/xml\n",
-			"url": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL",
+			"url": "http://www.webservicex.com/globalweather.asmx?WSDL",
 			"preRequestScript": "",
 			"pathVariables": {},
 			"method": "POST",
@@ -46,11 +46,11 @@
 			"currentHelper": "normal",
 			"helperAttributes": {},
 			"time": 1466492300038,
-			"name": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL copy",
+			"name": "http://www.webservicex.com/globalweather.asmx?WSDL copy",
 			"description": "SOAP Request",
 			"collectionId": "ee93ff24-74f6-e630-8b0d-dba155fe7d9c",
 			"responses": [],
-			"rawModeData": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://localhost/test_service/Service1.asmx\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n      <ser:Date/>\r\n   </soapenv:Body>\r\n</soapenv:Envelope>"
+			"rawModeData": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:web=\"http://www.webserviceX.NET\"> <soapenv:Header/> <soapenv:Body> <web:GetWeather> <web:CityName>?</web:CityName> <web:CountryName>?</web:CountryName> </web:GetWeather> </soapenv:Body> </soapenv:Envelope>"
 		},
 	]
 }

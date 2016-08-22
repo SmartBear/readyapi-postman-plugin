@@ -18,9 +18,13 @@ package com.smartbear.postman;
 
 import com.eviware.soapui.plugins.PluginAdapter;
 import com.eviware.soapui.plugins.PluginConfiguration;
+import com.eviware.soapui.support.UISupport;
 
-@PluginConfiguration(groupId = "com.smartbear.soapui.plugins", name = "Postman Plugin", version = "1.0",
-        autoDetect = true, description = "Creates Ready! API projects and tests based on Postman collections",
-        infoUrl = "https://github.com/SmartBear/readyapi-postman-plugin")
+@PluginConfiguration(groupId = "${project.groupId}",
+    name = "${project.name}",
+    version = "${project.version}",
+    autoDetect = true,
+    description = "${project.description}",
+    infoUrl = "${project.url}" )
 public class PluginConfig extends PluginAdapter {
 }
