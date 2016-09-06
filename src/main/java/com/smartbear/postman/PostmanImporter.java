@@ -1,17 +1,17 @@
 /**
- *  Copyright 2016 SmartBear Software, Inc.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
+ * Copyright 2016 SmartBear Software, Inc.
+ * <p>
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.smartbear.postman;
@@ -121,6 +121,7 @@ public class PostmanImporter {
                     if (requestObject instanceof JSONObject) {
                         JSONObject request = (JSONObject) requestObject;
                         String uri = getValue(request, URL);
+                        String requestName = getValue(request, NAME);
                         String method = getValue(request, METHOD);
                         String serviceName = getValue(request, DESCRIPTION);
                         String preRequestScript = getValue(request, PRE_REQUEST_SCRIPT);
@@ -145,6 +146,10 @@ public class PostmanImporter {
                                     addSoapHeaders(wsdlRequest, VariableUtils.convertVariables(headers));
                                 }
 
+                                if (StringUtils.hasContent(requestName)) {
+                                    wsdlRequest.setName(requestName);
+                                }
+
                                 if (StringUtils.hasContent(tests)) {
                                     testCreator.createTest(wsdlRequest);
                                     assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
@@ -152,6 +157,10 @@ public class PostmanImporter {
                             }
                         } else {
                             RestRequest restRequest = addRestRequest(project, serviceName, method, uri, headers);
+
+                            if (StringUtils.hasContent(requestName)) {
+                                restRequest.setName(requestName);
+                            }
 
                             if (restRequest.getMethod() == HttpMethod.POST && StringUtils.hasContent(rawModeData)) {
                                 restRequest.setRequestContent(rawModeData);
@@ -338,8 +347,7 @@ public class PostmanImporter {
             return restRequest;
         }
 
-        protected RestParamsPropertyHolder extractParams(String URI)
-        {
+        protected RestParamsPropertyHolder extractParams(String URI) {
             RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
                     RestParametersConfig.Factory.newInstance(), ParamLocation.METHOD);
             extractAndFillParameters(URI, params);

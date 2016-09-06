@@ -29,7 +29,6 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -119,7 +118,6 @@ public class PostmanImporterTest {
         assertEquals("Wrong method", HttpMethod.GET, method.getMethod());
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
         checkParams(postmanProject, request.getParams());
         List<RestParamProperty> headers = getParamsOfStyle(request.getParams(), ParameterStyle.HEADER);
@@ -195,7 +193,6 @@ public class PostmanImporterTest {
         assertEquals("Wrong method", HttpMethod.POST, method.getMethod());
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
@@ -233,7 +230,6 @@ public class PostmanImporterTest {
 
         assertEquals("Operation should have 1 request", 1, operation.getRequestCount());
         WsdlRequest request = operation.getRequestAt(0);
-        assertEquals("Request has wrong name", WSDL_REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", SOAP_ENDPOINT, request.getEndpoint());
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
