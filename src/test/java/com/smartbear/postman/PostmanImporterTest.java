@@ -58,10 +58,9 @@ public class PostmanImporterTest {
     public static final String PARAMETER1_NAME = "x";
     public static final String PARAMETER1_VALUE = "${#Project#string1}";
     public static final ParameterStyle PARAMETER1_STYLE = ParameterStyle.QUERY;
-    public static final String PARAMETER2_NAME = "y";
-    public static final String PARAMETER2_VALUE = "${#Project#string2}";
-    public static final String REQUEST_NAME = "Request 1";
-    public static final String WSDL_REQUEST_NAME = "Request 1";
+    public static final String REQUEST_NAME = "http://rapis02.aqa.com.ru/WCFREST/Service.svc/ConStroka?x=abc&y=def";
+    public static final String POST_REQUEST_NAME = "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass";
+    public static final String WSDL_REQUEST_NAME = "http://www.webservicex.com/globalweather.asmx?WSDL";
     public static final String PROPERTY1_NAME = "string1";
     public static final String PROPERTY1_VALUE = "abc";
     public static final String PROPERTY2_NAME = "string2";
@@ -69,7 +68,6 @@ public class PostmanImporterTest {
     private static final String OPERATION_NAME = "GetWeather";
     private static final String HEADER1_NAME = "header1";
     private static final String HEADER1_VALUE = "af";
-    private static final String HEADER2_NAME = "header2";
     private static final String HEADER2_VALUE = "er";
     private static final String REST_POST_BODY_VALUE = "{\"assd\":\"qwe\"}";
 
@@ -118,6 +116,7 @@ public class PostmanImporterTest {
         assertEquals("Wrong method", HttpMethod.GET, method.getMethod());
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
+        assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
         checkParams(postmanProject, request.getParams());
         List<RestParamProperty> headers = getParamsOfStyle(request.getParams(), ParameterStyle.HEADER);
@@ -193,6 +192,7 @@ public class PostmanImporterTest {
         assertEquals("Wrong method", HttpMethod.POST, method.getMethod());
         assertEquals("Method should have 1 request", 1, method.getRequestCount());
         RestRequest request = method.getRequestAt(0);
+        assertEquals("Request has wrong name", POST_REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
@@ -230,6 +230,7 @@ public class PostmanImporterTest {
 
         assertEquals("Operation should have 1 request", 1, operation.getRequestCount());
         WsdlRequest request = operation.getRequestAt(0);
+        assertEquals("Request has wrong name", WSDL_REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", SOAP_ENDPOINT, request.getEndpoint());
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
