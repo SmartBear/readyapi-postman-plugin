@@ -228,7 +228,7 @@ public class PostmanImporterTest {
         WsdlOperation operation = wsdlInterface.getOperationByName(OPERATION_NAME);
         assertNotNull("Operation is missing", operation);
 
-        assertEquals("Operation should have 1 request", 1, operation.getRequestCount());
+        assertEquals("Operation should have 2 request", 2, operation.getRequestCount());
         WsdlRequest request = operation.getRequestAt(0);
         assertEquals("Request has wrong name", WSDL_REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", SOAP_ENDPOINT, request.getEndpoint());
