@@ -74,6 +74,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 public class PostmanImporter {
     public static final String NAME = "name";
@@ -270,9 +271,9 @@ public class PostmanImporter {
     private WsdlRequest addWsdlRequest(WsdlProject project, String serviceName, String method, String uri, String operationName, String requestContent) {
         WsdlRequest request = null;
         ArrayList<WsdlInterface> interfaces = new ArrayList<>();
-        WsdlInterface existingWsdlInterface = findExistingWsdlInterface(project, uri);
-        if (existingWsdlInterface != null) {
-            interfaces.add(existingWsdlInterface);
+        List<WsdlInterface> existingWsdlInterfaces = findExistingWsdlInterfaces(project, uri);
+        if (existingWsdlInterfaces.size() > 0) {
+            interfaces.addAll(existingWsdlInterfaces);
         } else {
             try {
                 interfaces.addAll(
@@ -293,14 +294,15 @@ public class PostmanImporter {
         return request;
     }
 
-    private WsdlInterface findExistingWsdlInterface(WsdlProject project, String uri) {
-        for (Interface iface : project.getInterfaces().values()) {
+    private List<WsdlInterface> findExistingWsdlInterfaces(WsdlProject project, String uri) {
+        List<WsdlInterface> existingInterfaces = new ArrayList<>();
+        for (Interface iface : project.getInterfaceList()) {
             if (iface instanceof WsdlInterface
                     && ((WsdlInterface) iface).getDefinition().equals(uri)) {
-                return (WsdlInterface) iface;
+                existingInterfaces.add((WsdlInterface) iface);
             }
         }
-        return null;
+        return existingInterfaces;
     }
 
     private <T> T getTestRequestStep(WsdlProject project, Class<T> stepClass) {
