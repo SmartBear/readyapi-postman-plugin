@@ -41,6 +41,7 @@ import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
+import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.JsonUtil;
@@ -70,11 +71,12 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
 
 public class PostmanImporter {
-    private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
-
     public static final String NAME = "name";
     public static final String DESCRIPTION = "description";
     public static final String REQUESTS = "requests";
@@ -84,9 +86,8 @@ public class PostmanImporter {
     public static final String PRE_REQUEST_SCRIPT = "preRequestScript";
     public static final String TESTS = "tests";
     public static final String HEADERS = "headers";
-
     public static final String WSDL_SUFFIX = "?WSDL";
-
+    private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private final TestCreator testCreator;
 
     public PostmanImporter(TestCreator testCreator) {
@@ -136,6 +137,7 @@ public class PostmanImporter {
                         }
 
                         Assertable assertable = null;
+
                         if (isWsdlRequest(uri)) {
                             String operationName = getOperationName(rawModeData);
                             WsdlRequest wsdlRequest = addWsdlRequest(project, serviceName, method, uri,
@@ -268,20 +270,39 @@ public class PostmanImporter {
 
     private WsdlRequest addWsdlRequest(WsdlProject project, String serviceName, String method, String uri, String operationName, String requestContent) {
         WsdlRequest request = null;
-        try {
-            WsdlInterface[] interfaces = WsdlInterfaceFactory.importWsdl(project, uri, false);
-            for (WsdlInterface wsdlInterface : interfaces) {
-                WsdlOperation operation = wsdlInterface.getOperationByName(operationName);
-                if (operation != null) {
-                    request = operation.addNewRequest("Request 1");
-                    request.setRequestContent(requestContent);
-                    break;
-                }
+        ArrayList<WsdlInterface> interfaces = new ArrayList<>();
+        List<WsdlInterface> existingWsdlInterfaces = findExistingWsdlInterfaces(project, uri);
+        if (existingWsdlInterfaces.size() > 0) {
+            interfaces.addAll(existingWsdlInterfaces);
+        } else {
+            try {
+                interfaces.addAll(
+                        Arrays.asList(WsdlInterfaceFactory.importWsdl(project, uri, false)));
+            } catch (SoapUIException e) {
+                e.printStackTrace();
             }
-        } catch (SoapUIException e) {
-            e.printStackTrace();
+        }
+
+        for (WsdlInterface wsdlInterface : interfaces) {
+            WsdlOperation operation = wsdlInterface.getOperationByName(operationName);
+            if (operation != null) {
+                request = operation.addNewRequest("Request 1");
+                request.setRequestContent(requestContent);
+                break;
+            }
         }
         return request;
+    }
+
+    private List<WsdlInterface> findExistingWsdlInterfaces(WsdlProject project, String uri) {
+        List<WsdlInterface> existingInterfaces = new ArrayList<>();
+        for (Interface iface : project.getInterfaceList()) {
+            if (iface instanceof WsdlInterface
+                    && ((WsdlInterface) iface).getDefinition().equals(uri)) {
+                existingInterfaces.add((WsdlInterface) iface);
+            }
+        }
+        return existingInterfaces;
     }
 
     private <T> T getTestRequestStep(WsdlProject project, Class<T> stepClass) {
@@ -333,9 +354,17 @@ public class PostmanImporter {
     }
 
     private class PostmanRestServiceBuilder extends ProRestServiceBuilder {
-        public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject, RequestInfo paramRequestInfo, String headers) throws MalformedURLException {
-            RestResource restResource = createResource(ModelCreationStrategy.REUSE_MODEL, paramWsdlProject, paramRequestInfo.getUri());
-            RestMethod restMethod = addNewMethod(ModelCreationStrategy.CREATE_NEW_MODEL, restResource, paramRequestInfo.getRequestMethod());
+        public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject,
+                                                        RequestInfo paramRequestInfo,
+                                                        String headers) throws MalformedURLException {
+            RestResource restResource = createResource(
+                    ModelCreationStrategy.REUSE_MODEL,
+                    paramWsdlProject,
+                    paramRequestInfo.getUri());
+            RestMethod restMethod = addNewMethod(
+                    ModelCreationStrategy.CREATE_NEW_MODEL,
+                    restResource,
+                    paramRequestInfo.getRequestMethod());
             RestRequest restRequest = addNewRequest(restMethod);
             RestParamsPropertyHolder params = extractParams(paramRequestInfo.getUri());
             addRestHeaders(params, headers);
