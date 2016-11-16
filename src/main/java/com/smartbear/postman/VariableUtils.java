@@ -16,7 +16,6 @@
 
 package com.smartbear.postman;
 
-import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
 
 import java.util.regex.Matcher;

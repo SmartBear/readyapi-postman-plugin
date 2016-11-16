@@ -16,15 +16,15 @@
 
 package com.smartbear.postman.script;
 
+import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
-import com.smartbear.ready.core.exception.ReadyApiException;
 
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 
 public class PostmanScriptTokenizer {
 
-    public LinkedList<Token> tokenize(final String scriptToParse) throws ReadyApiException {
+    public LinkedList<Token> tokenize(final String scriptToParse) throws SoapUIException {
         LinkedList<Token> tokens = new LinkedList<>();
         if (StringUtils.isNullOrEmpty(scriptToParse)) {
             return tokens;
@@ -46,7 +46,7 @@ public class PostmanScriptTokenizer {
 
                     nextTokenPosition = lastTokenPosition + matcher.end();
                     if (nextTokenPosition == lastTokenPosition) {
-                        throw new ReadyApiException("Unexpected character in input: " + script);
+                        throw new SoapUIException("Unexpected character in input: " + script);
                     }
                     break;
                 }

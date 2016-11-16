@@ -16,8 +16,8 @@
 
 package com.smartbear.postman.script;
 
+import com.eviware.soapui.support.SoapUIException;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
-import com.smartbear.ready.core.exception.ReadyApiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class PostmanScriptParser {
     private Token lookahead;
     private StringBuffer currentCommand = new StringBuffer();
 
-    public void parse(LinkedList<Token> tokens, ScriptContext context) throws ReadyApiException {
+    public void parse(LinkedList<Token> tokens, ScriptContext context) throws SoapUIException {
         this.tokens = (LinkedList<Token>) tokens.clone();
         this.context = context;
 
@@ -57,7 +57,7 @@ public class PostmanScriptParser {
         }
 
         if (lookahead.getType() != TokenType.END_OF_SCRIPT) {
-            throw new ReadyApiException("Unexpected symbol is found:" + lookahead.getSequence());
+            throw new SoapUIException("Unexpected symbol is found:" + lookahead.getSequence());
         }
     }
 

@@ -57,7 +57,6 @@ import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.postman.script.ScriptContext;
-import com.smartbear.ready.core.exception.ReadyApiException;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -238,7 +237,7 @@ public class PostmanImporter {
 
             ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
             parser.parse(tokens, context);
-        } catch (ReadyApiException e) {
+        } catch (SoapUIException e) {
             e.printStackTrace();
         }
     }
@@ -251,7 +250,7 @@ public class PostmanImporter {
 
             ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
             parser.parse(tokens, context);
-        } catch (ReadyApiException e) {
+        } catch (SoapUIException e) {
             e.printStackTrace();
         }
     }
