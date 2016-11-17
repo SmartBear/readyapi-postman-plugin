@@ -19,8 +19,7 @@ package com.smartbear.postman;
 import com.eviware.soapui.config.RestParametersConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.WsdlInterfaceFactory;
-import com.eviware.soapui.impl.actions.ProRestServiceBuilder;
-import com.eviware.soapui.impl.actions.ProRestServiceBuilder.RequestInfo;
+import com.eviware.soapui.impl.actions.RestServiceBuilder;
 import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
@@ -274,10 +273,10 @@ public class PostmanImporter {
 
     private RestRequest addRestRequest(WsdlProject project, String serviceName, String method, String uri, String headers) {
         RestRequest currentRequest = null;
-        RequestInfo requestInfo = new RequestInfo(uri, RestRequestInterface.HttpMethod.valueOf(method));
         PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
         try {
-            currentRequest = builder.createRestServiceFromPostman(project, requestInfo, headers);
+            currentRequest = builder.createRestServiceFromPostman(project, uri,
+                    RestRequestInterface.HttpMethod.valueOf(method), headers);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
@@ -369,20 +368,21 @@ public class PostmanImporter {
         return defaultValue;
     }
 
-    private class PostmanRestServiceBuilder extends ProRestServiceBuilder {
+    private class PostmanRestServiceBuilder extends RestServiceBuilder {
         public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject,
-                                                        RequestInfo paramRequestInfo,
+                                                        String uri,
+                                                        HttpMethod httpMethod,
                                                         String headers) throws MalformedURLException {
             RestResource restResource = createResource(
                     ModelCreationStrategy.REUSE_MODEL,
                     paramWsdlProject,
-                    paramRequestInfo.getUri());
+                    uri);
             RestMethod restMethod = addNewMethod(
                     ModelCreationStrategy.CREATE_NEW_MODEL,
                     restResource,
-                    paramRequestInfo.getRequestMethod());
+                    httpMethod);
             RestRequest restRequest = addNewRequest(restMethod);
-            RestParamsPropertyHolder params = extractParams(paramRequestInfo.getUri());
+            RestParamsPropertyHolder params = extractParams(uri);
             addRestHeaders(params, headers);
             convertParameters(params);
 
