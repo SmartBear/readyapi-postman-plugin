@@ -50,8 +50,6 @@ import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
-import com.smartbear.analytics.Analytics;
-import com.smartbear.analytics.AnalyticsManager;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
@@ -74,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class PostmanImporter {
     public static final String NAME = "name";
@@ -181,21 +180,20 @@ public class PostmanImporter {
                 }
             }
         }
-        Analytics.getAnalyticsManager().trackAction(AnalyticsManager.Category.CUSTOM_PLUGIN_ACTION, "CreatedProjectBasedOnPostmanCollection", null);
+        sendAnalytics();
         return project;
     }
 
     private static String createProjectName(String collectionName, List<? extends Project> projectList) {
         Class clazz;
-        try{
+        try {
             clazz = Class.forName("com.eviware.soapui.support.ModelItemNamer$NumberSuffixStrategy");
             Method method = ModelItemNamer.class.getMethod("createName", String.class, Iterable.class, clazz);
             if (clazz.isEnum()) {
                 return (String) method.invoke(null, collectionName, projectList,
                         Enum.valueOf(clazz, "SUFFIX_WHEN_CONFLICT_FOUND"));
             }
-        }
-        catch (Throwable e){
+        } catch (Throwable e) {
             logger.warn("Setting number suffix strategy is only supported in Ready! API", e);
         }
 
@@ -366,6 +364,26 @@ public class PostmanImporter {
             }
         }
         return defaultValue;
+    }
+
+    private void sendAnalytics() {
+        Class analyticsClass;
+        try {
+            analyticsClass = Class.forName("com.smartbear.analytics.Analytics");
+        } catch (ClassNotFoundException e) {
+            return;
+        }
+        try {
+            Method getManagerMethod = analyticsClass.getMethod("getAnalyticsManager");
+            Object analyticsManager = getManagerMethod.invoke(null);
+            Class analyticsCategoryClass = Class.forName("com.smartbear.analytics.AnalyticsManager$Category");
+            Method trackMethod = analyticsManager.getClass().getMethod("trackAction", analyticsCategoryClass,
+                    String.class, Map.class);
+            trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
+                    "CreatedProjectBasedOnPostmanCollection", null);
+        } catch (Throwable e) {
+            logger.error("Error while sending analytics", e);
+        }
     }
 
     private class PostmanRestServiceBuilder extends RestServiceBuilder {
