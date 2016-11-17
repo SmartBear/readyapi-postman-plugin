@@ -42,11 +42,11 @@ import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.model.iface.Interface;
+import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.JsonUtil;
 import com.eviware.soapui.support.ModelItemNamer;
-import com.eviware.soapui.support.ModelItemNamer.NumberSuffixStrategy;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.types.StringToStringsMap;
@@ -69,6 +69,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -107,8 +108,7 @@ public class PostmanImporter {
             if (json instanceof JSONObject) {
                 JSONObject postmanCollection = (JSONObject) json;
                 String collectionName = getValue(postmanCollection, NAME);
-                String projectName = ModelItemNamer.createName(collectionName, workspace.getProjectList(),
-                        NumberSuffixStrategy.SUFFIX_WHEN_CONFLICT_FOUND);
+                String projectName = createProjectName(collectionName, workspace.getProjectList());
                 try {
                     project = workspace.createProject(projectName, null);
                 } catch (SoapUIException e) {
@@ -184,6 +184,23 @@ public class PostmanImporter {
         }
         Analytics.getAnalyticsManager().trackAction(AnalyticsManager.Category.CUSTOM_PLUGIN_ACTION, "CreatedProjectBasedOnPostmanCollection", null);
         return project;
+    }
+
+    private static String createProjectName(String collectionName, List<? extends Project> projectList) {
+        Class clazz;
+        try{
+            clazz = Class.forName("com.eviware.soapui.support.ModelItemNamer$NumberSuffixStrategy");
+            Method method = ModelItemNamer.class.getMethod("createName", String.class, Iterable.class, clazz);
+            if (clazz.isEnum()) {
+                return (String) method.invoke(null, collectionName, projectList,
+                        Enum.valueOf(clazz, "SUFFIX_WHEN_CONFLICT_FOUND"));
+            }
+        }
+        catch (Throwable e){
+            logger.warn("Setting number suffix strategy is only supported in Ready! API", e);
+        }
+
+        return ModelItemNamer.createName(collectionName, projectList);
     }
 
     private void addSoapHeaders(AbstractHttpRequest request, String headersString) {
