@@ -29,7 +29,7 @@ import com.eviware.x.form.support.AForm;
 
 import java.io.File;
 
-@ActionConfiguration(actionGroup = "WorkspaceImplActions", afterAction = "ImportProjectFromVcsAction", separatorBefore = true)
+@ActionConfiguration(actionGroup = "WorkspaceImplActions", beforeAction = "SaveAllProjectsAction", separatorAfter = true)
 public class ImportPostmanCollectionAction extends AbstractSoapUIAction<WorkspaceImpl> {
     private XFormDialog dialog;
 
