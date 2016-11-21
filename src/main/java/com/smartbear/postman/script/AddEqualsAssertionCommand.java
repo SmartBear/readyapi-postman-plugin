@@ -16,12 +16,18 @@
 
 package com.smartbear.postman.script;
 
-import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.model.testsuite.Assertable;
+import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.support.StringUtils;
 import groovy.json.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 public class AddEqualsAssertionCommand implements AddAssertionCommand {
+    private static final Logger logger = LoggerFactory.getLogger(AddEqualsAssertionCommand.class);
     private final Assertable assertable;
     private String value;
 
@@ -56,8 +62,19 @@ public class AddEqualsAssertionCommand implements AddAssertionCommand {
 
     @Override
     public Object execute() {
-        EqualsAssertion assertion = (EqualsAssertion) assertable.addAssertion(EqualsAssertion.LABEL);
-        assertion.setPatternText(StringUtils.unquote(StringEscapeUtils.unescapeJava(value)));
+        Class clazz;
+        try{
+            clazz = Class.forName("com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion");
+            Field labelField = clazz.getField("LABEL");
+            TestAssertion assertion = assertable.addAssertion((String) labelField.get(null));
+            if (clazz.isInstance(assertion)) {
+                Method method = clazz.getMethod("setPatternText", String.class);
+                method.invoke(assertion, StringUtils.unquote(StringEscapeUtils.unescapeJava(value)));
+            }
+        }
+        catch (Throwable e){
+            logger.warn("Creating EqualsAssertion is only supported in Ready! API", e);
+        }
         return null;
     }
 }

@@ -10,7 +10,7 @@ import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.InvalidHttpStatusCodesAssertion;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
-import com.smartbear.ready.core.exception.ReadyApiException;
+import com.eviware.soapui.support.SoapUIException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
@@ -45,18 +45,18 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-     public void parsesSettingGlobalVariable() throws ReadyApiException {
+     public void parsesSettingGlobalVariable() throws SoapUIException {
         String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
         parseSettingGlobalVariables(script);
     }
 
     @Test
-    public void skipsUnknownCommands() throws ReadyApiException {
+    public void skipsUnknownCommands() throws SoapUIException {
         String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\nvar jsonObject = xml2Json(responseBody);\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
         parseSettingGlobalVariables(script);
     }
 
-    private void parseSettingGlobalVariables(String script) throws ReadyApiException {
+    private void parseSettingGlobalVariables(String script) throws SoapUIException {
         ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
 
         parseScript(script, context);
@@ -71,7 +71,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseValidCodeAssertion() throws ReadyApiException {
+    public void parsesResponseValidCodeAssertion() throws SoapUIException {
         String script = "tests[\"Status code is 200\"] = responseCode.code === 200;";
 
         ValidHttpStatusCodesAssertion assertion = mock(ValidHttpStatusCodesAssertion.class);
@@ -85,7 +85,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseInvalidCodeAssertion() throws ReadyApiException {
+    public void parsesResponseInvalidCodeAssertion() throws SoapUIException {
         String script = "tests[\"Status code is not 401\"] = responseCode.code !== 401;";
 
         InvalidHttpStatusCodesAssertion assertion = mock(InvalidHttpStatusCodesAssertion.class);
@@ -99,7 +99,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseTwoValidCodeAssertion() throws ReadyApiException {
+    public void parsesResponseTwoValidCodeAssertion() throws SoapUIException {
         String script = "tests[\"Status code is 200 or 201\"] = responseCode.code === 200 || responseCode.code === 201;";
 
         final ArrayList<TestAssertion> assertions = new ArrayList<>();
@@ -127,7 +127,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseTimeAssertion() throws ReadyApiException {
+    public void parsesResponseTimeAssertion() throws SoapUIException {
         String script = "tests[\"Response time is less than 300ms\"] = responseTime < 300;";
 
         ResponseSLAAssertion assertion = mock(ResponseSLAAssertion.class);
@@ -141,7 +141,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseBodyEqualsAssertion() throws ReadyApiException {
+    public void parsesResponseBodyEqualsAssertion() throws SoapUIException {
         String script = "tests[\"Body is correct\"] = responseBody === \"\\\"abc def\\\"\";";
 
         EqualsAssertion assertion = mock(EqualsAssertion.class);
@@ -155,7 +155,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseBodyContainsAssertion() throws ReadyApiException {
+    public void parsesResponseBodyContainsAssertion() throws SoapUIException {
         String script = "tests[\"Body matches string\"] = responseBody.has(\"abc\");";
 
         SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
@@ -169,7 +169,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseBodyContainsAssertionWithQuotes() throws ReadyApiException {
+    public void parsesResponseBodyContainsAssertionWithQuotes() throws SoapUIException {
         String script = "tests[\"Body matches string\"] = responseBody.has(\"\\\"abc\\\"\");";
 
         SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
@@ -183,7 +183,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesGlobalVariableReference() throws ReadyApiException {
+    public void parsesGlobalVariableReference() throws SoapUIException {
         String script = "tests[\"Body matches string\"] = responseBody.has(globals[\"string1\"]);";
 
         SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
@@ -197,7 +197,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesCommandInTry() throws ReadyApiException {
+    public void parsesCommandInTry() throws SoapUIException {
         String script = "try { tests[\"Body matches string\"] = responseBody.has(\"abc\"); }\ncatch (e) { }";
         SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
         when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
@@ -210,7 +210,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesCommandAfterCatch() throws ReadyApiException {
+    public void parsesCommandAfterCatch() throws SoapUIException {
         String script = "try { responseJSON = JSON.parse(responseBody); }\ncatch (e) { }\n\ntests[\"Body matches string\"] = responseBody.has(\"abc\");";
         SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
         when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
@@ -223,7 +223,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void ignoresCommentedLines() throws ReadyApiException {
+    public void ignoresCommentedLines() throws SoapUIException {
         String script = "//tests[\"Body matches string\"] = responseBody.has(\"def\");\ntests[\"Body matches string\"] = responseBody.has(\"abc\");";
         SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
         when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
@@ -237,7 +237,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesResponseHeaderExistsAssertion() throws ReadyApiException {
+    public void parsesResponseHeaderExistsAssertion() throws SoapUIException {
         String script = "tests[\"Content Type is present\"] = postman.getResponseHeader(\"Content-Type\");";
 
         GroovyScriptAssertion assertion = mock(GroovyScriptAssertion.class);
@@ -251,7 +251,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesStringInSingleQuotes() throws ReadyApiException {
+    public void parsesStringInSingleQuotes() throws SoapUIException {
         String script = "tests[\"response code is 200\"] = responseCode.code === 200;tests[\"Content Type is present\"] = postman.getResponseHeader('Content-Type');";
 
         ValidHttpStatusCodesAssertion statusAssertion = mock(ValidHttpStatusCodesAssertion.class);
@@ -269,7 +269,7 @@ public class PostmanScriptParserTest {
     }
 
     @Test
-    public void parsesExpressionsInRoundBrackets() throws ReadyApiException {
+    public void parsesExpressionsInRoundBrackets() throws SoapUIException {
         String script = "tests[\"response code is 200\"] = (responseCode.code === 200);";
 
         ValidHttpStatusCodesAssertion statusAssertion = mock(ValidHttpStatusCodesAssertion.class);
@@ -282,7 +282,7 @@ public class PostmanScriptParserTest {
         verify(statusAssertion).setCodes("200");
     }
 
-    private void parseScript(String script, ScriptContext context) throws ReadyApiException {
+    private void parseScript(String script, ScriptContext context) throws SoapUIException {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
         PostmanScriptParser parser = new PostmanScriptParser();
         LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);

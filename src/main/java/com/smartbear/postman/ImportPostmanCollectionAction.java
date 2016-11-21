@@ -17,8 +17,6 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.impl.WorkspaceImpl;
-import com.eviware.soapui.impl.wsdl.WsdlProject;
-import com.eviware.soapui.model.workspace.Workspace;
 import com.eviware.soapui.plugins.ActionConfiguration;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
@@ -31,7 +29,7 @@ import com.eviware.x.form.support.AForm;
 
 import java.io.File;
 
-@ActionConfiguration(actionGroup = "WorkspaceImplActions", afterAction = "ImportProjectFromVcsAction", separatorBefore = true)
+@ActionConfiguration(actionGroup = "WorkspaceImplActions", beforeAction = "SaveAllProjectsAction", separatorAfter = true)
 public class ImportPostmanCollectionAction extends AbstractSoapUIAction<WorkspaceImpl> {
     private XFormDialog dialog;
 
