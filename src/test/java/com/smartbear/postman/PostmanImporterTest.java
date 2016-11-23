@@ -52,7 +52,7 @@ public class PostmanImporterTest {
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
-    public static final String SOAP_ENDPOINT = "http://www.webservicex.com/globalweather.asmx";
+    public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
     public static final String GET_PATH = "/WCFREST/Service.svc/ConStroka";
     public static final String POST_PATH = "/WCFREST/Service.svc/testComplexClass";
     public static final String PARAMETER1_NAME = "x";
@@ -60,12 +60,12 @@ public class PostmanImporterTest {
     public static final ParameterStyle PARAMETER1_STYLE = ParameterStyle.QUERY;
     public static final String REQUEST_NAME = "http://rapis02.aqa.com.ru/WCFREST/Service.svc/ConStroka?x=abc&y=def";
     public static final String POST_REQUEST_NAME = "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass";
-    public static final String WSDL_REQUEST_NAME = "http://www.webservicex.com/globalweather.asmx?WSDL";
+    public static final String WSDL_REQUEST_NAME = "SOAP Date request";
     public static final String PROPERTY1_NAME = "string1";
     public static final String PROPERTY1_VALUE = "abc";
     public static final String PROPERTY2_NAME = "string2";
     public static final String PROPERTY2_VALUE = "def";
-    private static final String OPERATION_NAME = "GetWeather";
+    private static final String OPERATION_NAME = "Date";
     private static final String HEADER1_NAME = "header1";
     private static final String HEADER1_VALUE = "af";
     private static final String HEADER2_VALUE = "er";
@@ -228,7 +228,7 @@ public class PostmanImporterTest {
         WsdlOperation operation = wsdlInterface.getOperationByName(OPERATION_NAME);
         assertNotNull("Operation is missing", operation);
 
-        assertEquals("Operation should have 2 request", 2, operation.getRequestCount());
+        assertEquals("Operation should have 1 request", 1, operation.getRequestCount());
         WsdlRequest request = operation.getRequestAt(0);
         assertEquals("Request has wrong name", WSDL_REQUEST_NAME, request.getName());
         assertEquals("Request has wrong endpoint", SOAP_ENDPOINT, request.getEndpoint());
@@ -237,7 +237,7 @@ public class PostmanImporterTest {
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
         WsdlTestRequestStep testStep = (WsdlTestRequestStep) testCase.getTestStepAt(0);
         TestAssertion assertion = testStep.getAssertionAt(0);
-        assertThat(assertion, instanceOf(GroovyScriptAssertion.class));
+        assertThat(assertion, instanceOf(ValidHttpStatusCodesAssertion.class));
     }
 
     @Test
