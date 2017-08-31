@@ -64,8 +64,12 @@ public class SetGlobalVariableCommand implements ScriptCommand {
 
     @Override
     public Object execute() {
-        TestProperty property = project.addProperty(StringUtils.unquote(variableName.trim()));
-        property.setValue(StringUtils.unquote(variableValue));
+        String propertyName = StringUtils.unquote(variableName.trim());
+        if (!project.hasProperty(propertyName)) {
+            TestProperty property = project.addProperty(propertyName);
+            property.setValue(StringUtils.unquote(variableValue));
+        }
+
         return null;
     }
 }
