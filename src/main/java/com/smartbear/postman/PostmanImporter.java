@@ -118,7 +118,7 @@ public class PostmanImporter {
                 for (Object requestObject : requests) {
                     if (requestObject instanceof JSONObject) {
                         JSONObject request = (JSONObject) requestObject;
-                        String uri = getValue(request, URL);
+                        String uri = VariableUtils.convertVariables(getValue(request, URL));
                         String requestName = getValue(request, NAME);
                         String method = getValue(request, METHOD);
                         String serviceName = getValue(request, DESCRIPTION);
