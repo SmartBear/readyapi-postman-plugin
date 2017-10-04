@@ -9,8 +9,8 @@
     <artifactId>readyapi-postman-plugin</artifactId>
     <version>1.0.1</version>
 
-    <name>Ready! API Postman Plugin</name>
-    <description>Creates Ready! API projects and tests based on Postman collections</description>
+    <name>ReadyAPI Postman Plugin</name>
+    <description>Creates ReadyAPI projects and tests based on Postman collections</description>
     <url>https://github.com/SmartBear/readyapi-postman-plugin</url>
 
     <repositories>

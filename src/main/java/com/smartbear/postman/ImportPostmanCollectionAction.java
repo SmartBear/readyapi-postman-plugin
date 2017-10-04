@@ -36,7 +36,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
     private XFormDialog dialog;
 
     public ImportPostmanCollectionAction() {
-        super("Import Postman Collection", "Imports a Postman collection into Ready! API");
+        super("Import Postman Collection", "Imports a Postman collection into ReadyAPI");
     }
 
     @Override

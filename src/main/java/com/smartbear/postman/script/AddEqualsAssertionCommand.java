@@ -73,7 +73,7 @@ public class AddEqualsAssertionCommand implements AddAssertionCommand {
             }
         }
         catch (Throwable e){
-            logger.warn("Creating EqualsAssertion is only supported in Ready! API", e);
+            logger.warn("Creating EqualsAssertion is only supported in ReadyAPI", e);
         }
         return null;
     }

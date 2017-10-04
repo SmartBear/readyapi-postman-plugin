@@ -1,6 +1,6 @@
-# Postman Plugin for Ready! API
+# Postman Plugin for ReadyAPI
 
-This repository contains source code files for the Postman Plugin for Ready! API. You can use this plugin to import your Postman collections.
+This repository contains source code files for the Postman Plugin for ReadyAPI. You can use this plugin to import your Postman collections.
 
 ## Plugin Info
 
@@ -9,7 +9,7 @@ This repository contains source code files for the Postman Plugin for Ready! API
 
 ## Requirements
 
-The plugin requires Ready! API version 1.7 or later.
+The plugin requires ReadyAPI version 1.7 or later.
 
 ## Working With the Plugin
 
@@ -17,7 +17,7 @@ The plugin requires Ready! API version 1.7 or later.
 
 To install the plugin:
 
-- Open the Plugin Manager in Ready! API.
+- Open the Plugin Manager in ReadyAPI.
 - Select **Postman Plugin** and click **Install/Upgrade Plugin**.
 - Confirm that you want to download and install the plugin.
 
@@ -40,4 +40,4 @@ which will create the plugin jar in the target folder
 
 ## Additional Information
 
-You can find more information about importing the plugin and conversion from Postman collection to Ready! API project in the [documentation](http://readyapi.smartbear.com/features/postman/start).
+You can find more information about importing the plugin and conversion from Postman collection to ReadyAPI project in the [documentation](http://readyapi.smartbear.com/features/postman/start).

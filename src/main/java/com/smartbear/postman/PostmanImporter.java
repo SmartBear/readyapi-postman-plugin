@@ -194,7 +194,7 @@ public class PostmanImporter {
                         Enum.valueOf(clazz, "SUFFIX_WHEN_CONFLICT_FOUND"));
             }
         } catch (Throwable e) {
-            logger.warn("Setting number suffix strategy is only supported in Ready! API", e);
+            logger.warn("Setting number suffix strategy is only supported in ReadyAPI", e);
         }
 
         return ModelItemNamer.createName(collectionName, projectList);
