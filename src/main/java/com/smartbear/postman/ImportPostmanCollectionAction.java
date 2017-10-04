@@ -29,6 +29,8 @@ import com.eviware.x.form.support.AForm;
 
 import java.io.File;
 
+import static com.smartbear.postman.PostmanImporter.sendAnalytics;
+
 @ActionConfiguration(actionGroup = "WorkspaceImplActions", beforeAction = "SaveAllProjectsAction", separatorAfter = true)
 public class ImportPostmanCollectionAction extends AbstractSoapUIAction<WorkspaceImpl> {
     private XFormDialog dialog;
@@ -54,6 +56,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                         if (new File(filePath).exists()) {
                             PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
                             importer.importPostmanCollection(workspace, filePath);
+                            sendAnalytics();
                         }
                         break;
                     }

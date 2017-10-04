@@ -70,6 +70,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -180,7 +181,6 @@ public class PostmanImporter {
                 }
             }
         }
-        sendAnalytics();
         return project;
     }
 
@@ -366,7 +366,10 @@ public class PostmanImporter {
         return defaultValue;
     }
 
-    private void sendAnalytics() {
+    /**
+     * https://smartbear.atlassian.net/wiki/spaces/PD/pages/172544951/ReadyAPI+analytics+home-phone+data+revision
+     * */
+    public static void sendAnalytics() {
         Class analyticsClass;
         try {
             analyticsClass = Class.forName("com.smartbear.analytics.Analytics");
@@ -379,8 +382,13 @@ public class PostmanImporter {
             Class analyticsCategoryClass = Class.forName("com.smartbear.analytics.AnalyticsManager$Category");
             Method trackMethod = analyticsManager.getClass().getMethod("trackAction", analyticsCategoryClass,
                     String.class, Map.class);
+            Map<String, String> params = new HashMap();
+            params.put("SourceModule", "");
+            params.put("ProductArea", "MainMenu");
+            params.put("Type", "REST");
+            params.put("Source", "PostmanCollection");
             trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
-                    "CreatedProjectBasedOnPostmanCollection", null);
+                    "CreatedProject", params);
         } catch (Throwable e) {
             logger.error("Error while sending analytics", e);
         }
