@@ -118,7 +118,7 @@ public class PostmanImporter {
                 for (Object requestObject : requests) {
                     if (requestObject instanceof JSONObject) {
                         JSONObject request = (JSONObject) requestObject;
-                        String uri = VariableUtils.convertVariables(getValue(request, URL));
+                        String uri = getValue(request, URL);
                         String requestName = getValue(request, NAME);
                         String method = getValue(request, METHOD);
                         String serviceName = getValue(request, DESCRIPTION);
@@ -336,9 +336,16 @@ public class PostmanImporter {
 
     private void convertParameters(RestParamsPropertyHolder propertyHolder) {
         for (TestProperty property : propertyHolder.getPropertyList()) {
+            if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == ParameterStyle.TEMPLATE) {
+                property.setValue("{{" + property.getName() + "}}");
+            }
             String convertedValue = VariableUtils.convertVariables(property.getValue());
+
             property.setValue(convertedValue);
             if (property instanceof RestParamProperty && StringUtils.hasContent(property.getDefaultValue())) {
+                if (((RestParamProperty) property).getStyle() == ParameterStyle.TEMPLATE) {
+                    ((RestParamProperty) property).setDefaultValue("{{" + property.getName() + "}}");
+                }
                 convertedValue = VariableUtils.convertVariables(property.getDefaultValue());
                 ((RestParamProperty) property).setDefaultValue(convertedValue);
             }
@@ -391,6 +398,7 @@ public class PostmanImporter {
                                                         String uri,
                                                         HttpMethod httpMethod,
                                                         String headers) throws MalformedURLException {
+            uri = convertTemplateProperties(uri);
             RestResource restResource = createResource(
                     ModelCreationStrategy.REUSE_MODEL,
                     paramWsdlProject,
@@ -399,6 +407,7 @@ public class PostmanImporter {
                     ModelCreationStrategy.CREATE_NEW_MODEL,
                     restResource,
                     httpMethod);
+
             RestRequest restRequest = addNewRequest(restMethod);
             RestParamsPropertyHolder params = extractParams(uri);
             addRestHeaders(params, headers);
@@ -415,6 +424,16 @@ public class PostmanImporter {
                     RestParametersConfig.Factory.newInstance(), ParamLocation.METHOD);
             extractAndFillParameters(URI, params);
             return params;
+        }
+    }
+
+    private String convertTemplateProperties(String postmanUri) {
+        int indexOfQuery = postmanUri.indexOf("?");
+        if (indexOfQuery != -1) {
+            return postmanUri.substring(0, indexOfQuery).replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}")
+                    + postmanUri.substring(indexOfQuery, postmanUri.length());
+        } else {
+            return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
         }
     }
 }
