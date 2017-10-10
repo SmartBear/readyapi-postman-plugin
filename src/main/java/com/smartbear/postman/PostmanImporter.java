@@ -395,7 +395,7 @@ public class PostmanImporter {
             params.put("Type", "REST");
             params.put("Source", "PostmanCollection");
             trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
-                    "CreatedProject", params);
+                    "CreateProject", params);
         } catch (Throwable e) {
             logger.error("Error while sending analytics", e);
         }
