@@ -390,7 +390,7 @@ public class PostmanImporter {
             Method trackMethod = analyticsManager.getClass().getMethod("trackAction", analyticsCategoryClass,
                     String.class, Map.class);
             Map<String, String> params = new HashMap();
-            params.put("SourceModule", "");
+            params.put("SourceModule", "Any");
             params.put("ProductArea", "MainMenu");
             params.put("Type", "REST");
             params.put("Source", "PostmanCollection");
