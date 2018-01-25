@@ -28,7 +28,6 @@
 
     <properties>
         <ready-api-version>1.7.0</ready-api-version>
-        <groovy.version>2.4.4</groovy.version>
     </properties>
 
     <dependencies>
