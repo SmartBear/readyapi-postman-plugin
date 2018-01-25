@@ -44,7 +44,6 @@ import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestProperty;
-import com.eviware.soapui.support.JsonUtil;
 import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
@@ -54,6 +53,7 @@ import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.postman.script.ScriptContext;
+import com.smartbear.postman.utils.PostmanJsonUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -102,8 +102,8 @@ public class PostmanImporter {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (JsonUtil.seemsToBeJson(postmanJson)) {
-            JSON json = new JsonUtil().parseTrimmedText(postmanJson);
+        if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
+            JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject) {
                 JSONObject postmanCollection = (JSONObject) json;
                 String collectionName = getValue(postmanCollection, NAME);
