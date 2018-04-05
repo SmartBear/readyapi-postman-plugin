@@ -20,7 +20,6 @@ import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.TestAssertionRegistry;
-import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.GroovyScriptAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
@@ -48,6 +47,7 @@ public class PostmanImporterTest {
 
     public static final String REST_GET_COLLECTION_PATH = "/REST_Get_Collection.postman_collection";
     public static final String REST_POST_COLLECTION_PATH = "/REST_Post_Collection.postman_collection";
+    public static final String PARAMETERIZED_COLLECTION_PATH = "/Parameterized_Endpoint_Collection.postman_collection";
     public static final String WSDL_COLLECTION_PATH = "/SOAP_Collection.postman_collection";
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
@@ -70,6 +70,16 @@ public class PostmanImporterTest {
     private static final String HEADER1_VALUE = "af";
     private static final String HEADER2_VALUE = "er";
     private static final String REST_POST_BODY_VALUE = "{\"assd\":\"qwe\"}";
+    public static final String PARAMETERIZED_REQUEST_NAME = "variableInsteadHost";
+    public static final String PARAMETERIZED_ENDPOINT = "http://${#Project#host}";
+    public static final String PARAMETERIZED_RESOURCE_PATH = "/{ResourceID}";
+    public static final String PARAMETERIZED_RESOURCE_NAME = "ResourceID";
+    public static final String TEMPLATE_PARAMETER_NAME = "ResourceID";
+    public static final String TEMPLATE_PARAMETER_VALUE = "${#Project#ResourceID}";
+    public static final ParameterStyle TEMPLATE_PARAMETER_STYLE = ParameterStyle.TEMPLATE;
+    public static final ParameterStyle QUERY_PARAMETER_STYLE = ParameterStyle.QUERY;
+    public static final String QUERY_PARAMETER_NAME = "qparam";
+    public static final String QUERY_PARAMETER_VALUE = "${#Project#queryParam}";
 
     private File workspaceFile;
     private WorkspaceImpl workspace;
@@ -136,6 +146,56 @@ public class PostmanImporterTest {
         assertThat(assertion, instanceOf(ValidHttpStatusCodesAssertion.class));
 
         checkParams(postmanProject, testStep.getTestRequest().getParams());
+    }
+
+    @Test
+    public void testImportRequestWithParameterizedEndpoint() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(PARAMETERIZED_COLLECTION_PATH).getPath());
+
+        TestProperty hostParam = postmanProject.getProperty("host");
+        assertNotNull("host property is missing", hostParam);
+
+        TestProperty resourceIdParam = postmanProject.getProperty("ResourceID");
+        assertNotNull("ResourceID property is missing", resourceIdParam);
+
+        TestProperty queryParam = postmanProject.getProperty("queryParam");
+        assertNotNull("queryParam property is missing", queryParam);
+
+        Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
+        assertEquals("Project should have 1 interfaces", 1, interfaceMap.size());
+
+        Interface service = postmanProject.getInterfaceAt(0);
+        assertThat(service, instanceOf(RestService.class));
+
+        RestService restService = (RestService) service;
+        List<RestResource> resources = restService.getResourceList();
+        assertEquals("Service should have 1 resource", 1, resources.size());
+        RestResource resource = resources.get(0);
+        assertEquals("Resource has wrong name", PARAMETERIZED_RESOURCE_NAME, resource.getName());
+        assertEquals("Resource has wrong path", PARAMETERIZED_RESOURCE_PATH, resource.getPath());
+
+        assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
+        RestMethod method = resource.getRestMethodAt(0);
+        assertEquals("Wrong method", HttpMethod.GET, method.getMethod());
+        assertEquals("Method should have 1 request", 1, method.getRequestCount());
+
+        RestRequest request = method.getRequestAt(0);
+        assertEquals("Request has wrong name", PARAMETERIZED_REQUEST_NAME, request.getName());
+        assertEquals("Request has wrong endpoint", PARAMETERIZED_ENDPOINT, request.getEndpoint());
+
+        assertEquals("Object should have 2 params", 2, request.getPropertyCount());
+
+        RestParamProperty parameter1 = request.getProperty(TEMPLATE_PARAMETER_NAME);
+        assertNotNull("Template property has not found", parameter1);
+        assertEquals("Template property has wrong style", TEMPLATE_PARAMETER_STYLE, parameter1.getStyle());
+        assertEquals("Template property has wrong value", TEMPLATE_PARAMETER_VALUE, parameter1.getValue());
+
+        RestParamProperty parameter2 = request.getProperty(QUERY_PARAMETER_NAME);
+        assertNotNull("Query property has not found", parameter2);
+        assertEquals("Query property has wrong style", QUERY_PARAMETER_STYLE, parameter2.getStyle());
+        assertEquals("Query property has wrong value", QUERY_PARAMETER_VALUE, parameter2.getValue());
     }
 
     private void checkParams(WsdlProject postmanProject, RestParamsPropertyHolder propertyHolder) {

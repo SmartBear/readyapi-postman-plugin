@@ -25,12 +25,17 @@ import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
 import com.eviware.soapui.impl.rest.RestRequestInterface.HttpMethod;
 import com.eviware.soapui.impl.rest.RestResource;
+import com.eviware.soapui.impl.rest.RestService;
+import com.eviware.soapui.impl.rest.RestServiceFactory;
 import com.eviware.soapui.impl.rest.actions.support.NewRestResourceActionBase.ParamLocation;
 import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle;
+import com.eviware.soapui.impl.rest.support.RestURIParserImpl;
+import com.eviware.soapui.impl.rest.support.RestUtils;
 import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
+import com.eviware.soapui.impl.support.AbstractInterface;
 import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
@@ -41,6 +46,7 @@ import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.model.iface.Interface;
+import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.model.testsuite.TestProperty;
@@ -58,6 +64,7 @@ import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
@@ -74,6 +81,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationStrategy.REUSE_MODEL;
 
 public class PostmanImporter {
     public static final String NAME = "name";
@@ -334,12 +343,15 @@ public class PostmanImporter {
         return null;
     }
 
-    private void convertParameters(RestParamsPropertyHolder propertyHolder) {
+    private void convertParameters(RestParamsPropertyHolder propertyHolder, WsdlProject project) {
         for (TestProperty property : propertyHolder.getPropertyList()) {
             if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == ParameterStyle.TEMPLATE) {
                 property.setValue("{{" + property.getName() + "}}");
             }
             String convertedValue = VariableUtils.convertVariables(property.getValue());
+            if (!project.hasProperty(property.getName())) {
+                project.addProperty(property.getName());
+            }
 
             property.setValue(convertedValue);
             if (property instanceof RestParamProperty && StringUtils.hasContent(property.getDefaultValue())) {
@@ -375,7 +387,7 @@ public class PostmanImporter {
 
     /**
      * https://smartbear.atlassian.net/wiki/spaces/PD/pages/172544951/ReadyAPI+analytics+home-phone+data+revision
-     * */
+     */
     public static void sendAnalytics() {
         Class analyticsClass;
         try {
@@ -402,24 +414,43 @@ public class PostmanImporter {
     }
 
     private class PostmanRestServiceBuilder extends RestServiceBuilder {
-        public RestRequest createRestServiceFromPostman(WsdlProject paramWsdlProject,
+        public RestRequest createRestServiceFromPostman(final WsdlProject paramWsdlProject,
                                                         String uri,
                                                         HttpMethod httpMethod,
                                                         String headers) throws MalformedURLException {
-            uri = convertTemplateProperties(uri);
-            RestResource restResource = createResource(
-                    ModelCreationStrategy.REUSE_MODEL,
-                    paramWsdlProject,
-                    uri);
+            RestResource restResource;
+            RestURIParserImpl uriParser = new RestURIParserImpl(uri);
+            String endpoint = uriParser.getEndpoint();
+            String resourcePath = convertTemplateProperties(uriParser.getResourcePath());
+
+            if (endpoint.contains("{{")) {
+                restResource = createResource(
+                        ModelCreationStrategy.REUSE_MODEL,
+                        paramWsdlProject,
+                        VariableUtils.convertVariables(uriParser.getEndpoint()),
+                        resourcePath,
+                        uriParser.getResourceName());
+                VariableUtils.getListOfPostmanVariables(endpoint).forEach(name -> {
+                    if (!paramWsdlProject.hasProperty(name)) {
+                        paramWsdlProject.addProperty(name);
+                    }
+                });
+            } else {
+                restResource = createResource(
+                        ModelCreationStrategy.REUSE_MODEL,
+                        paramWsdlProject,
+                        endpoint + resourcePath);
+            }
+
             RestMethod restMethod = addNewMethod(
                     ModelCreationStrategy.CREATE_NEW_MODEL,
                     restResource,
                     httpMethod);
 
             RestRequest restRequest = addNewRequest(restMethod);
-            RestParamsPropertyHolder params = extractParams(uri);
+            RestParamsPropertyHolder params = extractParams(resourcePath, uriParser.getQuery());
             addRestHeaders(params, headers);
-            convertParameters(params);
+            convertParameters(params, paramWsdlProject);
 
             RestParamsPropertyHolder requestPropertyHolder = restMethod.getParams();
             copyParameters(params, requestPropertyHolder);
@@ -427,11 +458,40 @@ public class PostmanImporter {
             return restRequest;
         }
 
-        protected RestParamsPropertyHolder extractParams(String URI) {
+        protected RestParamsPropertyHolder extractParams(String path, String queryString) {
             RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
                     RestParametersConfig.Factory.newInstance(), ParamLocation.METHOD);
-            extractAndFillParameters(URI, params);
+
+            RestUtils.extractTemplateParams(params, path);
+
+            if (StringUtils.hasContent(queryString)) {
+                RestUtils.extractParamsFromQueryString(params, queryString);
+            }
+
             return params;
+        }
+
+        protected RestResource createResource(ModelCreationStrategy creationStrategy, WsdlProject project, String host, String resourcePath, String resourceName) {
+            RestService restService = null;
+
+            if (creationStrategy == REUSE_MODEL) {
+                AbstractInterface<?, ? extends Operation> existingInterface = project.getInterfaceByName(host);
+                if (existingInterface instanceof RestService && ArrayUtils.contains(existingInterface.getEndpoints(), host)) {
+                    restService = (RestService) existingInterface;
+                }
+            }
+            if (restService == null) {
+                restService = (RestService) project.addNewInterface(host, RestServiceFactory.REST_TYPE);
+                restService.addEndpoint(host);
+            }
+            if (creationStrategy == REUSE_MODEL) {
+                RestResource existingResource = restService.getResourceByFullPath(RestResource.removeMatrixParams(resourcePath));
+                if (existingResource != null) {
+                    return existingResource;
+                }
+            }
+
+            return restService.addNewResource(resourceName, resourcePath);
         }
     }
 
