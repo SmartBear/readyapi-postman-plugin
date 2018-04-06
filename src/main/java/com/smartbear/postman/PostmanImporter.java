@@ -27,6 +27,7 @@ import com.eviware.soapui.impl.rest.RestRequestInterface.HttpMethod;
 import com.eviware.soapui.impl.rest.RestResource;
 import com.eviware.soapui.impl.rest.RestService;
 import com.eviware.soapui.impl.rest.RestServiceFactory;
+import com.eviware.soapui.impl.rest.RestURIParser;
 import com.eviware.soapui.impl.rest.actions.support.NewRestResourceActionBase.ParamLocation;
 import com.eviware.soapui.impl.rest.support.RestParamProperty;
 import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
@@ -152,7 +153,7 @@ public class PostmanImporter {
 
                             if (wsdlRequest != null) {
                                 if (StringUtils.hasContent(headers)) {
-                                    addSoapHeaders(wsdlRequest, VariableUtils.convertVariables(headers));
+                                    addSoapHeaders(wsdlRequest, VariableUtils.convertVariables(headers, project));
                                 }
 
                                 if (StringUtils.hasContent(requestName)) {
@@ -348,17 +349,14 @@ public class PostmanImporter {
             if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == ParameterStyle.TEMPLATE) {
                 property.setValue("{{" + property.getName() + "}}");
             }
-            String convertedValue = VariableUtils.convertVariables(property.getValue());
-            if (!project.hasProperty(property.getName())) {
-                project.addProperty(property.getName());
-            }
+            String convertedValue = VariableUtils.convertVariables(property.getValue(), project);
 
             property.setValue(convertedValue);
             if (property instanceof RestParamProperty && StringUtils.hasContent(property.getDefaultValue())) {
                 if (((RestParamProperty) property).getStyle() == ParameterStyle.TEMPLATE) {
                     ((RestParamProperty) property).setDefaultValue("{{" + property.getName() + "}}");
                 }
-                convertedValue = VariableUtils.convertVariables(property.getDefaultValue());
+                convertedValue = VariableUtils.convertVariables(property.getDefaultValue(), project);
                 ((RestParamProperty) property).setDefaultValue(convertedValue);
             }
         }
@@ -419,22 +417,20 @@ public class PostmanImporter {
                                                         HttpMethod httpMethod,
                                                         String headers) throws MalformedURLException {
             RestResource restResource;
-            RestURIParserImpl uriParser = new RestURIParserImpl(uri);
-            String endpoint = uriParser.getEndpoint();
+            RestURIParser uriParser = new RestURIParserImpl(uri);
+            String endpoint = StringUtils.hasContent(uriParser.getScheme())
+                    ? uriParser.getEndpoint()
+                    : uriParser.getAuthority();
+
             String resourcePath = convertTemplateProperties(uriParser.getResourcePath());
 
             if (endpoint.contains("{{")) {
                 restResource = createResource(
                         ModelCreationStrategy.REUSE_MODEL,
                         paramWsdlProject,
-                        VariableUtils.convertVariables(uriParser.getEndpoint()),
+                        VariableUtils.convertVariables(endpoint, paramWsdlProject),
                         resourcePath,
                         uriParser.getResourceName());
-                VariableUtils.getListOfPostmanVariables(endpoint).forEach(name -> {
-                    if (!paramWsdlProject.hasProperty(name)) {
-                        paramWsdlProject.addProperty(name);
-                    }
-                });
             } else {
                 restResource = createResource(
                         ModelCreationStrategy.REUSE_MODEL,
@@ -462,7 +458,7 @@ public class PostmanImporter {
             RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
                     RestParametersConfig.Factory.newInstance(), ParamLocation.METHOD);
 
-            RestUtils.extractTemplateParams(params, path);
+            RestUtils.extractTemplateParamsFromResourcePath(params, path);
 
             if (StringUtils.hasContent(queryString)) {
                 RestUtils.extractParamsFromQueryString(params, queryString);

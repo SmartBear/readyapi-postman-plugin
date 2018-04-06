@@ -17,7 +17,6 @@
 package com.smartbear.postman.script;
 
 import com.eviware.soapui.impl.wsdl.WsdlProject;
-import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.StringUtils;
 
 public class SetGlobalVariableCommand implements ScriptCommand {
@@ -64,17 +63,14 @@ public class SetGlobalVariableCommand implements ScriptCommand {
 
     @Override
     public Object execute() {
-        TestProperty property = null;
         String propertyName = StringUtils.unquote(variableName.trim());
         String propertyValue = StringUtils.unquote(variableValue);
 
         if (!project.hasProperty(propertyName)) {
-            property = project.addProperty(propertyName);
+            project.addProperty(propertyName);
         }
 
-        if (property != null) {
-            property.setValue(propertyValue);
-        }
+        project.setPropertyValue(propertyName, propertyValue);
 
         return null;
     }

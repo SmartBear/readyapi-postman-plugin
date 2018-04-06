@@ -16,23 +16,24 @@
 
 package com.smartbear.postman;
 
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class VariableUtils {
     private static final String READYAPI_VARIABLE_BEGIN = "${#Project#";
     private static final String READYAPI_VARIABLE_END = "}";
-    public static final Pattern VARIABLE_REG = Pattern.compile("\\{\\{.+\\}\\}");
-    public static final Pattern VARIABLES_NAMES = Pattern.compile("(?<=\\{\\{).*?(?=\\}\\})");
-    public static final String POSTMAN_VARIABLE_BEGIN = "{{";
-    public static final String POSTMAN_VARIABLE_END = "}}";
-    public static final String ESCAPING_PREFIX = "\\";
+    private static final String VARIABLE_NAME_REG_GROUP = "name";
+    private static final Pattern VARIABLE_REG = Pattern.compile("\\{\\{(?<" + VARIABLE_NAME_REG_GROUP + ">.*?)\\}\\}");
+    private static final String ESCAPING_PREFIX = "\\";
 
     public static String convertVariables(String postmanString) {
+        return convertVariables(postmanString, null);
+    }
+
+    public static String convertVariables(String postmanString, WsdlProject projectToAddProperties) {
         if (StringUtils.isNullOrEmpty(postmanString)) {
             return postmanString;
         }
@@ -40,11 +41,12 @@ public class VariableUtils {
         StringBuffer readyApiStringBuffer = new StringBuffer();
         Matcher matcher = VARIABLE_REG.matcher(postmanString);
         while (matcher.find()) {
-            String postmanVariable = matcher.group();
-            String readyApiVariable = postmanVariable
-                    .replace(POSTMAN_VARIABLE_BEGIN, ESCAPING_PREFIX + READYAPI_VARIABLE_BEGIN)
-                    .replace(POSTMAN_VARIABLE_END, READYAPI_VARIABLE_END);
-            matcher.appendReplacement(readyApiStringBuffer, readyApiVariable);
+            String propertyName = matcher.group(VARIABLE_NAME_REG_GROUP);
+            if (projectToAddProperties != null && !projectToAddProperties.hasProperty(propertyName)) {
+                projectToAddProperties.addProperty(propertyName);
+            }
+            matcher.appendReplacement(readyApiStringBuffer,
+                    ESCAPING_PREFIX + READYAPI_VARIABLE_BEGIN + propertyName + READYAPI_VARIABLE_END);
         }
         if (readyApiStringBuffer.length() > 0) {
             matcher.appendTail(readyApiStringBuffer);
@@ -52,15 +54,6 @@ public class VariableUtils {
         } else {
             return postmanString;
         }
-    }
-
-    public static List<String> getListOfPostmanVariables(String stringToFind) {
-        List<String> result = new ArrayList<>();
-        Matcher matcher = VARIABLES_NAMES.matcher(stringToFind);
-        while (matcher.find()) {
-            result.add(matcher.group());
-        }
-        return result;
     }
 
     public static String createProjectVariableExpansionString(String variableName) {
