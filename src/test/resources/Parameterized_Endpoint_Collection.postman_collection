@@ -1,0 +1,45 @@
+{
+	"id": "d15039d7-e216-bfb5-15b3-70b7739b6c70",
+	"name": "Parameterized endpoints collection",
+	"description": "",
+	"order": [
+		"265df7a9-103c-a108-0dcc-dd5fe0f1b83f"
+	],
+	"folders": [],
+	"folders_order": [],
+	"timestamp": 1522928500860,
+	"owner": "1179464",
+	"public": false,
+	"requests": [
+		{
+			"id": "265df7a9-103c-a108-0dcc-dd5fe0f1b83f",
+			"headers": "",
+			"headerData": [],
+			"url": "http://{{host}}/{{ResourceID}}?qparam={{queryParam}}",
+			"queryParams": [
+				{
+					"key": "qparam",
+					"value": "{{queryParam}}",
+					"equals": true,
+					"description": "",
+					"enabled": true
+				}
+			],
+			"preRequestScript": null,
+			"pathVariables": {},
+			"pathVariableData": [],
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"version": 2,
+			"tests": null,
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1522929720187,
+			"name": "variableInsteadHost",
+			"description": "",
+			"collectionId": "d15039d7-e216-bfb5-15b3-70b7739b6c70",
+			"responses": []
+		}
+	]
+}
