@@ -25,6 +25,7 @@ import com.eviware.soapui.support.UISupport;
     version = "${project.version}",
     autoDetect = true,
     description = "${project.description}",
-    infoUrl = "${project.url}" )
+    infoUrl = "${project.url}",
+    minimumReadyApiVersion = "${ready-api-version}")
 public class PluginConfig extends PluginAdapter {
 }
