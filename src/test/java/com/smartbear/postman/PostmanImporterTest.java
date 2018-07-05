@@ -46,6 +46,7 @@ public class PostmanImporterTest {
     private static final String TEST_WORKSPACE_FILE_PATH = OUTPUT_FOLDER_PATH + "test-workspace.xml";
 
     public static final String REST_GET_COLLECTION_PATH = "/REST_Get_Collection.postman_collection";
+    public static final String REST_GET_COLLECTION_EVENTS_PATH = "/REST_Get_Collection_events.postman_collection";
     public static final String REST_POST_COLLECTION_PATH = "/REST_Post_Collection.postman_collection";
     public static final String PARAMETERIZED_COLLECTION_PATH = "/Parameterized_Endpoint_Collection.postman_collection";
     public static final String WSDL_COLLECTION_PATH = "/SOAP_Collection.postman_collection";
@@ -94,10 +95,19 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportRestGetRequest() {
+    public void testImportRestGetRequestFromTestsNode() {
+        testImportRestGetRequest(REST_GET_COLLECTION_PATH);
+    }
+
+    @Test
+    public void testImportRestGetRequestFromEventsNode() {
+        testImportRestGetRequest(REST_GET_COLLECTION_EVENTS_PATH);
+    }
+
+    private void testImportRestGetRequest(String collectionPath) {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
-                PostmanImporterTest.class.getResource(REST_GET_COLLECTION_PATH).getPath());
+                PostmanImporterTest.class.getResource(collectionPath).getPath());
 
         TestProperty property1 = postmanProject.getProperty(PROPERTY1_NAME);
         assertNotNull("Property1 is missing", property1);
