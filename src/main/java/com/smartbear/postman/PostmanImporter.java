@@ -78,6 +78,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,10 +93,13 @@ public class PostmanImporter {
     public static final String URL = "url";
     public static final String METHOD = "method";
     public static final String RAW_MODE_DATA = "rawModeData";
-    public static final String PRE_REQUEST_SCRIPT = "preRequestScript";
-    public static final String TESTS = "tests";
+    public static final String EVENTS = "events";
+    public static final String LISTEN = "listen";
+    public static final String SCRIPT = "script";
+    public static final String EXEC = "exec";
     public static final String HEADERS = "headers";
     public static final String WSDL_SUFFIX = "?WSDL";
+    public static final char SCRIPT_LINE_DELIMITER = '\n';
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private final TestCreator testCreator;
 
@@ -133,8 +137,8 @@ public class PostmanImporter {
                         String requestName = getValue(request, NAME);
                         String method = getValue(request, METHOD);
                         String serviceName = getValue(request, DESCRIPTION);
-                        String preRequestScript = getValue(request, PRE_REQUEST_SCRIPT);
-                        String tests = getValue(request, TESTS);
+                        String preRequestScript = getScript(request, ScriptType.PRE_REQUEST);
+                        String tests = getScript(request, ScriptType.TESTS);
                         String headers = getValue(request, HEADERS);
                         String rawModeData = getValue(request, RAW_MODE_DATA);
 
@@ -192,6 +196,35 @@ public class PostmanImporter {
             }
         }
         return project;
+    }
+
+    private String getScript(JSONObject request, ScriptType scriptType) {
+        JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, EVENTS);
+        for (Object eventObject : events) {
+            if (eventObject instanceof JSONObject) {
+                JSONObject event = (JSONObject) eventObject;
+                String listen = getValue(event, LISTEN);
+                if (!StringUtils.sameString(listen, scriptType.getListenType())) {
+                    continue;
+                }
+                JSONObject script = event.getJSONObject(SCRIPT);
+                if (script != null) {
+                    StringBuffer scriptBuffer = new StringBuffer();
+                    JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
+                    for (Object scriptLine : scriptLines) {
+                        if (scriptBuffer.length() > 0) {
+                            scriptBuffer.append(SCRIPT_LINE_DELIMITER);
+                        }
+                        scriptBuffer.append(scriptLine);
+                    }
+                    if (scriptBuffer.length() > 0) {
+                        return scriptBuffer.toString();
+                    }
+                }
+            }
+        }
+
+        return getValue(request, scriptType.getRequestElement());
     }
 
     private static String createProjectName(String collectionName, List<? extends Project> projectList) {

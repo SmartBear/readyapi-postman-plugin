@@ -22,7 +22,7 @@ import com.eviware.soapui.support.UISupport;
 
 @PluginConfiguration(groupId = "${project.groupId}",
     name = "${project.name}",
-    version = "${project.version}",
+    version = "1.0.3",
     autoDetect = true,
     description = "${project.description}",
     infoUrl = "${project.url}",

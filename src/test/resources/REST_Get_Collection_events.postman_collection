@@ -1,0 +1,58 @@
+{
+	"id": "ee93ff24-74f6-e630-8b0d-dba155fe7d9c",
+	"name": "REST Service 1 collection",
+	"description": "",
+	"order": [
+		"b25f2fa7-3ce9-dfc3-2033-50851f3871d7"
+	],
+	"folders": [],
+	"timestamp": 1464170009203,
+	"owner": "",
+	"remoteLink": "",
+	"public": false,
+	"requests": [
+		{
+			"id": "b25f2fa7-3ce9-dfc3-2033-50851f3871d7",
+			"headers": "header1: af\nheader2: er\n",
+			"url": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/ConStroka?x={{string1}}&y={{string2}}",
+			"pathVariables": {},
+			"method": "GET",
+			"data": null,
+			"dataMode": "params",
+			"events": [
+			    {
+			        "listen": "prerequest",
+			        "script": {
+			            "id": "d2dfe930-b54b-4ff1-879c-ab9349a9dc33",
+			            "type": "text/javascript",
+			            "exec": [
+			                "postman.setGlobalVariable(\"string1\", \"abc\");",
+			                "postman.setGlobalVariable(\"string2\", \"def\");"
+			            ]
+			        }
+			    },
+			    {
+			        "listen": "test",
+			        "script": {
+			              "id": "b1c65874-0703-4f5a-bff5-459289dda45a",
+			              "type": "text/javascript",
+			              "exec": [
+			                    "tests[\"Status code is 200\"] = responseCode.code === 200;",
+			                    "tests[\"Body matches string\"] = responseBody.has(globals[\"string1\"]);",
+			                    "tests[\"Body is correct\"] = responseBody === \"\\\"abc def\\\"\";",
+			                    "tests[\"Content-Type is present\"] = postman.getResponseHeader(\"Content-Type\");",
+			                    "tests[\"Response time is less than 200ms\"] = responseTime < 200;"
+			              ]
+                    }
+                }
+            ],
+			"currentHelper": "normal",
+			"helperAttributes": {},
+			"time": 1464171909883,
+			"name": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/ConStroka?x=abc&y=def",
+			"description": "RequestDescription",
+			"collectionId": "ee93ff24-74f6-e630-8b0d-dba155fe7d9c",
+			"responses": []
+		}
+	]
+}

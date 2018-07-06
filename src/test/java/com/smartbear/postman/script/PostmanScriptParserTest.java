@@ -52,7 +52,14 @@ public class PostmanScriptParserTest {
 
     @Test
     public void skipsUnknownCommands() throws SoapUIException {
-        String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\nvar jsonObject = xml2Json(responseBody);\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
+        String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\nvar jsonObject = xml2Json(responseBody);\\n" +
+                "tests[\"last record ingested is 13\"] = jsonData.last_record_ingested == 13;\\n" +
+                "var schema = {\\n" +
+                "  \"files_not_found_records\": { \\n" +
+                "                \"type\": \"string\" \\n" +
+                "            }\\n" +
+                "}\\n" +
+                "postman.setGlobalVariable(\"string2\", \"def\");";
         parseSettingGlobalVariables(script);
     }
 
