@@ -2,6 +2,8 @@ package com.smartbear.postman.utils;
 
 import com.eviware.soapui.support.JsonUtil;
 import net.sf.json.JSON;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import net.sf.json.groovy.JsonSlurper;
@@ -25,6 +27,15 @@ public class PostmanJsonUtil {
             return true;
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public static JSONArray getJsonArraySafely(JSONObject node, String arrayNodeName) {
+        Object jsonObject = node.get(arrayNodeName);
+        if (jsonObject instanceof JSONArray) {
+            return (JSONArray) jsonObject;
+        } else {
+            return new JSONArray();
         }
     }
 

@@ -199,7 +199,7 @@ public class PostmanImporter {
     }
 
     private String getScript(JSONObject request, ScriptType scriptType) {
-        JSONArray events = getJsonArraySafely(request, EVENTS);
+        JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, EVENTS);
         for (Object eventObject : events) {
             if (eventObject instanceof JSONObject) {
                 JSONObject event = (JSONObject) eventObject;
@@ -210,7 +210,7 @@ public class PostmanImporter {
                 JSONObject script = event.getJSONObject(SCRIPT);
                 if (script != null) {
                     StringBuffer scriptBuffer = new StringBuffer();
-                    JSONArray scriptLines = getJsonArraySafely(script, EXEC);
+                    JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
                     for (Object scriptLine : scriptLines) {
                         if (scriptBuffer.length() > 0) {
                             scriptBuffer.append(SCRIPT_LINE_DELIMITER);
@@ -225,15 +225,6 @@ public class PostmanImporter {
         }
 
         return getValue(request, scriptType.getRequestElement());
-    }
-
-    private JSONArray getJsonArraySafely(JSONObject node, String arrayNodeName) {
-        Object jsonObject = node.get(arrayNodeName);
-        if (jsonObject instanceof JSONArray) {
-            return (JSONArray) jsonObject;
-        } else {
-            return new JSONArray();
-        }
     }
 
     private static String createProjectName(String collectionName, List<? extends Project> projectList) {
