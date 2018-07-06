@@ -78,6 +78,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -98,6 +99,7 @@ public class PostmanImporter {
     public static final String EXEC = "exec";
     public static final String HEADERS = "headers";
     public static final String WSDL_SUFFIX = "?WSDL";
+    public static final char SCRIPT_LINE_DELIMITER = '\n';
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private final TestCreator testCreator;
 
@@ -197,35 +199,41 @@ public class PostmanImporter {
     }
 
     private String getScript(JSONObject request, ScriptType scriptType) {
-        Object eventsObject = request.get(EVENTS);
-        if (eventsObject instanceof JSONArray) {
-            JSONArray events = (JSONArray) eventsObject;
-            for (Object eventObject : events) {
-                if (eventObject instanceof JSONObject) {
-                    JSONObject event = (JSONObject) eventObject;
-                    String listen = getValue(event, LISTEN);
-                    if (!StringUtils.sameString(listen, scriptType.getListenType())) {
-                        continue;
-                    }
-                    JSONObject script = event.getJSONObject(SCRIPT);
-                    if (script != null) {
-                        StringBuffer scriptBuffer = new StringBuffer();
-                        JSONArray scriptLines = script.getJSONArray(EXEC);
-                        for (Object scriptLine : scriptLines) {
-                            if (scriptBuffer.length() > 0) {
-                                scriptBuffer.append("\n");
-                            }
-                            scriptBuffer.append(scriptLine);
-                        }
+        JSONArray events = getJsonArraySafely(request, EVENTS);
+        for (Object eventObject : events) {
+            if (eventObject instanceof JSONObject) {
+                JSONObject event = (JSONObject) eventObject;
+                String listen = getValue(event, LISTEN);
+                if (!StringUtils.sameString(listen, scriptType.getListenType())) {
+                    continue;
+                }
+                JSONObject script = event.getJSONObject(SCRIPT);
+                if (script != null) {
+                    StringBuffer scriptBuffer = new StringBuffer();
+                    JSONArray scriptLines = getJsonArraySafely(script, EXEC);
+                    for (Object scriptLine : scriptLines) {
                         if (scriptBuffer.length() > 0) {
-                            return scriptBuffer.toString();
+                            scriptBuffer.append(SCRIPT_LINE_DELIMITER);
                         }
+                        scriptBuffer.append(scriptLine);
+                    }
+                    if (scriptBuffer.length() > 0) {
+                        return scriptBuffer.toString();
                     }
                 }
             }
         }
 
         return getValue(request, scriptType.getRequestElement());
+    }
+
+    private JSONArray getJsonArraySafely(JSONObject node, String arrayNodeName) {
+        Object jsonObject = node.get(arrayNodeName);
+        if (jsonObject instanceof JSONArray) {
+            return (JSONArray) jsonObject;
+        } else {
+            return new JSONArray();
+        }
     }
 
     private static String createProjectName(String collectionName, List<? extends Project> projectList) {
