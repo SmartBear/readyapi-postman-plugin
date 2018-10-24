@@ -53,6 +53,7 @@ public class PostmanImporterTest {
     public static final String WSDL_COLLECTION_PATH = "/SOAP_Collection.postman_collection";
     public static final String WSDL_COLLECTION_EVENTS_PATH = "/SOAP_Collection_events.postman_collection";
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
+    public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get.postman_collection_v2.0.json";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
@@ -335,6 +336,15 @@ public class PostmanImporterTest {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
+    }
+
+    @Test
+    public void testImportRestGetRequest20() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(REST_GET_COLLECTION_2_0_PATH).getPath());
+        List<RestParamProperty> headers = getParamsOfStyle(((RestRequest)postmanProject.getInterfaceAt(0).getOperationAt(0).getRequestAt(0)).getParams(), ParameterStyle.HEADER);
+        assertEquals("Request must have 1 headers", 1, headers.size());
     }
 
     @After

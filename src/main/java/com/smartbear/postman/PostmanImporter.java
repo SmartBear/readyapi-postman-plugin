@@ -56,13 +56,14 @@ import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
+import com.smartbear.postman.collection.PostmanCollection;
+import com.smartbear.postman.collection.PostmanCollectionFactory;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.postman.script.ScriptContext;
 import com.smartbear.postman.utils.PostmanJsonUtil;
 import net.sf.json.JSON;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -78,7 +79,6 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -87,19 +87,7 @@ import java.util.Map;
 import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationStrategy.REUSE_MODEL;
 
 public class PostmanImporter {
-    public static final String NAME = "name";
-    public static final String DESCRIPTION = "description";
-    public static final String REQUESTS = "requests";
-    public static final String URL = "url";
-    public static final String METHOD = "method";
-    public static final String RAW_MODE_DATA = "rawModeData";
-    public static final String EVENTS = "events";
-    public static final String LISTEN = "listen";
-    public static final String SCRIPT = "script";
-    public static final String EXEC = "exec";
-    public static final String HEADERS = "headers";
     public static final String WSDL_SUFFIX = "?WSDL";
-    public static final char SCRIPT_LINE_DELIMITER = '\n';
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private final TestCreator testCreator;
 
@@ -119,8 +107,8 @@ public class PostmanImporter {
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject) {
-                JSONObject postmanCollection = (JSONObject) json;
-                String collectionName = getValue(postmanCollection, NAME);
+                PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection((JSONObject) json);
+                String collectionName = postmanCollection.getName();
                 String projectName = createProjectName(collectionName, workspace.getProjectList());
                 try {
                     project = workspace.createProject(projectName, null);
@@ -128,103 +116,66 @@ public class PostmanImporter {
                     logger.error("Error while creating a project", e);
                     return null;
                 }
-                project.setDescription(getValue(postmanCollection, DESCRIPTION));
-                JSONArray requests = postmanCollection.getJSONArray(REQUESTS);
-                for (Object requestObject : requests) {
-                    if (requestObject instanceof JSONObject) {
-                        JSONObject request = (JSONObject) requestObject;
-                        String uri = getValue(request, URL);
-                        String requestName = getValue(request, NAME);
-                        String method = getValue(request, METHOD);
-                        String serviceName = getValue(request, DESCRIPTION);
-                        String preRequestScript = getScript(request, ScriptType.PRE_REQUEST);
-                        String tests = getScript(request, ScriptType.TESTS);
-                        String headers = getValue(request, HEADERS);
-                        String rawModeData = getValue(request, RAW_MODE_DATA);
+                project.setDescription(postmanCollection.getDescription());
+                List<PostmanCollection.Request> requests = postmanCollection.getRequests();
+                for (PostmanCollection.Request request : requests) {
+                    String uri = request.getUrl();
+                    String requestName = request.getName();
+                    String preRequestScript = request.getPreRequestScript();
+                    String tests = request.getTests();
+                    String rawModeData = request.getBody();
 
-                        logger.info("Importing a request with URI [" + uri + "] - started");
+                    logger.info("Importing a request with URI [" + uri + "] - started");
 
-                        if (StringUtils.hasContent(preRequestScript)) {
-                            processPreRequestScript(preRequestScript, project);
-                        }
+                    if (StringUtils.hasContent(preRequestScript)) {
+                        processPreRequestScript(preRequestScript, project);
+                    }
 
-                        Assertable assertable = null;
+                    Assertable assertable = null;
 
-                        if (isWsdlRequest(uri)) {
-                            String operationName = getOperationName(rawModeData);
-                            WsdlRequest wsdlRequest = addWsdlRequest(project, serviceName, method, uri,
-                                    operationName, rawModeData);
+                    if (isWsdlRequest(uri)) {
+                        String operationName = getOperationName(rawModeData);
+                        WsdlRequest wsdlRequest = addWsdlRequest(project, request.getMethod(), uri,
+                                operationName, rawModeData);
 
-                            if (wsdlRequest != null) {
-                                if (StringUtils.hasContent(headers)) {
-                                    addSoapHeaders(wsdlRequest, VariableUtils.convertVariables(headers, project));
-                                }
-
-                                if (StringUtils.hasContent(requestName)) {
-                                    wsdlRequest.setName(requestName);
-                                }
-
-                                if (StringUtils.hasContent(tests)) {
-                                    testCreator.createTest(wsdlRequest);
-                                    assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
-                                }
-                            }
-                        } else {
-                            RestRequest restRequest = addRestRequest(project, serviceName, method, uri, headers);
+                        if (wsdlRequest != null) {
+                            addSoapHeaders(wsdlRequest, request.getHeaders(), project);
 
                             if (StringUtils.hasContent(requestName)) {
-                                restRequest.setName(requestName);
-                            }
-
-                            if (restRequest.getMethod() == HttpMethod.POST && StringUtils.hasContent(rawModeData)) {
-                                restRequest.setRequestContent(rawModeData);
+                                wsdlRequest.setName(requestName);
                             }
 
                             if (StringUtils.hasContent(tests)) {
-                                testCreator.createTest(restRequest);
-                                assertable = getTestRequestStep(project, RestTestRequestStep.class);
+                                testCreator.createTest(wsdlRequest);
+                                assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                             }
                         }
+                    } else {
+                        RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
 
-                        if (assertable != null) {
-                            addAssertions(tests, project, assertable);
+                        if (StringUtils.hasContent(requestName)) {
+                            restRequest.setName(requestName);
                         }
 
-                        logger.info("Importing a request with URI [" + uri + "] - done");
+                        if (restRequest.getMethod() == HttpMethod.POST && StringUtils.hasContent(rawModeData)) {
+                            restRequest.setRequestContent(rawModeData);
+                        }
+
+                        if (StringUtils.hasContent(tests)) {
+                            testCreator.createTest(restRequest);
+                            assertable = getTestRequestStep(project, RestTestRequestStep.class);
+                        }
                     }
+
+                    if (assertable != null) {
+                        addAssertions(tests, project, assertable);
+                    }
+
+                    logger.info("Importing a request with URI [" + uri + "] - done");
                 }
             }
         }
         return project;
-    }
-
-    private String getScript(JSONObject request, ScriptType scriptType) {
-        JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, EVENTS);
-        for (Object eventObject : events) {
-            if (eventObject instanceof JSONObject) {
-                JSONObject event = (JSONObject) eventObject;
-                String listen = getValue(event, LISTEN);
-                if (!StringUtils.sameString(listen, scriptType.getListenType())) {
-                    continue;
-                }
-                JSONObject script = event.getJSONObject(SCRIPT);
-                if (script != null) {
-                    StringBuffer scriptBuffer = new StringBuffer();
-                    JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
-                    for (Object scriptLine : scriptLines) {
-                        if (scriptBuffer.length() > 0) {
-                            scriptBuffer.append(SCRIPT_LINE_DELIMITER);
-                        }
-                        scriptBuffer.append(scriptLine);
-                    }
-                    if (scriptBuffer.length() > 0) {
-                        return scriptBuffer.toString();
-                    }
-                }
-            }
-        }
-
-        return getValue(request, scriptType.getRequestElement());
     }
 
     private static String createProjectName(String collectionName, List<? extends Project> projectList) {
@@ -243,32 +194,20 @@ public class PostmanImporter {
         return ModelItemNamer.createName(collectionName, projectList);
     }
 
-    private void addSoapHeaders(AbstractHttpRequest request, String headersString) {
-        String[] headers = headersString.split("\\n");
-        for (String header : headers) {
-            String[] headerParts = header.split(":");
-
-            if (headerParts.length == 2) {
-                StringToStringsMap headersMap = request.getRequestHeaders();
-                headersMap.add(headerParts[0].trim(), headerParts[1].trim());
-                request.setRequestHeaders(headersMap);
-            }
+    private void addSoapHeaders(AbstractHttpRequest request, List<PostmanCollection.Header> headers,
+                                WsdlProject projectToAddProperties) {
+        for (PostmanCollection.Header header : headers) {
+            StringToStringsMap headersMap = request.getRequestHeaders();
+            headersMap.add(header.getKey(), VariableUtils.convertVariables(header.getValue(), projectToAddProperties));
+            request.setRequestHeaders(headersMap);
         }
     }
 
-    private void addRestHeaders(RestParamsPropertyHolder params, String headersString) {
-        if (StringUtils.isNullOrEmpty(headersString)) {
-            return;
-        }
-
-        String[] headers = headersString.split("\\n");
-        for (String header : headers) {
-            String[] headerParts = header.split(":");
-            if (headerParts.length == 2) {
-                RestParamProperty property = params.addProperty(headerParts[0].trim());
-                property.setStyle(ParameterStyle.HEADER);
-                property.setValue(headerParts[1].trim());
-            }
+    private void addRestHeaders(RestParamsPropertyHolder params, List<PostmanCollection.Header> headers) {
+        for (PostmanCollection.Header header : headers) {
+            RestParamProperty property = params.addProperty(header.getKey());
+            property.setStyle(ParameterStyle.HEADER);
+            property.setValue(header.getValue());
         }
     }
 
@@ -312,7 +251,7 @@ public class PostmanImporter {
         }
     }
 
-    private RestRequest addRestRequest(WsdlProject project, String serviceName, String method, String uri, String headers) {
+    private RestRequest addRestRequest(WsdlProject project, String method, String uri, List<PostmanCollection.Header> headers) {
         RestRequest currentRequest = null;
         PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
         try {
@@ -324,7 +263,7 @@ public class PostmanImporter {
         return currentRequest;
     }
 
-    private WsdlRequest addWsdlRequest(WsdlProject project, String serviceName, String method, String uri, String operationName, String requestContent) {
+    private WsdlRequest addWsdlRequest(WsdlProject project, String method, String uri, String operationName, String requestContent) {
         WsdlRequest request = null;
         ArrayList<WsdlInterface> interfaces = new ArrayList<>();
         List<WsdlInterface> existingWsdlInterfaces = findExistingWsdlInterfaces(project, uri);
@@ -399,23 +338,6 @@ public class PostmanImporter {
         return StringUtils.hasContent(url) && url.toUpperCase().endsWith(WSDL_SUFFIX);
     }
 
-    private String getValue(JSONObject jsonObject, String name) {
-        return getValue(jsonObject, name, "");
-    }
-
-
-    private String getValue(JSONObject jsonObject, String field, String defaultValue) {
-        final String NULL_STRING = "null";
-        Object value = jsonObject.get(field);
-        if (value != null) {
-            String valueString = value.toString();
-            if (!valueString.equals(NULL_STRING)) {
-                return valueString;
-            }
-        }
-        return defaultValue;
-    }
-
     /**
      * https://smartbear.atlassian.net/wiki/spaces/PD/pages/172544951/ReadyAPI+analytics+home-phone+data+revision
      */
@@ -448,7 +370,7 @@ public class PostmanImporter {
         public RestRequest createRestServiceFromPostman(final WsdlProject paramWsdlProject,
                                                         String uri,
                                                         HttpMethod httpMethod,
-                                                        String headers) throws MalformedURLException {
+                                                        List<PostmanCollection.Header> headers) throws MalformedURLException {
             RestResource restResource;
             RestURIParser uriParser = new RestURIParserImpl(uri);
             String endpoint = StringUtils.hasContent(uriParser.getScheme())
