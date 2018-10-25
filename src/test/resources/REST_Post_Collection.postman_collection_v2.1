@@ -1,0 +1,57 @@
+{
+	"info": {
+		"_postman_id": "449d47d7-c276-4be9-a3c5-7b9916fa3940",
+		"name": "REST Service 1 collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Body matches string\"] = responseBody.has(\"test_complex_classResult\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Authorization",
+						"value": "Basic Og=="
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"assd\":\"qwe\"}"
+				},
+				"url": {
+					"raw": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
+					"protocol": "http",
+					"host": [
+						"rapis02",
+						"aqa",
+						"com",
+						"ru"
+					],
+					"path": [
+						"WCFREST",
+						"Service.svc",
+						"testComplexClass"
+					]
+				},
+				"description": "Request 2"
+			},
+			"response": []
+		}
+	]
+}

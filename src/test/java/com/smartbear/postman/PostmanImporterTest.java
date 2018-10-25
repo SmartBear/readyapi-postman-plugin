@@ -47,13 +47,19 @@ public class PostmanImporterTest {
 
     public static final String REST_GET_COLLECTION_PATH = "/REST_Get_Collection.postman_collection";
     public static final String REST_GET_COLLECTION_EVENTS_PATH = "/REST_Get_Collection_events.postman_collection";
+    public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get_Collection.postman_collection_v2.0";
+    public static final String REST_GET_COLLECTION_2_1_PATH = "/REST_Get_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_PATH = "/REST_Post_Collection.postman_collection";
+    public static final String REST_POST_COLLECTION_2_0_PATH = "/REST_Post_Collection.postman_collection_v2.0";
+    public static final String REST_POST_COLLECTION_2_1_PATH = "/REST_Post_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_EVENTS_PATH = "/REST_Post_Collection_events.postman_collection";
     public static final String PARAMETERIZED_COLLECTION_PATH = "/Parameterized_Endpoint_Collection.postman_collection";
     public static final String WSDL_COLLECTION_PATH = "/SOAP_Collection.postman_collection";
     public static final String WSDL_COLLECTION_EVENTS_PATH = "/SOAP_Collection_events.postman_collection";
+    public static final String WSDL_COLLECTION_2_0_PATH = "/SOAP_Collection.postman_collection_v2.0";
+    public static final String WSDL_COLLECTION_2_1_PATH = "/SOAP_Collection.postman_collection_v2.1";
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
-    public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get.postman_collection_v2.0.json";
+    public static final String SAMPLE_COLLECTION_2_1_PATH = "/Postman_Echo.postman_collection_v2.1";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
@@ -105,6 +111,16 @@ public class PostmanImporterTest {
     @Test
     public void testImportRestGetRequestFromEventsNode() {
         testImportRestGetRequest(REST_GET_COLLECTION_EVENTS_PATH);
+    }
+
+    @Test
+    public void testImportRestGetRequestFromCollection20() {
+        testImportRestGetRequest(REST_GET_COLLECTION_2_0_PATH);
+    }
+
+    @Test
+    public void testImportRestGetRequestFromCollection21() {
+        testImportRestGetRequest(REST_GET_COLLECTION_2_1_PATH);
     }
 
     private void testImportRestGetRequest(String collectionPath) {
@@ -247,6 +263,16 @@ public class PostmanImporterTest {
         testImportRestPostRequest(REST_POST_COLLECTION_EVENTS_PATH);
     }
 
+    @Test
+    public void testImportRestPostRequestFromCollection20() {
+        testImportRestPostRequest(REST_POST_COLLECTION_2_0_PATH);
+    }
+
+    @Test
+    public void testImportRestPostRequestFromCollection21() {
+        testImportRestPostRequest(REST_POST_COLLECTION_2_1_PATH);
+    }
+
     public void testImportRestPostRequest(String collectionPath) {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
@@ -304,6 +330,16 @@ public class PostmanImporterTest {
         testImportWsdlRequest(WSDL_COLLECTION_EVENTS_PATH);
     }
 
+    @Test
+    public void testImportWsdlRequestFromCollection20() {
+        testImportWsdlRequest(WSDL_COLLECTION_2_0_PATH);
+    }
+
+    @Test
+    public void testImportWsdlRequestFromCollection21() {
+        testImportWsdlRequest(WSDL_COLLECTION_2_1_PATH);
+    }
+
     public void testImportWsdlRequest(String collectionPath) {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
@@ -332,19 +368,19 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportSampleCollectionDoesNotHangUp() {
-        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
-                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
+    public void testImportSampleCollection10DoesNotHangUp() {
+        testImportSampleCollectionDoesNotHangUp(SAMPLE_COLLECTION_PATH);
     }
 
     @Test
-    public void testImportRestGetRequest20() {
+    public void testImportSampleCollection21DoesNotHangUp() {
+        testImportSampleCollectionDoesNotHangUp(SAMPLE_COLLECTION_2_1_PATH);
+    }
+
+    public void testImportSampleCollectionDoesNotHangUp(String collectionPath) {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
-                PostmanImporterTest.class.getResource(REST_GET_COLLECTION_2_0_PATH).getPath());
-        List<RestParamProperty> headers = getParamsOfStyle(((RestRequest)postmanProject.getInterfaceAt(0).getOperationAt(0).getRequestAt(0)).getParams(), ParameterStyle.HEADER);
-        assertEquals("Request must have 1 headers", 1, headers.size());
+                PostmanImporterTest.class.getResource(collectionPath).getPath());
     }
 
     @After
