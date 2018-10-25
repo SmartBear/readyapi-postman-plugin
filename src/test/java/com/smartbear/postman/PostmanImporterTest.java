@@ -59,6 +59,7 @@ public class PostmanImporterTest {
     public static final String WSDL_COLLECTION_2_0_PATH = "/SOAP_Collection.postman_collection_v2.0";
     public static final String WSDL_COLLECTION_2_1_PATH = "/SOAP_Collection.postman_collection_v2.1";
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
+    public static final String SAMPLE_COLLECTION_2_0_PATH = "/Postman_Echo.postman_collection_v2.0";
     public static final String SAMPLE_COLLECTION_2_1_PATH = "/Postman_Echo.postman_collection_v2.1";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
@@ -370,6 +371,11 @@ public class PostmanImporterTest {
     @Test
     public void testImportSampleCollection10DoesNotHangUp() {
         testImportSampleCollectionDoesNotHangUp(SAMPLE_COLLECTION_PATH);
+    }
+
+    @Test
+    public void testImportSampleCollection20DoesNotHangUp() {
+        testImportSampleCollectionDoesNotHangUp(SAMPLE_COLLECTION_2_0_PATH);
     }
 
     @Test

@@ -39,13 +39,25 @@ public class PostmanCollectionV2 extends PostmanCollection {
     @Override
     public List<Request> getRequests() {
         ArrayList<Request> requestList = new ArrayList<>();
-        JSONArray requests = postmanCollection.getJSONArray(ITEM);
-        for (Object requestObject : requests) {
-            if (requestObject instanceof JSONObject) {
-                requestList.add(new RequestV2((JSONObject) requestObject));
+        extractRequestsFromItems(postmanCollection.getJSONArray(ITEM), requestList);
+        return requestList;
+    }
+
+    private boolean isFolder(JSONObject item) {
+        return item.containsKey(ITEM);
+    }
+
+    private void extractRequestsFromItems(JSONArray items, List<Request> requestList) {
+        for (Object itemObject : items) {
+            if (itemObject instanceof JSONObject) {
+                JSONObject item = (JSONObject) itemObject;
+                if (isFolder(item)) {
+                    extractRequestsFromItems(item.getJSONArray(ITEM), requestList);
+                } else {
+                    requestList.add(new RequestV2(item));
+                }
             }
         }
-        return requestList;
     }
 
     private static class RequestV2 implements Request {
