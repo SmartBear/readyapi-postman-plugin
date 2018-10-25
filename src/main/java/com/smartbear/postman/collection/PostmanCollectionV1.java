@@ -1,5 +1,6 @@
 package com.smartbear.postman.collection;
 
+import com.eviware.soapui.support.StringUtils;
 import com.smartbear.postman.ScriptType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -9,6 +10,7 @@ import java.util.List;
 
 public class PostmanCollectionV1 extends PostmanCollection {
     public static final String REQUESTS = "requests";
+    public static final String EVENTS = "events";
     public static final String HEADERS = "headers";
     public static final String RAW_MODE_DATA = "rawModeData";
 
@@ -36,6 +38,15 @@ public class PostmanCollectionV1 extends PostmanCollection {
             }
         }
         return requestList;
+    }
+
+    private static String getScript(JSONObject request, ScriptType scriptType) {
+        String eventScript = getEventScript(request, scriptType, EVENTS);
+        if (StringUtils.hasContent(eventScript)) {
+            return eventScript;
+        } else {
+            return getValue(request, scriptType.getRequestElement());
+        }
     }
 
     private static class RequestV1 implements Request {

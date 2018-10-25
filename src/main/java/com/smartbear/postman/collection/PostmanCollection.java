@@ -16,7 +16,6 @@ public abstract class PostmanCollection {
     public static final String URL = "url";
     public static final String METHOD = "method";
 
-    public static final String EVENTS = "events";
     public static final String LISTEN = "listen";
     public static final String SCRIPT = "script";
     public static final String EXEC = "exec";
@@ -32,8 +31,8 @@ public abstract class PostmanCollection {
     public abstract String getDescription();
     public abstract List<Request> getRequests();
 
-    protected static String getScript(JSONObject request, ScriptType scriptType) {
-        JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, EVENTS);
+    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
+        JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
         for (Object eventObject : events) {
             if (eventObject instanceof JSONObject) {
                 JSONObject event = (JSONObject) eventObject;
@@ -57,8 +56,7 @@ public abstract class PostmanCollection {
                 }
             }
         }
-
-        return getValue(request, scriptType.getRequestElement());
+        return null;
     }
 
     protected static String getValue(JSONObject jsonObject, String name) {
@@ -75,6 +73,16 @@ public abstract class PostmanCollection {
             }
         }
         return defaultValue;
+    }
+
+    protected static String getValueFromObjectOrString(JSONObject jsonObject, String firstLevelField, String secondLevelField) {
+        Object firstLevelObject = jsonObject.get(firstLevelField);
+        if (firstLevelObject instanceof JSONObject) {
+            return getValue((JSONObject) firstLevelObject, secondLevelField);
+        } else if (firstLevelObject != null) {
+            return firstLevelObject.toString();
+        }
+        return null;
     }
 
     protected static List<Header> createHeaderList(String headersString) {

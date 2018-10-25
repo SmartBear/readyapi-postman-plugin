@@ -1,5 +1,6 @@
 package com.smartbear.postman.collection;
 
+import com.smartbear.postman.ScriptType;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -16,6 +17,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     public static final String VALUE = "value";
     public static final String BODY = "body";
     public static final String RAW = "raw";
+    public static final String EVENT = "event";
 
     private final JSONObject info;
 
@@ -64,7 +66,10 @@ public class PostmanCollectionV2 extends PostmanCollection {
 
         @Override
         public String getUrl() {
-            return request != null ? getValue(request, URL) : url;
+            if (request == null) {
+                return url;
+            }
+            return getValueFromObjectOrString(request, URL, RAW);
         }
 
         @Override
@@ -84,12 +89,12 @@ public class PostmanCollectionV2 extends PostmanCollection {
 
         @Override
         public String getPreRequestScript() {
-            return null;
+            return getEventScript(item, ScriptType.PRE_REQUEST, EVENT);
         }
 
         @Override
         public String getTests() {
-            return null;
+            return getEventScript(item, ScriptType.TESTS, EVENT);
         }
 
         @Override
@@ -116,11 +121,10 @@ public class PostmanCollectionV2 extends PostmanCollection {
 
         @Override
         public String getBody() {
-            JSONObject body = null;
-            if (request != null) {
-                body = request.getJSONObject(BODY);
+            if (request == null) {
+                return "";
             }
-            return body != null ? getValue(body, RAW) : "";
+            return getValueFromObjectOrString(request, BODY, RAW);
         }
     }
 }
