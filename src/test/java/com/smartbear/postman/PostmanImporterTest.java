@@ -25,6 +25,7 @@ import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
+import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
 import org.junit.After;
 import org.junit.Before;
@@ -36,9 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 
 public class PostmanImporterTest {
@@ -369,24 +368,71 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportSampleCollection10DoesNotHangUp() {
-        testImportSampleCollectionDoesNotHangUp(SAMPLE_COLLECTION_PATH);
-    }
-
-    @Test
-    public void testImportSampleCollection20DoesNotHangUp() {
-        testImportSampleCollectionDoesNotHangUp(SAMPLE_COLLECTION_2_0_PATH);
-    }
-
-    @Test
-    public void testImportSampleCollection21DoesNotHangUp() {
-        testImportSampleCollectionDoesNotHangUp(SAMPLE_COLLECTION_2_1_PATH);
-    }
-
-    public void testImportSampleCollectionDoesNotHangUp(String collectionPath) {
+    public void testSampleCollectionCreatesTheSameProjectFrom10and20() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
-        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
-                PostmanImporterTest.class.getResource(collectionPath).getPath());
+        WsdlProject expectedProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
+        importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject actualProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_2_0_PATH).getPath());
+        compareProjects(expectedProject, actualProject);
+    }
+
+    @Test
+    public void testSampleCollectionCreatesTheSameProjectFrom10and21() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject expectedProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
+        importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject actualProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_2_1_PATH).getPath());
+        compareProjects(expectedProject, actualProject);
+    }
+
+    private void compareProjects(WsdlProject expectedProject, WsdlProject actualProject) {
+        assertEquals("Different number of properties", expectedProject.getPropertyCount(), actualProject.getPropertyCount());
+
+        assertEquals("Different number of interfaces", expectedProject.getInterfaceCount(), actualProject.getInterfaceCount());
+        if (expectedProject.getInterfaceCount() == 1) {
+            assertThat("Wrong interface type",
+                    actualProject.getInterfaceAt(0), instanceOf(expectedProject.getInterfaceAt(0).getClass()));
+        }
+        assertEquals("Wrong number of operations", expectedProject.getInterfaceAt(0).getOperationCount(),
+                actualProject.getInterfaceAt(0).getOperationCount());
+
+        assertEquals("Wrong number of test suites", expectedProject.getTestSuiteCount(), actualProject.getTestSuiteCount());
+        assertEquals("Wrong number of test cases", expectedProject.getTestSuiteAt(0).getTestCaseCount(),
+                actualProject.getTestSuiteAt(0).getTestCaseCount());
+
+        WsdlTestCase expectedTestCase = expectedProject.getTestSuiteAt(0).getTestCaseAt(0);
+        WsdlTestCase actualTestCase = actualProject.getTestSuiteAt(0).getTestCaseAt(0);
+        assertEquals("Wrong number of test steps", expectedTestCase.getTestStepCount(),
+                actualTestCase.getTestStepCount());
+        for (TestStep testStep : expectedTestCase.getTestStepList()) {
+            RestTestRequestStep expectedTestStep = (RestTestRequestStep) testStep;
+            RestTestRequest expectedRequest = expectedTestStep.getTestRequest();
+            RestTestRequestStep actualTestStep = getRestTestStepForRequest(actualTestCase,
+                    expectedTestStep.getRestMethod().getRequestById(expectedRequest.getId()).getName());
+            assertNotNull("No test step with name " + expectedTestStep.getName(), actualTestStep);
+            assertTrue("Number of assertions is less than expected for step " + expectedTestStep.getName(),
+                    actualTestStep.getAssertionCount() >= expectedTestStep.getAssertionCount());
+            RestTestRequest actualRequest = actualTestStep.getTestRequest();
+            assertTrue("Number of paramters is less than expected for step " + expectedTestStep.getName(),
+                    actualRequest.getParams().size() >= expectedRequest.getParams().size());
+            assertEquals("Payloads don't match for step " + expectedTestStep.getName(),
+                    expectedRequest.getRequestContent(), actualRequest.getRequestContent());
+        }
+    }
+
+    private RestTestRequestStep getRestTestStepForRequest(WsdlTestCase testCase, String requestName) {
+        for (TestStep testStep : testCase.getTestStepList()) {
+            RestTestRequestStep restTestStep = (RestTestRequestStep) testStep;
+            RestRequest restRequest = restTestStep.getRestMethod().getRequestById(restTestStep.getTestRequest().getId());
+            if (restRequest.getName().equals(requestName)) {
+                return restTestStep;
+            }
+        }
+        return null;
     }
 
     @After
