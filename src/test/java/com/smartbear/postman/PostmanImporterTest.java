@@ -60,6 +60,7 @@ public class PostmanImporterTest {
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
     public static final String SAMPLE_COLLECTION_2_0_PATH = "/Postman_Echo.postman_collection_v2.0";
     public static final String SAMPLE_COLLECTION_2_1_PATH = "/Postman_Echo.postman_collection_v2.1";
+    public static final String NEW_HTTP_METHODS_COLLECTION_2_1_PATH = "/New_Methods_Collection.postman_collection_v2.1";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
@@ -365,6 +366,23 @@ public class PostmanImporterTest {
         WsdlTestRequestStep testStep = (WsdlTestRequestStep) testCase.getTestStepAt(0);
         TestAssertion assertion = testStep.getAssertionAt(0);
         assertThat(assertion, instanceOf(ValidHttpStatusCodesAssertion.class));
+    }
+
+    @Test
+    public void testImportNewHttpMethods() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(NEW_HTTP_METHODS_COLLECTION_2_1_PATH).getPath());
+
+        Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
+        assertEquals("Project should have 1 interface", 1, interfaceMap.size());
+        Interface service = postmanProject.getInterfaceAt(0);
+        assertThat(service, instanceOf(RestService.class));
+        RestService restService = (RestService) service;
+        List<RestResource> resources = restService.getResourceList();
+        assertEquals("Service should have 1 resource", 1, resources.size());
+        RestResource resource = resources.get(0);
+        assertEquals("Resource should have 5 methods", 5, resource.getRestMethodCount());
     }
 
     @Test

@@ -152,6 +152,10 @@ public class PostmanImporter {
                         }
                     } else {
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
+                        if (restRequest == null) {
+                            logger.error("Could not import request with URI [" + uri + "]");
+                            continue;
+                        }
 
                         if (StringUtils.hasContent(requestName)) {
                             restRequest.setName(requestName);
@@ -257,7 +261,7 @@ public class PostmanImporter {
         try {
             currentRequest = builder.createRestServiceFromPostman(project, uri,
                     RestRequestInterface.HttpMethod.valueOf(method), headers);
-        } catch (MalformedURLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return currentRequest;
