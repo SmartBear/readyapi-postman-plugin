@@ -9,9 +9,12 @@ import com.eviware.soapui.impl.wsdl.teststeps.registry.RestRequestStepFactory;
 import com.eviware.soapui.impl.wsdl.teststeps.registry.WsdlTestRequestStepFactory;
 
 public class DummyTestCreator implements TestCreator {
+    private WsdlTestCase testCase;
     @Override
     public void createTest(RestRequest request) {
-        WsdlTestCase testCase = createTestHierarchyForRequest(request.getProject());
+        if (testCase == null) {
+            testCase = createTestHierarchyForRequest(request.getProject());
+        }
         String stepName = request.getRestMethod().getName() + " - " + request.getName();
         testCase.addTestStep(RestRequestStepFactory.createConfig(request, stepName));
     }

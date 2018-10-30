@@ -1,0 +1,45 @@
+{
+	"info": {
+		"name": "TestImport",
+		"_postman_id": "6d4f1884-61d3-2b8e-270a-5c09480fcf56",
+		"description": "My simple col",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "MyTestReq1",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "DNT",
+						"value": "asdasd",
+						"description": "adsasdasd",
+						"disabled": true
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "http://google.com/?id=123",
+					"protocol": "http",
+					"host": [
+						"google",
+						"com"
+					],
+					"path": [
+						""
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "123",
+							"equals": true
+						}
+					]
+				},
+				"description": "MyTestReq1 Desc"
+			},
+			"response": []
+		}
+	]
+}

@@ -29,10 +29,6 @@ public class VariableUtils {
     private static final Pattern VARIABLE_REG = Pattern.compile("\\{\\{(?<" + VARIABLE_NAME_REG_GROUP + ">.*?)\\}\\}");
     private static final String ESCAPING_PREFIX = "\\";
 
-    public static String convertVariables(String postmanString) {
-        return convertVariables(postmanString, null);
-    }
-
     public static String convertVariables(String postmanString, WsdlProject projectToAddProperties) {
         if (StringUtils.isNullOrEmpty(postmanString)) {
             return postmanString;

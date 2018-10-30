@@ -25,6 +25,7 @@ import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
 import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
+import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
 import org.junit.After;
 import org.junit.Before;
@@ -36,9 +37,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 
 public class PostmanImporterTest {
@@ -47,12 +46,21 @@ public class PostmanImporterTest {
 
     public static final String REST_GET_COLLECTION_PATH = "/REST_Get_Collection.postman_collection";
     public static final String REST_GET_COLLECTION_EVENTS_PATH = "/REST_Get_Collection_events.postman_collection";
+    public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get_Collection.postman_collection_v2.0";
+    public static final String REST_GET_COLLECTION_2_1_PATH = "/REST_Get_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_PATH = "/REST_Post_Collection.postman_collection";
+    public static final String REST_POST_COLLECTION_2_0_PATH = "/REST_Post_Collection.postman_collection_v2.0";
+    public static final String REST_POST_COLLECTION_2_1_PATH = "/REST_Post_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_EVENTS_PATH = "/REST_Post_Collection_events.postman_collection";
     public static final String PARAMETERIZED_COLLECTION_PATH = "/Parameterized_Endpoint_Collection.postman_collection";
     public static final String WSDL_COLLECTION_PATH = "/SOAP_Collection.postman_collection";
     public static final String WSDL_COLLECTION_EVENTS_PATH = "/SOAP_Collection_events.postman_collection";
+    public static final String WSDL_COLLECTION_2_0_PATH = "/SOAP_Collection.postman_collection_v2.0";
+    public static final String WSDL_COLLECTION_2_1_PATH = "/SOAP_Collection.postman_collection_v2.1";
     public static final String SAMPLE_COLLECTION_PATH = "/Postman_Echo.postman_collection";
+    public static final String SAMPLE_COLLECTION_2_0_PATH = "/Postman_Echo.postman_collection_v2.0";
+    public static final String SAMPLE_COLLECTION_2_1_PATH = "/Postman_Echo.postman_collection_v2.1";
+    public static final String NEW_HTTP_METHODS_COLLECTION_2_1_PATH = "/New_Methods_Collection.postman_collection_v2.1";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
@@ -104,6 +112,16 @@ public class PostmanImporterTest {
     @Test
     public void testImportRestGetRequestFromEventsNode() {
         testImportRestGetRequest(REST_GET_COLLECTION_EVENTS_PATH);
+    }
+
+    @Test
+    public void testImportRestGetRequestFromCollection20() {
+        testImportRestGetRequest(REST_GET_COLLECTION_2_0_PATH);
+    }
+
+    @Test
+    public void testImportRestGetRequestFromCollection21() {
+        testImportRestGetRequest(REST_GET_COLLECTION_2_1_PATH);
     }
 
     private void testImportRestGetRequest(String collectionPath) {
@@ -246,6 +264,16 @@ public class PostmanImporterTest {
         testImportRestPostRequest(REST_POST_COLLECTION_EVENTS_PATH);
     }
 
+    @Test
+    public void testImportRestPostRequestFromCollection20() {
+        testImportRestPostRequest(REST_POST_COLLECTION_2_0_PATH);
+    }
+
+    @Test
+    public void testImportRestPostRequestFromCollection21() {
+        testImportRestPostRequest(REST_POST_COLLECTION_2_1_PATH);
+    }
+
     public void testImportRestPostRequest(String collectionPath) {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
@@ -303,6 +331,16 @@ public class PostmanImporterTest {
         testImportWsdlRequest(WSDL_COLLECTION_EVENTS_PATH);
     }
 
+    @Test
+    public void testImportWsdlRequestFromCollection20() {
+        testImportWsdlRequest(WSDL_COLLECTION_2_0_PATH);
+    }
+
+    @Test
+    public void testImportWsdlRequestFromCollection21() {
+        testImportWsdlRequest(WSDL_COLLECTION_2_1_PATH);
+    }
+
     public void testImportWsdlRequest(String collectionPath) {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
@@ -331,10 +369,88 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportSampleCollectionDoesNotHangUp() {
+    public void testImportNewHttpMethods() {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(NEW_HTTP_METHODS_COLLECTION_2_1_PATH).getPath());
+
+        Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
+        assertEquals("Project should have 1 interface", 1, interfaceMap.size());
+        Interface service = postmanProject.getInterfaceAt(0);
+        assertThat(service, instanceOf(RestService.class));
+        RestService restService = (RestService) service;
+        List<RestResource> resources = restService.getResourceList();
+        assertEquals("Service should have 1 resource", 1, resources.size());
+        RestResource resource = resources.get(0);
+        assertEquals("Resource should have 5 methods", 5, resource.getRestMethodCount());
+    }
+
+    @Test
+    public void testSampleCollectionCreatesTheSameProjectFrom10and20() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject expectedProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
+        importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject actualProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_2_0_PATH).getPath());
+        compareProjects(expectedProject, actualProject);
+    }
+
+    @Test
+    public void testSampleCollectionCreatesTheSameProjectFrom10and21() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject expectedProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
+        importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject actualProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_2_1_PATH).getPath());
+        compareProjects(expectedProject, actualProject);
+    }
+
+    private void compareProjects(WsdlProject expectedProject, WsdlProject actualProject) {
+        assertEquals("Different number of properties", expectedProject.getPropertyCount(), actualProject.getPropertyCount());
+
+        assertEquals("Different number of interfaces", expectedProject.getInterfaceCount(), actualProject.getInterfaceCount());
+        if (expectedProject.getInterfaceCount() == 1) {
+            assertThat("Wrong interface type",
+                    actualProject.getInterfaceAt(0), instanceOf(expectedProject.getInterfaceAt(0).getClass()));
+        }
+        assertEquals("Wrong number of operations", expectedProject.getInterfaceAt(0).getOperationCount(),
+                actualProject.getInterfaceAt(0).getOperationCount());
+
+        assertEquals("Wrong number of test suites", expectedProject.getTestSuiteCount(), actualProject.getTestSuiteCount());
+        assertEquals("Wrong number of test cases", expectedProject.getTestSuiteAt(0).getTestCaseCount(),
+                actualProject.getTestSuiteAt(0).getTestCaseCount());
+
+        WsdlTestCase expectedTestCase = expectedProject.getTestSuiteAt(0).getTestCaseAt(0);
+        WsdlTestCase actualTestCase = actualProject.getTestSuiteAt(0).getTestCaseAt(0);
+        assertEquals("Wrong number of test steps", expectedTestCase.getTestStepCount(),
+                actualTestCase.getTestStepCount());
+        for (TestStep testStep : expectedTestCase.getTestStepList()) {
+            RestTestRequestStep expectedTestStep = (RestTestRequestStep) testStep;
+            RestTestRequest expectedRequest = expectedTestStep.getTestRequest();
+            RestTestRequestStep actualTestStep = getRestTestStepForRequest(actualTestCase,
+                    expectedTestStep.getRestMethod().getRequestById(expectedRequest.getId()).getName());
+            assertNotNull("No test step with name " + expectedTestStep.getName(), actualTestStep);
+            assertTrue("Number of assertions is less than expected for step " + expectedTestStep.getName(),
+                    actualTestStep.getAssertionCount() >= expectedTestStep.getAssertionCount());
+            RestTestRequest actualRequest = actualTestStep.getTestRequest();
+            assertTrue("Number of paramters is less than expected for step " + expectedTestStep.getName(),
+                    actualRequest.getParams().size() >= expectedRequest.getParams().size());
+            assertEquals("Payloads don't match for step " + expectedTestStep.getName(),
+                    expectedRequest.getRequestContent(), actualRequest.getRequestContent());
+        }
+    }
+
+    private RestTestRequestStep getRestTestStepForRequest(WsdlTestCase testCase, String requestName) {
+        for (TestStep testStep : testCase.getTestStepList()) {
+            RestTestRequestStep restTestStep = (RestTestRequestStep) testStep;
+            RestRequest restRequest = restTestStep.getRestMethod().getRequestById(restTestStep.getTestRequest().getId());
+            if (restRequest.getName().equals(requestName)) {
+                return restTestStep;
+            }
+        }
+        return null;
     }
 
     @After
