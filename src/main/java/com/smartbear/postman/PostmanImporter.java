@@ -37,6 +37,7 @@ import com.eviware.soapui.impl.rest.support.RestUtils;
 import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.support.AbstractInterface;
+import com.eviware.soapui.impl.support.HttpUtils;
 import com.eviware.soapui.impl.wsdl.WsdlInterface;
 import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
@@ -153,7 +154,7 @@ public class PostmanImporter {
                     } else {
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
                         if (restRequest == null) {
-                            logger.error("Could not import request with URI [" + uri + "]");
+                            logger.error("Could not import " + request.getMethod() + " request with URI [" + uri + "]");
                             continue;
                         }
 
@@ -161,7 +162,7 @@ public class PostmanImporter {
                             restRequest.setName(requestName);
                         }
 
-                        if (restRequest.getMethod() == HttpMethod.POST && StringUtils.hasContent(rawModeData)) {
+                        if (HttpUtils.canHavePayload(restRequest.getMethod()) && StringUtils.hasContent(rawModeData)) {
                             restRequest.setRequestContent(rawModeData);
                         }
 
@@ -262,7 +263,7 @@ public class PostmanImporter {
             currentRequest = builder.createRestServiceFromPostman(project, uri,
                     RestRequestInterface.HttpMethod.valueOf(method), headers);
         } catch (Exception e) {
-            e.printStackTrace();
+           logger.error("Error while creating a REST service", e);
         }
         return currentRequest;
     }
