@@ -17,6 +17,7 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.impl.WorkspaceImpl;
+import com.eviware.soapui.impl.wsdl.support.PathUtils;
 import com.eviware.soapui.plugins.ActionConfiguration;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
@@ -53,7 +54,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                 if (StringUtils.hasContent(fieldValue)) {
                     String filePath = fieldValue.trim();
                     if (StringUtils.hasContent(filePath)) {
-                        if (new File(filePath).exists()) {
+                        if (new File(filePath).exists() || PathUtils.isHttpPath(filePath)) {
                             PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
                             importer.importPostmanCollection(workspace, filePath);
                             sendAnalytics();

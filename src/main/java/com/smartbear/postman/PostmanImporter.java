@@ -43,6 +43,7 @@ import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
+import com.eviware.soapui.impl.wsdl.support.wsdl.UrlClientLoader;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
@@ -66,7 +67,7 @@ import com.smartbear.postman.script.ScriptContext;
 import com.smartbear.postman.utils.PostmanJsonUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
@@ -74,10 +75,9 @@ import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -98,11 +98,12 @@ public class PostmanImporter {
 
     public WsdlProject importPostmanCollection(WorkspaceImpl workspace, String filePath) {
         WsdlProject project = null;
-        File jsonFile = new File(filePath);
         String postmanJson = null;
+        UrlClientLoader loader = new UrlClientLoader(filePath);
+        loader.setUseWorker(false);
         try {
-            postmanJson = FileUtils.readFileToString(jsonFile);
-        } catch (IOException e) {
+            postmanJson = IOUtils.toString(loader.load(), StandardCharsets.UTF_8);
+        } catch (Exception e) {
             e.printStackTrace();
         }
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
