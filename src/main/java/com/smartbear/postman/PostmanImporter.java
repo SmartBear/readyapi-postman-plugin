@@ -43,6 +43,7 @@ import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
+import com.eviware.soapui.impl.wsdl.support.wsdl.UrlClientLoader;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
@@ -55,8 +56,12 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
+import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
+import com.eviware.x.dialogs.Worker;
+import com.eviware.x.dialogs.XProgressDialog;
+import com.eviware.x.dialogs.XProgressMonitor;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
 import com.smartbear.postman.script.PostmanScriptParser;
@@ -66,7 +71,7 @@ import com.smartbear.postman.script.ScriptContext;
 import com.smartbear.postman.utils.PostmanJsonUtil;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
@@ -74,10 +79,9 @@ import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -98,13 +102,16 @@ public class PostmanImporter {
 
     public WsdlProject importPostmanCollection(WorkspaceImpl workspace, String filePath) {
         WsdlProject project = null;
-        File jsonFile = new File(filePath);
         String postmanJson = null;
+        XProgressDialog collectionImportProgressDialog = UISupport.getDialogs().createProgressDialog("Import Collection",
+                0, "Importing the collection...", false);
+        PostmanImporterWorker worker = new PostmanImporterWorker(filePath);
         try {
-            postmanJson = FileUtils.readFileToString(jsonFile);
-        } catch (IOException e) {
+            collectionImportProgressDialog.run(worker);
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        postmanJson = worker.getPostmanJson();
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject) {
@@ -458,6 +465,41 @@ public class PostmanImporter {
                     + postmanUri.substring(indexOfQuery, postmanUri.length());
         } else {
             return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
+        }
+    }
+
+    private class PostmanImporterWorker implements Worker {
+        private String url;
+        private String postmanJson;
+
+        public PostmanImporterWorker(String url) {
+            this.url = url;
+        }
+
+        @Override
+        public Object construct(XProgressMonitor monitor) {
+            UrlClientLoader loader = new UrlClientLoader(url);
+            try {
+                loader.setUseWorker(false);
+                postmanJson = IOUtils.toString(loader.load(), StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                UISupport.showErrorMessage(e.getMessage());
+            }
+            return postmanJson;
+        }
+
+        @Override
+        public void finished() {
+
+        }
+
+        @Override
+        public boolean onCancel() {
+            return false;
+        }
+
+        public String getPostmanJson() {
+            return postmanJson;
         }
     }
 }
