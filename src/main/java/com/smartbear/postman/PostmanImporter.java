@@ -104,7 +104,7 @@ public class PostmanImporter {
         WsdlProject project = null;
         String postmanJson = null;
         XProgressDialog collectionImportProgressDialog = UISupport.getDialogs().createProgressDialog("Import Collection",
-                0, "Importing a collection", false);
+                0, "Importing the collection...", false);
         PostmanImporterWorker worker = new PostmanImporterWorker(filePath);
         try {
             collectionImportProgressDialog.run(worker);
@@ -483,7 +483,7 @@ public class PostmanImporter {
                 loader.setUseWorker(false);
                 postmanJson = IOUtils.toString(loader.load(), StandardCharsets.UTF_8);
             } catch (Exception e) {
-                e.printStackTrace();
+                UISupport.showErrorMessage(e.getMessage());
             }
             return postmanJson;
         }
