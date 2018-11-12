@@ -56,8 +56,12 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
+import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
+import com.eviware.x.dialogs.Worker;
+import com.eviware.x.dialogs.XProgressDialog;
+import com.eviware.x.dialogs.XProgressMonitor;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
 import com.smartbear.postman.script.PostmanScriptParser;
@@ -99,13 +103,15 @@ public class PostmanImporter {
     public WsdlProject importPostmanCollection(WorkspaceImpl workspace, String filePath) {
         WsdlProject project = null;
         String postmanJson = null;
-        UrlClientLoader loader = new UrlClientLoader(filePath);
-        loader.setUseWorker(false);
+        XProgressDialog collectionImportProgressDialog = UISupport.getDialogs().createProgressDialog("Import Collection",
+                0, "Importing a collection", false);
+        PostmanImporterWorker worker = new PostmanImporterWorker(filePath);
         try {
-            postmanJson = IOUtils.toString(loader.load(), StandardCharsets.UTF_8);
+            collectionImportProgressDialog.run(worker);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        postmanJson = worker.getPostmanJson();
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject) {
@@ -459,6 +465,41 @@ public class PostmanImporter {
                     + postmanUri.substring(indexOfQuery, postmanUri.length());
         } else {
             return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
+        }
+    }
+
+    private class PostmanImporterWorker implements Worker {
+        private String url;
+        private String postmanJson;
+
+        public PostmanImporterWorker(String url) {
+            this.url = url;
+        }
+
+        @Override
+        public Object construct(XProgressMonitor monitor) {
+            UrlClientLoader loader = new UrlClientLoader(url);
+            try {
+                loader.setUseWorker(false);
+                postmanJson = IOUtils.toString(loader.load(), StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return postmanJson;
+        }
+
+        @Override
+        public void finished() {
+
+        }
+
+        @Override
+        public boolean onCancel() {
+            return false;
+        }
+
+        public String getPostmanJson() {
+            return postmanJson;
         }
     }
 }
