@@ -17,20 +17,29 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.impl.rest.RestRequest;
-import com.eviware.soapui.impl.rest.actions.request.AddRestRequestToTestCaseAction;
+import com.eviware.soapui.impl.rest.actions.request.AddRestRequestToTestCaseSilentAction;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
-import com.eviware.soapui.impl.wsdl.actions.request.AddRequestToTestCaseAction;
+import com.eviware.soapui.impl.wsdl.actions.request.AddRequestToTestCaseSilentAction;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.eviware.soapui.impl.wsdl.actions.support.AbstractAddToTestCaseAction.TEST_CASE_NAME;
 
 public class GuiTestCreator implements TestCreator {
     @Override
-    public void createTest(RestRequest request) {
-        AddRestRequestToTestCaseAction addRestRequestToTestCaseAction = new AddRestRequestToTestCaseAction();
-        addRestRequestToTestCaseAction.perform(request, null);
+    public void createTest(RestRequest request, String testCaseName) {
+        Map<String, String> param = new HashMap<>();
+        param.put(TEST_CASE_NAME, testCaseName);
+        AddRestRequestToTestCaseSilentAction addRestRequestToTestCaseSilentAction = new AddRestRequestToTestCaseSilentAction();
+        addRestRequestToTestCaseSilentAction.perform(request, param);
     }
 
     @Override
-    public void createTest(WsdlRequest request) {
-        AddRequestToTestCaseAction addRequestToTestCaseAction = new AddRequestToTestCaseAction();
-        addRequestToTestCaseAction.perform(request, null);
+    public void createTest(WsdlRequest request, String testCaseName) {
+        Map<String, String> param = new HashMap<>();
+        param.put(TEST_CASE_NAME, testCaseName);
+        AddRequestToTestCaseSilentAction addRequestToTestCaseSilentAction = new AddRequestToTestCaseSilentAction();
+        addRequestToTestCaseSilentAction.perform(request, param);
     }
 }

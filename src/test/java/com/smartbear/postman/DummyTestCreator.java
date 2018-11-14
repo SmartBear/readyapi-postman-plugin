@@ -11,7 +11,7 @@ import com.eviware.soapui.impl.wsdl.teststeps.registry.WsdlTestRequestStepFactor
 public class DummyTestCreator implements TestCreator {
     private WsdlTestCase testCase;
     @Override
-    public void createTest(RestRequest request) {
+    public void createTest(RestRequest request, String testCaseName) {
         if (testCase == null) {
             testCase = createTestHierarchyForRequest(request.getProject());
         }
@@ -20,7 +20,7 @@ public class DummyTestCreator implements TestCreator {
     }
 
     @Override
-    public void createTest(WsdlRequest request) {
+    public void createTest(WsdlRequest request, String testCaseName) {
         WsdlTestCase testCase = createTestHierarchyForRequest(request.getProject());
         String stepName = request.getOperation().getName() + " - " + request.getName();
         testCase.addTestStep(WsdlTestRequestStepFactory.createConfig(request, stepName));

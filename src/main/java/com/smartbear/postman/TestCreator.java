@@ -21,7 +21,7 @@ import com.eviware.soapui.impl.wsdl.WsdlRequest;
 
 public interface TestCreator {
 
-    void createTest(RestRequest request);
+    void createTest(RestRequest request, String testCaseName);
 
-    void createTest(WsdlRequest request);
+    void createTest(WsdlRequest request, String testCaseName);
 }

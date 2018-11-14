@@ -17,7 +17,10 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.impl.WorkspaceImpl;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
+import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.support.PathUtils;
+import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.plugins.ActionConfiguration;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
@@ -56,8 +59,8 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                     if (StringUtils.hasContent(filePath)) {
                         if (new File(filePath).exists() || PathUtils.isHttpPath(filePath)) {
                             PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
-                            importer.importPostmanCollection(workspace, filePath);
-                            sendAnalytics();
+                            WsdlProject project = importer.importPostmanCollection(workspace, filePath);
+                            sendAnalytics(getTestStepsCount(project));
                         }
                         break;
                     }
@@ -66,6 +69,16 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                 UISupport.showErrorMessage(ex);
             }
         }
+    }
+
+    private int getTestStepsCount(WsdlProject project) {
+        int testStepsCount = 0;
+        for (WsdlTestSuite testSuite : project.getTestSuiteList()) {
+            for (WsdlTestCase testCase : testSuite.getTestCaseList()) {
+                testStepsCount =+ testCase.getTestStepCount();
+            }
+        }
+        return testStepsCount;
     }
 
     @AForm(name = "Import Postman Collection", description = "Create a project from the specified Postman collection")

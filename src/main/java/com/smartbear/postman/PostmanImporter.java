@@ -154,7 +154,7 @@ public class PostmanImporter {
                             }
 
                             if (StringUtils.hasContent(tests)) {
-                                testCreator.createTest(wsdlRequest);
+                                testCreator.createTest(wsdlRequest, collectionName);
                                 assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                             }
                         }
@@ -174,7 +174,7 @@ public class PostmanImporter {
                         }
 
                         if (StringUtils.hasContent(tests)) {
-                            testCreator.createTest(restRequest);
+                            testCreator.createTest(restRequest, collectionName);
                             assertable = getTestRequestStep(project, RestTestRequestStep.class);
                         }
                     }
@@ -353,7 +353,7 @@ public class PostmanImporter {
     /**
      * https://smartbear.atlassian.net/wiki/spaces/PD/pages/172544951/ReadyAPI+analytics+home-phone+data+revision
      */
-    public static void sendAnalytics() {
+    public static void sendAnalytics(int testStepsCount) {
         Class analyticsClass;
         try {
             analyticsClass = Class.forName("com.smartbear.analytics.Analytics");
@@ -371,6 +371,7 @@ public class PostmanImporter {
             params.put("ProductArea", "MainMenu");
             params.put("Type", "REST");
             params.put("Source", "PostmanCollection");
+            params.put("NumberOfSteps", Integer.toString(testStepsCount));
             trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
                     "CreateProject", params);
         } catch (Throwable e) {
