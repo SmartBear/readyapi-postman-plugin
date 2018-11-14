@@ -43,6 +43,13 @@ public class PostmanCollectionV2 extends PostmanCollection {
         return requestList;
     }
 
+    @Override
+    public List<JSONObject> getFolders() {
+        ArrayList<JSONObject> foldersList = new ArrayList<>();
+        extractFoldersFromItems(postmanCollection.getJSONArray(ITEM), foldersList);
+        return foldersList;
+    }
+
     private boolean isFolder(JSONObject item) {
         return item.containsKey(ITEM);
     }
@@ -55,6 +62,18 @@ public class PostmanCollectionV2 extends PostmanCollection {
                     extractRequestsFromItems(item.getJSONArray(ITEM), requestList);
                 } else {
                     requestList.add(new RequestV2(item));
+                }
+            }
+        }
+    }
+
+    private void extractFoldersFromItems(JSONArray items, List<JSONObject> foldersList) {
+        for (Object itemObject : items) {
+            if (itemObject instanceof JSONObject) {
+                JSONObject item = (JSONObject) itemObject;
+                if (isFolder(item)) {
+                    foldersList.add(item);
+                    extractFoldersFromItems(item.getJSONArray(ITEM), foldersList);
                 }
             }
         }

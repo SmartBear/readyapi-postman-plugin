@@ -60,7 +60,7 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                         if (new File(filePath).exists() || PathUtils.isHttpPath(filePath)) {
                             PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
                             WsdlProject project = importer.importPostmanCollection(workspace, filePath);
-                            sendAnalytics(getTestStepsCount(project));
+                            sendAnalytics(getTestStepsAmount(project));
                         }
                         break;
                     }
@@ -71,14 +71,14 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
         }
     }
 
-    private int getTestStepsCount(WsdlProject project) {
-        int testStepsCount = 0;
+    private int getTestStepsAmount(WsdlProject project) {
+        int testStepsAmount = 0;
         for (WsdlTestSuite testSuite : project.getTestSuiteList()) {
             for (WsdlTestCase testCase : testSuite.getTestCaseList()) {
-                testStepsCount =+ testCase.getTestStepCount();
+                testStepsAmount =+ testCase.getTestStepCount();
             }
         }
-        return testStepsCount;
+        return testStepsAmount;
     }
 
     @AForm(name = "Import Postman Collection", description = "Create a project from the specified Postman collection")

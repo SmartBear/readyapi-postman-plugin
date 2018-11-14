@@ -19,7 +19,7 @@ package com.smartbear.postman;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.actions.request.AddRestRequestToTestCaseSilentAction;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
-import com.eviware.soapui.impl.wsdl.actions.request.AddRequestToTestCaseSilentAction;
+import com.eviware.soapui.impl.wsdl.actions.request.AddRequestToTestCaseAction;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,9 +37,7 @@ public class GuiTestCreator implements TestCreator {
 
     @Override
     public void createTest(WsdlRequest request, String testCaseName) {
-        Map<String, String> param = new HashMap<>();
-        param.put(TEST_CASE_NAME, testCaseName);
-        AddRequestToTestCaseSilentAction addRequestToTestCaseSilentAction = new AddRequestToTestCaseSilentAction();
-        addRequestToTestCaseSilentAction.perform(request, param);
+        AddRequestToTestCaseAction addRequestToTestCaseAction = new AddRequestToTestCaseAction();
+        addRequestToTestCaseAction.perform(request, null);
     }
 }
