@@ -44,12 +44,10 @@ public class PostmanCollectionV1 extends PostmanCollection {
     @Override
     public List<JSONObject> getFolders() {
         ArrayList<JSONObject> foldersList = new ArrayList<>();
-        Object folders = postmanCollection.get(FOLDERS);
-        if (folders instanceof JSONArray) {
-            for (Object folder : (JSONArray) folders) {
-                if (folder instanceof JSONObject) {
-                    foldersList.add((JSONObject) folder);
-                }
+        JSONArray folders = postmanCollection.getJSONArray(FOLDERS);
+        for (Object folder : folders) {
+            if (folder instanceof JSONObject) {
+                foldersList.add((JSONObject) folder);
             }
         }
         return foldersList;
