@@ -94,6 +94,8 @@ import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationSt
 public class PostmanImporter {
     public static final String WSDL_SUFFIX = "?WSDL";
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
+    private static String foldersAmount;
+    private static String requestsAmount;
     private final TestCreator testCreator;
 
     public PostmanImporter(TestCreator testCreator) {
@@ -117,6 +119,8 @@ public class PostmanImporter {
             if (json instanceof JSONObject) {
                 PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection((JSONObject) json);
                 String collectionName = postmanCollection.getName();
+                foldersAmount = Integer.toString(postmanCollection.getFolders().size());
+                requestsAmount = Integer.toString(postmanCollection.getRequests().size());
                 String projectName = createProjectName(collectionName, workspace.getProjectList());
                 try {
                     project = workspace.createProject(projectName, null);
@@ -154,7 +158,7 @@ public class PostmanImporter {
                             }
 
                             if (StringUtils.hasContent(tests)) {
-                                testCreator.createTest(wsdlRequest);
+                                testCreator.createTest(wsdlRequest, collectionName);
                                 assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                             }
                         }
@@ -174,7 +178,7 @@ public class PostmanImporter {
                         }
 
                         if (StringUtils.hasContent(tests)) {
-                            testCreator.createTest(restRequest);
+                            testCreator.createTest(restRequest, collectionName);
                             assertable = getTestRequestStep(project, RestTestRequestStep.class);
                         }
                     }
@@ -353,7 +357,7 @@ public class PostmanImporter {
     /**
      * https://smartbear.atlassian.net/wiki/spaces/PD/pages/172544951/ReadyAPI+analytics+home-phone+data+revision
      */
-    public static void sendAnalytics() {
+    public static void sendAnalytics(int testStepsAmount) {
         Class analyticsClass;
         try {
             analyticsClass = Class.forName("com.smartbear.analytics.Analytics");
@@ -366,13 +370,20 @@ public class PostmanImporter {
             Class analyticsCategoryClass = Class.forName("com.smartbear.analytics.AnalyticsManager$Category");
             Method trackMethod = analyticsManager.getClass().getMethod("trackAction", analyticsCategoryClass,
                     String.class, Map.class);
-            Map<String, String> params = new HashMap();
-            params.put("SourceModule", "Any");
-            params.put("ProductArea", "MainMenu");
-            params.put("Type", "REST");
-            params.put("Source", "PostmanCollection");
+            Map<String, String> paramsForCreateProject = new HashMap();
+            paramsForCreateProject.put("SourceModule", "Any");
+            paramsForCreateProject.put("ProductArea", "MainMenu");
+            paramsForCreateProject.put("Type", "REST");
+            paramsForCreateProject.put("Source", "PostmanCollection");
             trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
-                    "CreateProject", params);
+                    "CreateProject", paramsForCreateProject);
+
+            Map<String, String> paramsForImportPostmnaCollection = new HashMap();
+            paramsForImportPostmnaCollection.put("NumberOfStepsCreated", Integer.toString(testStepsAmount));
+            paramsForImportPostmnaCollection.put("NumberOfFolders", foldersAmount);
+            paramsForImportPostmnaCollection.put("NumberOfRequests", requestsAmount);
+            trackMethod.invoke(analyticsManager, Enum.valueOf(analyticsCategoryClass, "CUSTOM_PLUGIN_ACTION"),
+                    "ImportPostmanCollection", paramsForImportPostmnaCollection);
         } catch (Throwable e) {
             logger.error("Error while sending analytics", e);
         }

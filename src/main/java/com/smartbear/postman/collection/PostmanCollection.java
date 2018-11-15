@@ -30,6 +30,7 @@ public abstract class PostmanCollection {
     public abstract String getName();
     public abstract String getDescription();
     public abstract List<Request> getRequests();
+    public abstract List<JSONObject> getFolders();
 
     protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);

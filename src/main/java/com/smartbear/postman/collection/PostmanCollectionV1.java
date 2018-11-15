@@ -13,6 +13,7 @@ public class PostmanCollectionV1 extends PostmanCollection {
     public static final String EVENTS = "events";
     public static final String HEADERS = "headers";
     public static final String RAW_MODE_DATA = "rawModeData";
+    public static final String FOLDERS = "folders";
 
     public PostmanCollectionV1(JSONObject postmanCollection) {
         super(postmanCollection);
@@ -38,6 +39,18 @@ public class PostmanCollectionV1 extends PostmanCollection {
             }
         }
         return requestList;
+    }
+
+    @Override
+    public List<JSONObject> getFolders() {
+        ArrayList<JSONObject> foldersList = new ArrayList<>();
+        JSONArray folders = postmanCollection.getJSONArray(FOLDERS);
+        for (Object folder : folders) {
+            if (folder instanceof JSONObject) {
+                foldersList.add((JSONObject) folder);
+            }
+        }
+        return foldersList;
     }
 
     private static String getScript(JSONObject request, ScriptType scriptType) {
