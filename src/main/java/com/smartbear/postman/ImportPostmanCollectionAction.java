@@ -35,7 +35,6 @@ import java.io.File;
 
 import static com.smartbear.postman.PostmanImporter.sendAnalytics;
 
-@ActionConfiguration(actionGroup = "WorkspaceImplActions", beforeAction = "SaveAllProjectsAction", separatorAfter = true)
 public class ImportPostmanCollectionAction extends AbstractSoapUIAction<WorkspaceImpl> {
     private XFormDialog dialog;
 
@@ -61,8 +60,10 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                             PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
                             WsdlProject project = importer.importPostmanCollection(workspace, filePath);
                             sendAnalytics(getTestStepsAmount(project));
+                            break;
+                        } else {
+                            UISupport.showErrorMessage("The \"Postman Collection\" must be an existing file or a valid URL.");
                         }
-                        break;
                     }
                 }
             } catch (Exception ex) {
