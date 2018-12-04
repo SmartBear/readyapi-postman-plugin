@@ -19,6 +19,9 @@ package com.smartbear.postman;
 import com.eviware.soapui.plugins.PluginAdapter;
 import com.eviware.soapui.plugins.PluginConfiguration;
 import com.eviware.soapui.support.UISupport;
+import com.smartbear.ready.core.ApplicationEnvironment;
+import com.eviware.soapui.SoapUICore;
+import com.eviware.soapui.impl.actions.ImportMethodFactory;
 
 @PluginConfiguration(groupId = "${project.groupId}",
     name = "${project.name}",
@@ -28,4 +31,10 @@ import com.eviware.soapui.support.UISupport;
     infoUrl = "${project.url}",
     minimumReadyApiVersion = "${ready-api-version}")
 public class PluginConfig extends PluginAdapter {
+
+    public PluginConfig() {
+        super();
+        ApplicationEnvironment.getSoapUICore().getFactoryRegistry().addFactory(ImportMethodFactory.class,
+                new PostmanImportMethodFactory());
+    }
 }
