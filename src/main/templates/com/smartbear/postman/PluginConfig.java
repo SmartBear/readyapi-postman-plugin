@@ -25,7 +25,7 @@ import com.eviware.soapui.impl.actions.ImportMethodFactory;
 
 @PluginConfiguration(groupId = "${project.groupId}",
     name = "${project.name}",
-    version = "1.0.4-SNAPSHOT",
+    version = "2.0.0",
     autoDetect = true,
     description = "${project.description}",
     infoUrl = "${project.url}",
