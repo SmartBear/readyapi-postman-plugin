@@ -31,6 +31,7 @@ public abstract class PostmanCollection {
     public abstract String getDescription();
     public abstract List<Request> getRequests();
     public abstract List<JSONObject> getFolders();
+    public abstract List<Variable> getVariables();
 
     protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
@@ -111,6 +112,16 @@ public abstract class PostmanCollection {
         String getTests();
         List<Header> getHeaders();
         String getBody();
+    }
+
+    public interface Variable {
+        String getId();
+
+        String getKey();
+
+        String getValue();
+
+        String getType();
     }
 
     public static class Header {

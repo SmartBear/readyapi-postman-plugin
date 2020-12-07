@@ -189,6 +189,18 @@ public class PostmanImporter {
 
                     logger.info("Importing a request with URI [" + uri + "] - done");
                 }
+
+                List<PostmanCollection.Variable> variables = postmanCollection.getVariables();
+                if (variables != null) {
+                    for (PostmanCollection.Variable variable : variables) {
+                        String propertyName = variable.getKey();
+                        if (!project.hasProperty(propertyName)) {
+                            project.addProperty(propertyName);
+                        }
+
+                        project.setPropertyValue(propertyName, variable.getValue());
+                    }
+                }
             }
         }
         return project;
