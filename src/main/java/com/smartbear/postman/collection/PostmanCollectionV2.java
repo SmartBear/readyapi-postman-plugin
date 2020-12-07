@@ -3,6 +3,7 @@ package com.smartbear.postman.collection;
 import com.smartbear.postman.ScriptType;
 import javax.annotation.Nullable;
 import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 import java.util.ArrayList;
@@ -59,7 +60,11 @@ public class PostmanCollectionV2 extends PostmanCollection {
     @Override
     public List<Variable> getVariables() {
         ArrayList<Variable> variablesList = new ArrayList<>();
-        extractVariablesFromItems(postmanCollection.getJSONArray(VARIABLE), variablesList);
+        try {
+            extractVariablesFromItems(postmanCollection.getJSONArray(VARIABLE), variablesList);
+        } catch (JSONException e) {
+
+        }
         return variablesList;
     }
 
