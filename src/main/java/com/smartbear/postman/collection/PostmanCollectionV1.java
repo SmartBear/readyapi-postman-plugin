@@ -2,6 +2,7 @@ package com.smartbear.postman.collection;
 
 import com.eviware.soapui.support.StringUtils;
 import com.smartbear.postman.ScriptType;
+import javax.annotation.Nullable;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -51,6 +52,12 @@ public class PostmanCollectionV1 extends PostmanCollection {
             }
         }
         return foldersList;
+    }
+
+    @Override
+    @Nullable
+    public List<Variable> getVariables() {
+        return null;
     }
 
     private static String getScript(JSONObject request, ScriptType scriptType) {

@@ -27,7 +27,7 @@
     </repositories>
 
     <properties>
-        <ready-api-version>2.6.0-SNAPSHOT</ready-api-version>
+        <ready-api-version>3.5.0</ready-api-version>
     </properties>
 
     <dependencies>

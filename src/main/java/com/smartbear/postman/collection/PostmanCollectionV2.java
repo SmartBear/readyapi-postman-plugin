@@ -1,6 +1,7 @@
 package com.smartbear.postman.collection;
 
 import com.smartbear.postman.ScriptType;
+import javax.annotation.Nullable;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
@@ -18,6 +19,11 @@ public class PostmanCollectionV2 extends PostmanCollection {
     public static final String BODY = "body";
     public static final String RAW = "raw";
     public static final String EVENT = "event";
+    public static final String VARIABLE = "variable";
+    public static final String VARIABLE_ID = "id";
+    public static final String VARIABLE_KEY = "key";
+    public static final String VARIABLE_VALUE = "value";
+    public static final String VARIABLE_TYPE = "type";
 
     private final JSONObject info;
 
@@ -50,6 +56,13 @@ public class PostmanCollectionV2 extends PostmanCollection {
         return foldersList;
     }
 
+    @Override
+    public List<Variable> getVariables() {
+        ArrayList<Variable> variablesList = new ArrayList<>();
+        extractVariablesFromItems(postmanCollection.getJSONArray(VARIABLE), variablesList);
+        return variablesList;
+    }
+
     private boolean isFolder(JSONObject item) {
         return item.containsKey(ITEM);
     }
@@ -75,6 +88,15 @@ public class PostmanCollectionV2 extends PostmanCollection {
                     foldersList.add(item);
                     extractFoldersFromItems(item.getJSONArray(ITEM), foldersList);
                 }
+            }
+        }
+    }
+
+    private void extractVariablesFromItems(JSONArray items, List<Variable> variablesList) {
+        for (Object itemObject : items) {
+            if (itemObject instanceof JSONObject) {
+                JSONObject item = (JSONObject) itemObject;
+                variablesList.add(new VariableImpl(item));
             }
         }
     }
@@ -156,6 +178,34 @@ public class PostmanCollectionV2 extends PostmanCollection {
                 return "";
             }
             return getValueFromObjectOrString(request, BODY, RAW);
+        }
+    }
+
+    private class VariableImpl implements Variable {
+        private final JSONObject item;
+
+        public VariableImpl(JSONObject item) {
+            this.item = item;
+        }
+
+        @Override
+        public String getId() {
+            return PostmanCollectionV2.this.getValue(item, VARIABLE_ID);
+        }
+
+        @Override
+        public String getKey() {
+            return PostmanCollectionV2.this.getValue(item, VARIABLE_KEY);
+        }
+
+        @Override
+        public String getValue() {
+            return PostmanCollectionV2.this.getValue(item, VARIABLE_VALUE);
+        }
+
+        @Override
+        public String getType() {
+            return PostmanCollectionV2.this.getValue(item, VARIABLE_TYPE);
         }
     }
 }
