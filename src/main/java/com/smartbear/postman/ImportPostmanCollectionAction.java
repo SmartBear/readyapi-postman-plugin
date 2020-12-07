@@ -59,11 +59,13 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
                         if (new File(filePath).exists() || PathUtils.isHttpPath(filePath)) {
                             PostmanImporter importer = new PostmanImporter(new GuiTestCreator());
                             WsdlProject project = importer.importPostmanCollection(workspace, filePath);
-                            sendAnalytics(getTestStepsAmount(project));
-                            break;
-                        } else {
-                            UISupport.showErrorMessage("The \"Postman Collection\" must be an existing file or a valid URL.");
+                            if (project != null) {
+                                sendAnalytics(getTestStepsAmount(project));
+                                break;
+                            }
                         }
+
+                        UISupport.showErrorMessage("The \"Postman Collection\" must be an existing file or a valid URL.");
                     }
                 }
             } catch (Exception ex) {
