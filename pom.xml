@@ -7,7 +7,7 @@
 
     <groupId>com.smartbear.soapui.plugins</groupId>
     <artifactId>readyapi-postman-plugin</artifactId>
-    <version>2.0.1-SNAPSHOT</version>
+    <version>2.0.1</version>
 
     <name>ReadyAPI Postman Plugin</name>
     <description>Creates ReadyAPI projects and tests based on Postman collections</description>
