@@ -124,9 +124,9 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>dist</descriptorRef>
-                    </descriptorRefs>
+                    <descriptors>
+                        <descriptor>src/assembly/dist-assembly.xml</descriptor>
+                    </descriptors>
                 </configuration>
             </plugin>
             <plugin>
