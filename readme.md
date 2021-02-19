@@ -5,7 +5,7 @@ This repository contains source code files for the Postman Plugin for ReadyAPI. 
 ## Plugin Info
 
 - Author: SmartBear Software (http://smartbear.com)
-- Plugin version: 2.0
+- Plugin version: 2.0.1
 
 ## Requirements
 
@@ -29,8 +29,8 @@ To install the plugin:
 
 To import the collection:
 
-- Select **File > New Project**.
-- In the **New Project** dialog, select **API Definition > Postman collection**. Click **Import**.
+- Select **File > Create Project via Integration**.
+- In the **Create Project via Integration** dialog, click **Postman collection**.
 - In the **Import Postman Collection** dialog, click **Browse** and select the Postman collection to import.
 
 ## Build the plugin
