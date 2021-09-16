@@ -18,6 +18,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,14 +39,40 @@ public class PostmanScriptParserTest {
     private WsdlProject project;
     private Assertable assertable;
 
+    List<TestAssertion> assertions;
+
+    GroovyScriptAssertion groovyAssertion;
+    ValidHttpStatusCodesAssertion validHttpStatusCodesAssertion;
+    InvalidHttpStatusCodesAssertion invalidHttpStatusCodesAssertion;
+    ResponseSLAAssertion responseSLAAssertion;
+    EqualsAssertion equalsAssertion;
+    SimpleContainsAssertion simpleContainsAssertion;
+
     @Before
     public void prepare() {
         project = new WsdlProject();
         assertable = mock(Assertable.class);
+
+        groovyAssertion = mock(GroovyScriptAssertion.class);
+        validHttpStatusCodesAssertion = mock(ValidHttpStatusCodesAssertion.class);
+        invalidHttpStatusCodesAssertion = mock(InvalidHttpStatusCodesAssertion.class);
+        responseSLAAssertion = mock(ResponseSLAAssertion.class);
+        equalsAssertion = mock(EqualsAssertion.class);
+        simpleContainsAssertion = mock(SimpleContainsAssertion.class);
+
+        when(assertable.addAssertion(GroovyScriptAssertion.LABEL)).thenReturn(groovyAssertion);
+        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(validHttpStatusCodesAssertion);
+        when(assertable.addAssertion(InvalidHttpStatusCodesAssertion.LABEL)).thenReturn(invalidHttpStatusCodesAssertion);
+        when(assertable.addAssertion(ResponseSLAAssertion.LABEL)).thenReturn(responseSLAAssertion);
+        when(assertable.addAssertion(EqualsAssertion.LABEL)).thenReturn(equalsAssertion);
+        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(simpleContainsAssertion);
+
+        assertions = new ArrayList<>();
+        when(assertable.getAssertionList()).thenReturn(assertions);
     }
 
     @Test
-     public void parsesSettingGlobalVariable() throws SoapUIException {
+    public void parsesSettingGlobalVariable() throws SoapUIException {
         String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
         parseSettingGlobalVariables(script);
     }
@@ -81,197 +108,128 @@ public class PostmanScriptParserTest {
     public void parsesResponseValidCodeAssertion() throws SoapUIException {
         String script = "tests[\"Status code is 200\"] = responseCode.code === 200;";
 
-        ValidHttpStatusCodesAssertion assertion = mock(ValidHttpStatusCodesAssertion.class);
-        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setCodes("200");
+        verify(validHttpStatusCodesAssertion).setCodes("200");
     }
 
     @Test
     public void parsesResponseInvalidCodeAssertion() throws SoapUIException {
         String script = "tests[\"Status code is not 401\"] = responseCode.code !== 401;";
 
-        InvalidHttpStatusCodesAssertion assertion = mock(InvalidHttpStatusCodesAssertion.class);
-        when(assertable.addAssertion(InvalidHttpStatusCodesAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setCodes("401");
+        verify(invalidHttpStatusCodesAssertion).setCodes("401");
     }
 
     @Test
     public void parsesResponseTwoValidCodeAssertion() throws SoapUIException {
         String script = "tests[\"Status code is 200 or 201\"] = responseCode.code === 200 || responseCode.code === 201;";
 
-        final ArrayList<TestAssertion> assertions = new ArrayList<>();
-        when(assertable.getAssertionList()).thenReturn(assertions);
-
-        final ValidHttpStatusCodesAssertion assertion = mock(ValidHttpStatusCodesAssertion.class);
-
-        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(assertion);
         doAnswer(new Answer<Void>() {
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                when(assertion.getCodes()).thenReturn((String) invocation.getArguments()[0]);
-                assertions.add(assertion);
+                when(validHttpStatusCodesAssertion.getCodes()).thenReturn((String) invocation.getArguments()[0]);
+                assertions.add(validHttpStatusCodesAssertion);
                 return null;
             }
-        }).when(assertion).setCodes(anyString());
+        }).when(validHttpStatusCodesAssertion).setCodes(anyString());
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        createContextAndParse(script);
 
-        parseScript(script, context);
-
-        verify(assertion).setCodes("200");
-
-        verify(assertion).setCodes("200,201");
+        verify(validHttpStatusCodesAssertion).setCodes("200");
+        verify(validHttpStatusCodesAssertion).setCodes("200,201");
     }
 
     @Test
     public void parsesResponseTimeAssertion() throws SoapUIException {
         String script = "tests[\"Response time is less than 300ms\"] = responseTime < 300;";
 
-        ResponseSLAAssertion assertion = mock(ResponseSLAAssertion.class);
-        when(assertable.addAssertion(ResponseSLAAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setSLA("300");
+        verify(responseSLAAssertion).setSLA("300");
     }
 
     @Test
     public void parsesResponseBodyEqualsAssertion() throws SoapUIException {
         String script = "tests[\"Body is correct\"] = responseBody === \"\\\"abc def\\\"\";";
 
-        EqualsAssertion assertion = mock(EqualsAssertion.class);
-        when(assertable.addAssertion(EqualsAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setPatternText("\"abc def\"");
+        verify(equalsAssertion).setPatternText("\"abc def\"");
     }
 
     @Test
     public void parsesResponseBodyContainsAssertion() throws SoapUIException {
         String script = "tests[\"Body matches string\"] = responseBody.has(\"abc\");";
 
-        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
-        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setToken("abc");
+        verify(simpleContainsAssertion).setToken("abc");
     }
 
     @Test
     public void parsesResponseBodyContainsAssertionWithQuotes() throws SoapUIException {
         String script = "tests[\"Body matches string\"] = responseBody.has(\"\\\"abc\\\"\");";
 
-        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
-        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setToken("\"abc\"");
+        verify(simpleContainsAssertion).setToken("\"abc\"");
     }
 
     @Test
     public void parsesGlobalVariableReference() throws SoapUIException {
         String script = "tests[\"Body matches string\"] = responseBody.has(globals[\"string1\"]);";
 
-        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
-        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setToken("${#Project#string1}");
+        verify(simpleContainsAssertion).setToken("${#Project#string1}");
     }
 
     @Test
     public void parsesCommandInTry() throws SoapUIException {
         String script = "try { tests[\"Body matches string\"] = responseBody.has(\"abc\"); }\ncatch (e) { }";
-        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
-        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        createContextAndParse(script);
 
-        parseScript(script, context);
-
-        verify(assertion).setToken("abc");
+        verify(simpleContainsAssertion).setToken("abc");
     }
 
     @Test
     public void parsesCommandAfterCatch() throws SoapUIException {
         String script = "try { responseJSON = JSON.parse(responseBody); }\ncatch (e) { }\n\ntests[\"Body matches string\"] = responseBody.has(\"abc\");";
-        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
-        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        createContextAndParse(script);
 
-        parseScript(script, context);
-
-        verify(assertion).setToken("abc");
+        verify(simpleContainsAssertion).setToken("abc");
     }
 
     @Test
     public void ignoresCommentedLines() throws SoapUIException {
         String script = "//tests[\"Body matches string\"] = responseBody.has(\"def\");\ntests[\"Body matches string\"] = responseBody.has(\"abc\");";
-        SimpleContainsAssertion assertion = mock(SimpleContainsAssertion.class);
-        when(assertable.addAssertion(SimpleContainsAssertion.LABEL)).thenReturn(assertion);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        createContextAndParse(script);
 
-        parseScript(script, context);
-
-        verify(assertion).setToken("abc");
-        verify(assertion, never()).setToken("def");
+        verify(simpleContainsAssertion).setToken("abc");
+        verify(simpleContainsAssertion, never()).setToken("def");
     }
 
     @Test
     public void parsesResponseHeaderExistsAssertion() throws SoapUIException {
         String script = "tests[\"Content Type is present\"] = postman.getResponseHeader(\"Content-Type\");";
 
-        GroovyScriptAssertion assertion = mock(GroovyScriptAssertion.class);
-        when(assertable.addAssertion(GroovyScriptAssertion.LABEL)).thenReturn(assertion);
+        createContextAndParse(script);
 
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(assertion).setScriptText("assert messageExchange.responseHeaders.hasValues(\"Content-Type\")");
+        verify(groovyAssertion).setScriptText("assert messageExchange.responseHeaders.hasValues(\"Content-Type\")");
     }
 
     @Test
     public void parsesStringInSingleQuotes() throws SoapUIException {
         String script = "tests[\"response code is 200\"] = responseCode.code === 200;tests[\"Content Type is present\"] = postman.getResponseHeader('Content-Type');";
 
-        ValidHttpStatusCodesAssertion statusAssertion = mock(ValidHttpStatusCodesAssertion.class);
-        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(statusAssertion);
+        createContextAndParse(script);
 
-        GroovyScriptAssertion groovyAssertion = mock(GroovyScriptAssertion.class);
-        when(assertable.addAssertion(GroovyScriptAssertion.LABEL)).thenReturn(groovyAssertion);
-
-        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
-        parseScript(script, context);
-
-        verify(statusAssertion).setCodes("200");
+        verify(validHttpStatusCodesAssertion).setCodes("200");
         verify(groovyAssertion).setScriptText("assert messageExchange.responseHeaders.hasValues('Content-Type')");
     }
 
@@ -279,14 +237,14 @@ public class PostmanScriptParserTest {
     public void parsesExpressionsInRoundBrackets() throws SoapUIException {
         String script = "tests[\"response code is 200\"] = (responseCode.code === 200);";
 
-        ValidHttpStatusCodesAssertion statusAssertion = mock(ValidHttpStatusCodesAssertion.class);
-        when(assertable.addAssertion(ValidHttpStatusCodesAssertion.LABEL)).thenReturn(statusAssertion);
+        createContextAndParse(script);
 
+        verify(validHttpStatusCodesAssertion).setCodes("200");
+    }
+
+    private void createContextAndParse(String script) throws SoapUIException {
         ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-
         parseScript(script, context);
-
-        verify(statusAssertion).setCodes("200");
     }
 
     private void parseScript(String script, ScriptContext context) throws SoapUIException {
