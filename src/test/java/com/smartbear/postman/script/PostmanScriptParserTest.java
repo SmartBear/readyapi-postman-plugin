@@ -72,6 +72,14 @@ public class PostmanScriptParserTest {
     }
 
     @Test
+    public void newLineTokenIsFirst() {
+        //???
+        //Each token regular expression appended in the beginning with "\s*" pattern which includes new line pattern,
+        //so the NEW_LINE pattern must be first in the pattern check list.
+        assert (TokenType.values()[0] == TokenType.NEW_LINE);
+    }
+
+    @Test
     public void parsesSettingGlobalVariable() throws SoapUIException {
         String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
         parseSettingGlobalVariables(script);

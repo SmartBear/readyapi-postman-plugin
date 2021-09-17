@@ -19,11 +19,11 @@ package com.smartbear.postman.script;
 import java.util.regex.Pattern;
 
 public enum TokenType {
+    NEW_LINE("\\n", false),
     COMMENT("//"),
     NAME("[a-zA-Z]\\w*"),
     DOT("\\."),
     COMMA("\\,"),
-    NEW_LINE("\\\\n"),
     OPEN_ROUND_BRACKET("\\("),
     CLOSE_ROUND_BRACKET("\\)"),
     OPEN_SQUARE_BRACKET("\\["),
@@ -41,7 +41,14 @@ public enum TokenType {
     END_OF_SCRIPT("");
 
     TokenType(String regex) {
-        pattern = Pattern.compile("^\\s*" + regex);
+        this(regex, true);
+    }
+
+    TokenType(String regex, boolean addSpacesBefore) {
+        if (addSpacesBefore) {
+            regex = "\\s*" + regex;
+        }
+        pattern = Pattern.compile("^" + regex);
     }
 
     public Pattern getPattern() {
