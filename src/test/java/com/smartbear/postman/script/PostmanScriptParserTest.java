@@ -251,6 +251,17 @@ public class PostmanScriptParserTest {
         verify(validHttpStatusCodesAssertion).setCodes("200");
     }
 
+    @Test
+    public void testMultiline() throws SoapUIException {
+        final String TESTS = "tests[\"response code is 200\"] = responseCode.code === 200\n\n\n" +
+                "tests[\"Status code is not 401\"] = responseCode.code !== 401\n\n" +
+                "tests[\"Response time is less than 500ms\"] = responseTime < 500\n";
+        createContextAndParse(TESTS);
+        verify(validHttpStatusCodesAssertion).setCodes("200");
+        verify(invalidHttpStatusCodesAssertion).setCodes("401");
+        verify(responseSLAAssertion).setSLA("500");
+    }
+
     private void createContextAndParse(String script) throws SoapUIException {
         ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
         parseScript(script, context);
