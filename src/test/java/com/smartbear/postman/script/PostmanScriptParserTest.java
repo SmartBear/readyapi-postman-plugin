@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -72,20 +73,28 @@ public class PostmanScriptParserTest {
     }
 
     @Test
+    public void newLineTokenIsFirst() {
+        //???
+        //Each token regular expression appended in the beginning with "\s*" pattern which includes new line pattern,
+        //so the NEW_LINE pattern must be the first in the pattern check list, so it must be the first in the enum.
+        assertTrue("The NEW_LINE pattern must be the first in the enum TokenType", TokenType.values()[0] == TokenType.NEW_LINE);
+    }
+
+    @Test
     public void parsesSettingGlobalVariable() throws SoapUIException {
-        String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\npostman.setGlobalVariable(\"string2\", \"def\"); ";
+        String script = "postman.setGlobalVariable(\"string1\", \"abc\");\npostman.setGlobalVariable(\"string2\", \"def\"); ";
         parseSettingGlobalVariables(script);
     }
 
     @Test
     public void skipsUnknownCommands() throws SoapUIException {
-        String script = "postman.setGlobalVariable(\"string1\", \"abc\");\\nvar jsonObject = xml2Json(responseBody);\\n" +
-                "tests[\"last record ingested is 13\"] = jsonData.last_record_ingested == 13;\\n" +
-                "var schema = {\\n" +
-                "  \"files_not_found_records\": { \\n" +
-                "                \"type\": \"string\" \\n" +
-                "            }\\n" +
-                "}\\n" +
+        String script = "postman.setGlobalVariable(\"string1\", \"abc\");\nvar jsonObject = xml2Json(responseBody);\n" +
+                "tests[\"last record ingested is 13\"] = jsonData.last_record_ingested == 13;\n" +
+                "var schema = {\n" +
+                "  \"files_not_found_records\": { \n" +
+                "                \"type\": \"string\" \n" +
+                "            }\n" +
+                "}\n" +
                 "postman.setGlobalVariable(\"string2\", \"def\");";
         parseSettingGlobalVariables(script);
     }
