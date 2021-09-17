@@ -249,6 +249,8 @@ public class PostmanScriptParser {
         if (TokenType.LOGIC == lookahead.getType()) {
             nextToken();
             assertions();
+        } else {
+            command();
         }
     }
 
