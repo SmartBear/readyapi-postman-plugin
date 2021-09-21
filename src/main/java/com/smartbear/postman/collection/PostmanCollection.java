@@ -19,7 +19,7 @@ public abstract class PostmanCollection {
     public static final String LISTEN = "listen";
     public static final String SCRIPT = "script";
     public static final String EXEC = "exec";
-    public static final char SCRIPT_LINE_DELIMITER = '\n';
+    public static final char SCRIPT_LINE_DELIMITER = ';';
 
     protected final JSONObject postmanCollection;
 
