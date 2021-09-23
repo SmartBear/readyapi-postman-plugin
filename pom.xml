@@ -17,12 +17,12 @@
         <repository>
             <id>eviware</id>
             <name>Eviware Maven2 Repository</name>
-            <url>http://www.eviware.com/repository/maven2</url>
+            <url>https://www.eviware.com/repository/maven2</url>
         </repository>
         <repository>
             <id>central</id>
             <name>Central Maven2 Repository</name>
-            <url>http://repo1.maven.org/maven2</url>
+            <url>https://repo1.maven.org/maven2</url>
         </repository>
     </repositories>
 
