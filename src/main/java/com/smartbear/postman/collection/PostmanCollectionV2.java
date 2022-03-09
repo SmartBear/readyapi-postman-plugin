@@ -18,6 +18,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     public static final String KEY = "key";
     public static final String VALUE = "value";
     public static final String BODY = "body";
+    public static final String MODE = "mode";
     public static final String RAW = "raw";
     public static final String EVENT = "event";
     public static final String VARIABLE = "variable";
@@ -178,11 +179,19 @@ public class PostmanCollectionV2 extends PostmanCollection {
         }
 
         @Override
+        public String getMode() {
+            if (request == null) {
+                return "";
+            }
+            return getValueFromObjectOrString(request, BODY, MODE);
+        }
+
+        @Override
         public String getBody() {
             if (request == null) {
                 return "";
             }
-            return getValueFromObjectOrString(request, BODY, RAW);
+            return getValueFromObjectOrString(request, BODY, getMode());
         }
     }
 

@@ -115,5 +115,10 @@ public class PostmanCollectionV1 extends PostmanCollection {
         public String getBody() {
             return getValue(request, RAW_MODE_DATA);
         }
+
+        @Override
+        public String getMode() {
+            return null;
+        }
     }
 }

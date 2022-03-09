@@ -104,6 +104,7 @@ public abstract class PostmanCollection {
     }
 
     public interface Request {
+        String getMode();
         String getUrl();
         String getName();
         String getMethod();

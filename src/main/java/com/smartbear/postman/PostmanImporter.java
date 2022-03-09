@@ -93,6 +93,7 @@ import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationSt
 
 public class PostmanImporter {
     public static final String WSDL_SUFFIX = "?WSDL";
+    private static final String GRAPHQL_MODE = "graphql";
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private static String foldersAmount;
     private static String requestsAmount;
@@ -162,6 +163,8 @@ public class PostmanImporter {
                                 assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                             }
                         }
+                    } else if (isGraphQlRequest(request)) {
+
                     } else {
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
                         if (restRequest == null) {
@@ -364,6 +367,11 @@ public class PostmanImporter {
 
     private boolean isWsdlRequest(String url) {
         return StringUtils.hasContent(url) && url.toUpperCase().endsWith(WSDL_SUFFIX);
+    }
+
+    private boolean isGraphQlRequest(PostmanCollection.Request request) {
+        String mode = request.getMode();
+        return mode != null && mode.equals(GRAPHQL_MODE);
     }
 
     /**
