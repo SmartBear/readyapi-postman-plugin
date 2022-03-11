@@ -17,6 +17,7 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.config.RestParametersConfig;
+import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.WsdlInterfaceFactory;
 import com.eviware.soapui.impl.actions.RestServiceBuilder;
@@ -43,11 +44,13 @@ import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
+import com.eviware.soapui.impl.wsdl.actions.support.AbstractAddToTestCaseAction;
 import com.eviware.soapui.impl.wsdl.support.wsdl.UrlClientLoader;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
+import com.eviware.soapui.impl.wsdl.teststeps.registry.GraphQLTestRequestTestStepFactory;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.project.Project;
@@ -164,7 +167,13 @@ public class PostmanImporter {
                             }
                         }
                     } else if (isGraphQlRequest(request)) {
-
+                        WsdlTestCase testCase = AbstractAddToTestCaseAction.getTargetTestCase(project);
+                        GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
+                        TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
+                        WsdlTestStep testStep = testCase.insertTestStep(stepConfig, -1);
+                        if (testStep != null) {
+                            UISupport.selectAndShow(testCase);
+                        }
                     } else {
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
                         if (restRequest == null) {
