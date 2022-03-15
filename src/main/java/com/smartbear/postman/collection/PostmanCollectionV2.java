@@ -20,6 +20,8 @@ public class PostmanCollectionV2 extends PostmanCollection {
     public static final String BODY = "body";
     public static final String MODE = "mode";
     public static final String RAW = "raw";
+    public static final String GRAPHQL_QUERY = "query";
+    public static final String GRAPHQL_VARIABLES = "variables";
     public static final String EVENT = "event";
     public static final String VARIABLE = "variable";
     public static final String VARIABLE_ID = "id";
@@ -192,6 +194,26 @@ public class PostmanCollectionV2 extends PostmanCollection {
                 return "";
             }
             return getValueFromObjectOrString(request, BODY, getMode());
+        }
+
+        @Override
+        public String getGraphQlQuery() {
+            Object body = request.get(BODY);
+            if (body instanceof JSONObject) {
+                return getValueFromObjectOrString((JSONObject) body, getMode(), GRAPHQL_QUERY);
+            }
+
+            return "";
+        }
+
+        @Override
+        public String getGraphQlVariables() {
+            Object body = request.get(BODY);
+            if (body instanceof JSONObject) {
+                return getValueFromObjectOrString((JSONObject) body, getMode(), GRAPHQL_VARIABLES);
+            }
+
+            return "";
         }
     }
 

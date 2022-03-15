@@ -16,6 +16,7 @@
 
 package com.smartbear.postman;
 
+import com.eviware.soapui.config.GraphQLTestRequestConfig;
 import com.eviware.soapui.config.RestParametersConfig;
 import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
@@ -45,6 +46,7 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.actions.support.AbstractAddToTestCaseAction;
+import com.eviware.soapui.impl.wsdl.support.CompressedStringSupport;
 import com.eviware.soapui.impl.wsdl.support.wsdl.UrlClientLoader;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
@@ -170,6 +172,8 @@ public class PostmanImporter {
                         WsdlTestCase testCase = AbstractAddToTestCaseAction.getTargetTestCase(project);
                         GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
                         TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
+                        GraphQLTestRequestConfig graphQlConfig = (GraphQLTestRequestConfig) stepConfig.getConfig();
+                        CompressedStringSupport.setString(graphQlConfig.addNewRequest(), request.getGraphQlQuery());
                         WsdlTestStep testStep = testCase.insertTestStep(stepConfig, -1);
                         if (testStep != null) {
                             UISupport.selectAndShow(testCase);

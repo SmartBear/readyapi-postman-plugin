@@ -120,5 +120,15 @@ public class PostmanCollectionV1 extends PostmanCollection {
         public String getMode() {
             return null;
         }
+
+        @Override
+        public String getGraphQlQuery() {
+            return null;
+        }
+
+        @Override
+        public String getGraphQlVariables() {
+            return null;
+        }
     }
 }

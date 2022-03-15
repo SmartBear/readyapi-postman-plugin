@@ -113,6 +113,8 @@ public abstract class PostmanCollection {
         String getTests();
         List<Header> getHeaders();
         String getBody();
+        String getGraphQlQuery();
+        String getGraphQlVariables();
     }
 
     public interface Variable {
