@@ -67,6 +67,8 @@ import com.eviware.soapui.support.xml.XmlUtils;
 import com.eviware.x.dialogs.Worker;
 import com.eviware.x.dialogs.XProgressDialog;
 import com.eviware.x.dialogs.XProgressMonitor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
 import com.smartbear.postman.script.PostmanScriptParser;
@@ -173,7 +175,14 @@ public class PostmanImporter {
                         GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
                         TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
                         GraphQLTestRequestConfig graphQlConfig = (GraphQLTestRequestConfig) stepConfig.getConfig();
-                        CompressedStringSupport.setString(graphQlConfig.addNewRequest(), request.getGraphQlQuery());
+                        ObjectMapper mapper = new ObjectMapper();
+                        ObjectNode body = mapper.createObjectNode();
+                        String nullValue = null;
+                        body.put("query", request.getGraphQlQuery());
+                        body.put("operationName", requestName);
+                        body.put("variables", request.getGraphQlVariables());
+                        CompressedStringSupport.setString(graphQlConfig.addNewRequest(), body.toString());
+                        graphQlConfig.setEndpoint(uri);
                         WsdlTestStep testStep = testCase.insertTestStep(stepConfig, -1);
                         if (testStep != null) {
                             UISupport.selectAndShow(testCase);
