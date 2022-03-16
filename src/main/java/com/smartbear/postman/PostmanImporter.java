@@ -22,6 +22,7 @@ import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.WsdlInterfaceFactory;
 import com.eviware.soapui.impl.actions.RestServiceBuilder;
+import com.eviware.soapui.impl.graphql.GraphQLTestRequest;
 import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
@@ -45,10 +46,9 @@ import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
-import com.eviware.soapui.impl.wsdl.actions.support.AbstractAddToTestCaseAction;
-import com.eviware.soapui.impl.wsdl.support.CompressedStringSupport;
 import com.eviware.soapui.impl.wsdl.support.wsdl.UrlClientLoader;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.impl.wsdl.teststeps.GraphQLTestRequestTestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
@@ -67,8 +67,6 @@ import com.eviware.soapui.support.xml.XmlUtils;
 import com.eviware.x.dialogs.Worker;
 import com.eviware.x.dialogs.XProgressDialog;
 import com.eviware.x.dialogs.XProgressMonitor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
 import com.smartbear.postman.script.PostmanScriptParser;
@@ -175,17 +173,13 @@ public class PostmanImporter {
                         GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
                         TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
                         GraphQLTestRequestConfig graphQlConfig = (GraphQLTestRequestConfig) stepConfig.getConfig();
-                        ObjectMapper mapper = new ObjectMapper();
-                        ObjectNode body = mapper.createObjectNode();
-                        String nullValue = null;
-                        body.put("query", request.getGraphQlQuery());
-                        body.put("operationName", requestName);
-                        body.put("variables", request.getGraphQlVariables());
-                        CompressedStringSupport.setString(graphQlConfig.addNewRequest(), body.toString());
                         graphQlConfig.setEndpoint(uri);
+                        graphQlConfig.setMethod(request.getMethod());
                         WsdlTestStep testStep = testCase.insertTestStep(stepConfig, -1);
-                        if (testStep != null) {
-                            UISupport.selectAndShow(testCase);
+                        if (testStep instanceof GraphQLTestRequestTestStep) {
+                            GraphQLTestRequest graphQLTestRequest = ((GraphQLTestRequestTestStep) testStep).getTestRequest();
+                            graphQLTestRequest.setQuery(request.getGraphQlQuery());
+                            graphQLTestRequest.setVariables(request.getGraphQlVariables());
                         }
                     } else {
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());

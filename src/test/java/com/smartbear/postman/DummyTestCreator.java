@@ -28,7 +28,10 @@ public class DummyTestCreator implements TestCreator {
 
     @Override
     public WsdlTestCase createTestCase(WsdlProject project, String testCaseName) {
-        return createTestHierarchyForRequest(project);
+        if (testCase == null) {
+            testCase = createTestHierarchyForRequest(project);
+        }
+        return testCase;
     }
 
     private WsdlTestCase createTestHierarchyForRequest(WsdlProject project) {

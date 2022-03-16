@@ -24,6 +24,7 @@ import com.eviware.soapui.impl.wsdl.actions.request.AddRequestToTestCaseAction;
 import com.eviware.soapui.impl.wsdl.actions.support.AbstractAddToTestCaseAction;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.model.ModelItem;
+import com.eviware.soapui.support.UISupport;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,6 +63,7 @@ public class GuiTestCreator implements TestCreator {
         @Override
         public void perform(ModelItem project, Object testCaseName) {
             testCase = addNewTestSuiteAndTestCaseSilent((WsdlProject) project, null, (String) testCaseName);
+            UISupport.selectAndShow(testCase);
         }
 
         public WsdlTestCase getTestCase() {
