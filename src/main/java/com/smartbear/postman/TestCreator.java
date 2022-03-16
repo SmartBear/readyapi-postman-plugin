@@ -17,11 +17,16 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.impl.rest.RestRequest;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
+import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.smartbear.postman.collection.PostmanCollection;
 
 public interface TestCreator {
 
     void createTest(RestRequest request, String testCaseName);
 
     void createTest(WsdlRequest request, String testCaseName);
+
+    WsdlTestCase createTestCase(WsdlProject project, String testCaseName);
 }

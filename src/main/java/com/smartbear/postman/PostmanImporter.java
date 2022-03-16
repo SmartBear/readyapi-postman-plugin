@@ -171,7 +171,7 @@ public class PostmanImporter {
                             }
                         }
                     } else if (isGraphQlRequest(request)) {
-                        WsdlTestCase testCase = AbstractAddToTestCaseAction.getTargetTestCase(project);
+                        WsdlTestCase testCase = testCreator.createTestCase(project, collectionName);
                         GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
                         TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
                         GraphQLTestRequestConfig graphQlConfig = (GraphQLTestRequestConfig) stepConfig.getConfig();

@@ -26,6 +26,11 @@ public class DummyTestCreator implements TestCreator {
         testCase.addTestStep(WsdlTestRequestStepFactory.createConfig(request, stepName));
     }
 
+    @Override
+    public WsdlTestCase createTestCase(WsdlProject project, String testCaseName) {
+        return createTestHierarchyForRequest(project);
+    }
+
     private WsdlTestCase createTestHierarchyForRequest(WsdlProject project) {
         WsdlTestSuite testSuite = project.addNewTestSuite("TestSuite 1");
         return testSuite.addNewTestCase("TestCase 1");
