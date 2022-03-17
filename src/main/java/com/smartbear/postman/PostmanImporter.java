@@ -157,7 +157,7 @@ public class PostmanImporter {
                                 operationName, rawModeData);
 
                         if (wsdlRequest != null) {
-                            addSoapHeaders(wsdlRequest, request.getHeaders(), project);
+                            addHttpHeaders(wsdlRequest, request.getHeaders(), project);
 
                             if (StringUtils.hasContent(requestName)) {
                                 wsdlRequest.setName(requestName);
@@ -173,13 +173,18 @@ public class PostmanImporter {
                         GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
                         TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
                         GraphQLTestRequestConfig graphQlConfig = (GraphQLTestRequestConfig) stepConfig.getConfig();
-                        graphQlConfig.setEndpoint(uri);
+                        graphQlConfig.setEndpoint(VariableUtils.convertVariables(uri, project));
                         graphQlConfig.setMethod(request.getMethod());
                         WsdlTestStep testStep = testCase.insertTestStep(stepConfig, -1);
                         if (testStep instanceof GraphQLTestRequestTestStep) {
-                            GraphQLTestRequest graphQLTestRequest = ((GraphQLTestRequestTestStep) testStep).getTestRequest();
+                            GraphQLTestRequestTestStep graphQlTestStep = (GraphQLTestRequestTestStep) testStep;
+                            GraphQLTestRequest graphQLTestRequest = graphQlTestStep.getTestRequest();
                             graphQLTestRequest.setQuery(request.getGraphQlQuery());
                             graphQLTestRequest.setVariables(request.getGraphQlVariables());
+                            addHttpHeaders(graphQLTestRequest, request.getHeaders(), project);
+                            if (StringUtils.hasContent(tests)) {
+                                assertable = graphQlTestStep;
+                            }
                         }
                     } else {
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
@@ -241,7 +246,7 @@ public class PostmanImporter {
         return ModelItemNamer.createName(collectionName, projectList);
     }
 
-    private void addSoapHeaders(AbstractHttpRequest request, List<PostmanCollection.Header> headers,
+    private void addHttpHeaders(AbstractHttpRequest request, List<PostmanCollection.Header> headers,
                                 WsdlProject projectToAddProperties) {
         for (PostmanCollection.Header header : headers) {
             StringToStringsMap headersMap = request.getRequestHeaders();
