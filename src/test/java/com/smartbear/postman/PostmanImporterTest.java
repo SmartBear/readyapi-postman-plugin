@@ -18,6 +18,7 @@ import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequest;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
+import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.TestAssertionRegistry;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
@@ -61,7 +62,9 @@ public class PostmanImporterTest {
     public static final String SAMPLE_COLLECTION_2_0_PATH = "/Postman_Echo.postman_collection_v2.0";
     public static final String SAMPLE_COLLECTION_2_1_PATH = "/Postman_Echo.postman_collection_v2.1";
     public static final String NEW_HTTP_METHODS_COLLECTION_2_1_PATH = "/New_Methods_Collection.postman_collection_v2.1";
+    public static final String GRAPHQL_COLLECTION_2_0_PATH = "/GraphQL_Collection.postman_collection_v2.0";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
+    public static final String GRAPHQL_COLLECTION_NAME = "Postman Collection (from GraphQL)";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
     public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
     public static final String GET_PATH = "/WCFREST/Service.svc/ConStroka";
@@ -91,6 +94,7 @@ public class PostmanImporterTest {
     public static final ParameterStyle QUERY_PARAMETER_STYLE = ParameterStyle.QUERY;
     public static final String QUERY_PARAMETER_NAME = "qparam";
     public static final String QUERY_PARAMETER_VALUE = "${#Project#queryParam}";
+    public static final String[] GRAPHQL_REQUESTS = {"addCustomer", "editCustomer", "customer", "customers"};
 
     private File workspaceFile;
     private WorkspaceImpl workspace;
@@ -314,6 +318,24 @@ public class PostmanImporterTest {
         List<RestParamProperty> requestParams = getParamsOfStyle(testRequest.getParams(), ParameterStyle.QUERY);
         assertEquals("Request should have 0 query params", 0, requestParams != null ? requestParams.size() : 0);
         assertEquals("Request should have test body", REST_POST_BODY_VALUE, request.getRequestContent());
+    }
+
+    @Test
+    public void testImportGraphQlRequests() {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(GRAPHQL_COLLECTION_2_0_PATH).getPath());
+
+        assertEquals("Project should be named after collection", GRAPHQL_COLLECTION_NAME, postmanProject.getName());
+        assertEquals("Project should have 1 test suite", 1, postmanProject.getTestSuiteCount());
+        WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
+        assertEquals("Test suite should have 1 test case", 1, testSuite.getTestCaseCount());
+        WsdlTestCase testCase = testSuite.getTestCaseAt(0);
+        assertEquals("Test case should have 4 steps", GRAPHQL_REQUESTS.length, testCase.getTestStepCount());
+        for (int i = 0; i < 4; i++) {
+            WsdlTestStep testStep = testCase.getTestStepAt(i);
+            assertEquals("Test step '" + GRAPHQL_REQUESTS[i] + "' is missing", GRAPHQL_REQUESTS[i], testStep.getName());
+        }
     }
 
     private String makeResourceName(String resourcePath) {

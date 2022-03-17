@@ -16,10 +16,13 @@
 
 package com.smartbear.postman;
 
+import com.eviware.soapui.config.GraphQLTestRequestConfig;
 import com.eviware.soapui.config.RestParametersConfig;
+import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.WsdlInterfaceFactory;
 import com.eviware.soapui.impl.actions.RestServiceBuilder;
+import com.eviware.soapui.impl.graphql.GraphQLTestRequest;
 import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestRequestInterface;
@@ -45,9 +48,11 @@ import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.support.wsdl.UrlClientLoader;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.impl.wsdl.teststeps.GraphQLTestRequestTestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
+import com.eviware.soapui.impl.wsdl.teststeps.registry.GraphQLTestRequestTestStepFactory;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.project.Project;
@@ -93,6 +98,7 @@ import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationSt
 
 public class PostmanImporter {
     public static final String WSDL_SUFFIX = "?WSDL";
+    private static final String GRAPHQL_MODE = "graphql";
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private static String foldersAmount;
     private static String requestsAmount;
@@ -151,7 +157,7 @@ public class PostmanImporter {
                                 operationName, rawModeData);
 
                         if (wsdlRequest != null) {
-                            addSoapHeaders(wsdlRequest, request.getHeaders(), project);
+                            addHttpHeaders(wsdlRequest, request.getHeaders(), project);
 
                             if (StringUtils.hasContent(requestName)) {
                                 wsdlRequest.setName(requestName);
@@ -160,6 +166,24 @@ public class PostmanImporter {
                             if (StringUtils.hasContent(tests)) {
                                 testCreator.createTest(wsdlRequest, collectionName);
                                 assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
+                            }
+                        }
+                    } else if (isGraphQlRequest(request)) {
+                        WsdlTestCase testCase = testCreator.createTestCase(project, collectionName);
+                        GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
+                        TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
+                        GraphQLTestRequestConfig graphQlConfig = (GraphQLTestRequestConfig) stepConfig.getConfig();
+                        graphQlConfig.setEndpoint(VariableUtils.convertVariables(uri, project));
+                        graphQlConfig.setMethod(request.getMethod());
+                        WsdlTestStep testStep = testCase.insertTestStep(stepConfig, -1);
+                        if (testStep instanceof GraphQLTestRequestTestStep) {
+                            GraphQLTestRequestTestStep graphQlTestStep = (GraphQLTestRequestTestStep) testStep;
+                            GraphQLTestRequest graphQLTestRequest = graphQlTestStep.getTestRequest();
+                            graphQLTestRequest.setQuery(request.getGraphQlQuery());
+                            graphQLTestRequest.setVariables(request.getGraphQlVariables());
+                            addHttpHeaders(graphQLTestRequest, request.getHeaders(), project);
+                            if (StringUtils.hasContent(tests)) {
+                                assertable = graphQlTestStep;
                             }
                         }
                     } else {
@@ -222,7 +246,7 @@ public class PostmanImporter {
         return ModelItemNamer.createName(collectionName, projectList);
     }
 
-    private void addSoapHeaders(AbstractHttpRequest request, List<PostmanCollection.Header> headers,
+    private void addHttpHeaders(AbstractHttpRequest request, List<PostmanCollection.Header> headers,
                                 WsdlProject projectToAddProperties) {
         for (PostmanCollection.Header header : headers) {
             StringToStringsMap headersMap = request.getRequestHeaders();
@@ -364,6 +388,11 @@ public class PostmanImporter {
 
     private boolean isWsdlRequest(String url) {
         return StringUtils.hasContent(url) && url.toUpperCase().endsWith(WSDL_SUFFIX);
+    }
+
+    private boolean isGraphQlRequest(PostmanCollection.Request request) {
+        String mode = request.getMode();
+        return mode != null && mode.equals(GRAPHQL_MODE);
     }
 
     /**

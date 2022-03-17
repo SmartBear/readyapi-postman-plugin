@@ -18,8 +18,13 @@ package com.smartbear.postman;
 
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.actions.request.AddRestRequestToTestCaseSilentAction;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.actions.request.AddRequestToTestCaseAction;
+import com.eviware.soapui.impl.wsdl.actions.support.AbstractAddToTestCaseAction;
+import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
+import com.eviware.soapui.model.ModelItem;
+import com.eviware.soapui.support.UISupport;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,5 +44,30 @@ public class GuiTestCreator implements TestCreator {
     public void createTest(WsdlRequest request, String testCaseName) {
         AddRequestToTestCaseAction addRequestToTestCaseAction = new AddRequestToTestCaseAction();
         addRequestToTestCaseAction.perform(request, null);
+    }
+
+    @Override
+    public WsdlTestCase createTestCase(WsdlProject project, String testCaseName) {
+        AddTestCaseSilentAction addTestCaseSilentAction = new AddTestCaseSilentAction();
+        addTestCaseSilentAction.perform(project, testCaseName);
+        return addTestCaseSilentAction.getTestCase();
+    }
+
+    private static class AddTestCaseSilentAction extends AbstractAddToTestCaseAction {
+        private WsdlTestCase testCase;
+
+        public AddTestCaseSilentAction() {
+            super("", "");
+        }
+
+        @Override
+        public void perform(ModelItem project, Object testCaseName) {
+            testCase = addNewTestSuiteAndTestCaseSilent((WsdlProject) project, null, (String) testCaseName);
+            UISupport.selectAndShow(testCase);
+        }
+
+        public WsdlTestCase getTestCase() {
+            return testCase;
+        }
     }
 }

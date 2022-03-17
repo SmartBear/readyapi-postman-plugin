@@ -104,6 +104,7 @@ public abstract class PostmanCollection {
     }
 
     public interface Request {
+        String getMode();
         String getUrl();
         String getName();
         String getMethod();
@@ -112,6 +113,8 @@ public abstract class PostmanCollection {
         String getTests();
         List<Header> getHeaders();
         String getBody();
+        String getGraphQlQuery();
+        String getGraphQlVariables();
     }
 
     public interface Variable {
