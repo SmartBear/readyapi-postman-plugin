@@ -60,12 +60,12 @@ public class SoapServiceCreatorTest {
         // given
         URL collectionUrl = SoapServiceCreator.class.getResource("/soap/continents/continents_collection_11_v20.json");
 
-        List<PostmanCollection.Request> requests = getRequests(collectionUrl);
+        PostmanCollection.Request request = getRequests(collectionUrl).get(0);
 
         String continentsBody = IOUtils.toString(SoapServiceCreator.class.getResource("/soap/continents/continents_body_11.xml"), StandardCharsets.UTF_8);
 
         // when
-        creator.addSoapRequest(requests.get(0));
+        creator.addSoapRequest(request);
 
         TestDataHolder testDataHolder = new TestDataHolder(SoapVersion.Soap11);
 
