@@ -136,8 +136,6 @@ public class PostmanImporter {
                     String tests = request.getTests();
                     String rawModeData = request.getBody();
 
-                    logger.info("Importing a request with URI [" + uri + "] - started");
-
                     if (StringUtils.hasContent(preRequestScript)) {
                         processPreRequestScript(preRequestScript, project);
                     }
@@ -154,6 +152,7 @@ public class PostmanImporter {
                             assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                         }
                     } else if (isGraphQlRequest(request)) {
+                        logger.info("Importing a GraphQL request with URI [ {} ] - started", uri);
                         WsdlTestCase testCase = testCreator.createTestCase(project, collectionName);
                         GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
                         TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
@@ -172,9 +171,10 @@ public class PostmanImporter {
                             }
                         }
                     } else {
+                        logger.info("Importing a REST request with URI [ {} ] - started", uri);
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
                         if (restRequest == null) {
-                            logger.error("Could not import " + request.getMethod() + " request with URI [" + uri + "]");
+                            logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
 
@@ -196,7 +196,7 @@ public class PostmanImporter {
                         addAssertions(tests, project, assertable);
                     }
 
-                    logger.info("Importing a request with URI [" + uri + "] - done");
+                    logger.info("Importing a request with URI [ {} ] - done", uri);
                 }
 
                 List<PostmanCollection.Variable> variables = postmanCollection.getVariables();
@@ -281,7 +281,7 @@ public class PostmanImporter {
             currentRequest = builder.createRestServiceFromPostman(project, uri,
                     RestRequestInterface.HttpMethod.valueOf(method), headers);
         } catch (Exception e) {
-           logger.error("Error while creating a REST service", e);
+            logger.error("Error while creating a REST service", e);
         }
         return currentRequest;
     }
@@ -444,7 +444,7 @@ public class PostmanImporter {
         int indexOfQuery = postmanUri.indexOf("?");
         if (indexOfQuery != -1) {
             return postmanUri.substring(0, indexOfQuery).replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}")
-                    + postmanUri.substring(indexOfQuery, postmanUri.length());
+                   + postmanUri.substring(indexOfQuery, postmanUri.length());
         } else {
             return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
         }
