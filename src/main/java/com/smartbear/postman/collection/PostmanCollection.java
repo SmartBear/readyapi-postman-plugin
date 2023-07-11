@@ -1,5 +1,6 @@
 package com.smartbear.postman.collection;
 
+import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
 import com.eviware.soapui.support.StringUtils;
 import com.smartbear.postman.ScriptType;
 import com.smartbear.postman.utils.PostmanJsonUtil;
@@ -115,6 +116,16 @@ public abstract class PostmanCollection {
         String getBody();
         String getGraphQlQuery();
         String getGraphQlVariables();
+
+        default boolean isSoap() {return false;}
+
+        default SoapVersion getSoapVersion() {
+            return null;
+        }
+
+        default DirectoryInfo getFolderInfo() {
+            return null;
+        }
     }
 
     public interface Variable {

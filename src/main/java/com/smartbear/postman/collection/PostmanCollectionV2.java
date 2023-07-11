@@ -1,10 +1,12 @@
 package com.smartbear.postman.collection;
 
+import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
 import com.smartbear.postman.ScriptType;
-import javax.annotation.Nullable;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.apache.xmlbeans.XmlError;
+import org.apache.xmlbeans.XmlOptions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,7 +51,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     @Override
     public List<Request> getRequests() {
         ArrayList<Request> requestList = new ArrayList<>();
-        extractRequestsFromItems(postmanCollection.getJSONArray(ITEM), requestList);
+        extractRequestsFromItems(postmanCollection.getJSONArray(ITEM), requestList, DirectoryInfo.createRoot(getName()));
         return requestList;
     }
 
@@ -75,14 +77,14 @@ public class PostmanCollectionV2 extends PostmanCollection {
         return item.containsKey(ITEM);
     }
 
-    private void extractRequestsFromItems(JSONArray items, List<Request> requestList) {
+    private void extractRequestsFromItems(JSONArray items, List<Request> requestList, DirectoryInfo directoryInfo) {
         for (Object itemObject : items) {
             if (itemObject instanceof JSONObject) {
                 JSONObject item = (JSONObject) itemObject;
                 if (isFolder(item)) {
-                    extractRequestsFromItems(item.getJSONArray(ITEM), requestList);
+                    extractRequestsFromItems(item.getJSONArray(ITEM), requestList, new DirectoryInfo(item.getString(NAME), item.get(DESCRIPTION) != null ? item.getString(DESCRIPTION) : "", directoryInfo));
                 } else {
-                    requestList.add(new RequestV2(item));
+                    requestList.add(new RequestV2(item, directoryInfo));
                 }
             }
         }
@@ -113,8 +115,9 @@ public class PostmanCollectionV2 extends PostmanCollection {
         private final JSONObject item;
         private final JSONObject request;
         private String url;
+        private DirectoryInfo directoryInfo;
 
-        public RequestV2(JSONObject item) {
+        public RequestV2(JSONObject item, DirectoryInfo directoryInfo) {
             this.item = item;
             Object requestObject = item.get(REQUEST);
             if (requestObject instanceof JSONObject) {
@@ -123,6 +126,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
                 request = null;
                 url = requestObject.toString();
             }
+            this.directoryInfo = directoryInfo;
         }
 
         @Override
@@ -172,7 +176,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
                         }
                     }
                     return headerList;
-                } else if (headersObject != null){
+                } else if (headersObject != null) {
                     String headerString = headersObject.toString();
                     return createHeaderList(headerString);
                 }
@@ -214,6 +218,35 @@ public class PostmanCollectionV2 extends PostmanCollection {
             }
 
             return "";
+        }
+
+        @Override
+        public boolean isSoap() {
+            return isSoapVersion(SoapVersion.Soap11) || isSoapVersion(SoapVersion.Soap12);
+        }
+
+        private boolean isSoapVersion(SoapVersion soapVersion) {
+            String body = getBody();
+            List<XmlError> errors = new ArrayList<>();
+            soapVersion.validateSoapEnvelope(body, errors, new XmlOptions());
+            return errors.isEmpty();
+        }
+
+        @Override
+        public SoapVersion getSoapVersion() {
+            if (isSoapVersion(SoapVersion.Soap11)) {
+                return SoapVersion.Soap11;
+            }
+            if (isSoapVersion(SoapVersion.Soap12)) {
+                return SoapVersion.Soap12;
+            }
+
+            throw new IllegalStateException("Request is not a valid SOAP request");
+        }
+
+        @Override
+        public DirectoryInfo getFolderInfo() {
+            return directoryInfo;
         }
     }
 
