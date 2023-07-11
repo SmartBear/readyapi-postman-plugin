@@ -8,6 +8,7 @@ import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
 import com.eviware.soapui.support.SoapUIException;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
+import com.smartbear.postman.collection.Request;
 import com.smartbear.postman.utils.PostmanJsonUtil;
 import com.smartbear.postman.utils.SoapServiceCreator;
 import net.sf.json.JSON;
@@ -42,7 +43,7 @@ public class SoapServiceCreatorTest {
     public void testAddingInterfaceWithOneRequestSoap12() throws IOException {
         // given
         URL collectionUrl = SoapServiceCreator.class.getResource("/soap/continents/continents_collection_12_v20.json");
-        PostmanCollection.Request request = getRequests(collectionUrl).get(0);
+        Request request = getRequests(collectionUrl).get(0);
 
         String continentsBody = IOUtils.toString(SoapServiceCreator.class.getResource("/soap/continents/continents_body_12.xml"), StandardCharsets.UTF_8);
 
@@ -60,7 +61,7 @@ public class SoapServiceCreatorTest {
         // given
         URL collectionUrl = SoapServiceCreator.class.getResource("/soap/continents/continents_collection_11_v20.json");
 
-        PostmanCollection.Request request = getRequests(collectionUrl).get(0);
+        Request request = getRequests(collectionUrl).get(0);
 
         String continentsBody = IOUtils.toString(SoapServiceCreator.class.getResource("/soap/continents/continents_body_11.xml"), StandardCharsets.UTF_8);
 
@@ -116,7 +117,7 @@ public class SoapServiceCreatorTest {
         // given
         URL collectionUrl = SoapServiceCreator.class.getResource("/soap/public_soap_apis/soap_apis_collection.json");
 
-        List<PostmanCollection.Request> requests = getRequests(collectionUrl);
+        List<Request> requests = getRequests(collectionUrl);
 
         // when
         requests.forEach(creator::addSoapRequest);
@@ -140,7 +141,7 @@ public class SoapServiceCreatorTest {
         return project.getInterfaceList().stream().map(WsdlInterface.class::cast).collect(Collectors.toList());
     }
 
-    private List<PostmanCollection.Request> getRequests(URL collectionUrl) throws IOException {
+    private List<Request> getRequests(URL collectionUrl) throws IOException {
         String postmanJson = IOUtils.toString(
                 collectionUrl,
                 StandardCharsets.UTF_8

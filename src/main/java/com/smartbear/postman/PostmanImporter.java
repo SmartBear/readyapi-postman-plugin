@@ -64,6 +64,7 @@ import com.eviware.x.dialogs.XProgressDialog;
 import com.eviware.x.dialogs.XProgressMonitor;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
+import com.smartbear.postman.collection.Request;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
@@ -125,11 +126,11 @@ public class PostmanImporter {
                     return null;
                 }
                 project.setDescription(postmanCollection.getDescription());
-                List<PostmanCollection.Request> requests = postmanCollection.getRequests();
+                List<Request> requests = postmanCollection.getRequests();
 
                 SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
 
-                for (PostmanCollection.Request request : requests) {
+                for (Request request : requests) {
                     String uri = request.getUrl();
                     String requestName = request.getName();
                     String preRequestScript = request.getPreRequestScript();
@@ -320,7 +321,7 @@ public class PostmanImporter {
         }
     }
 
-    private boolean isGraphQlRequest(PostmanCollection.Request request) {
+    private boolean isGraphQlRequest(Request request) {
         String mode = request.getMode();
         return mode != null && mode.equals(GRAPHQL_MODE);
     }

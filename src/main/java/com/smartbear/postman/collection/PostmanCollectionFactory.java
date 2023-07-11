@@ -1,5 +1,7 @@
 package com.smartbear.postman.collection;
 
+import com.smartbear.postman.collection.v1.PostmanCollectionV1;
+import com.smartbear.postman.collection.v2.PostmanCollectionV2;
 import net.sf.json.JSONObject;
 
 public class PostmanCollectionFactory {

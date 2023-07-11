@@ -12,6 +12,7 @@ import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
 import com.smartbear.postman.VariableUtils;
 import com.smartbear.postman.collection.PostmanCollection;
+import com.smartbear.postman.collection.Request;
 import org.apache.xmlbeans.XmlException;
 import org.apache.xmlbeans.XmlObject;
 import org.apache.xmlbeans.XmlOptions;
@@ -32,7 +33,7 @@ public class SoapServiceCreator {
         this.project = project;
     }
 
-    public WsdlRequest addSoapRequest(PostmanCollection.Request request) {
+    public WsdlRequest addSoapRequest(Request request) {
         final String url = getRequestWsdlUrl(request.getUrl());
 
         List<WsdlInterface> wsdlInterfaces = getWsdlInterfaces(url);
@@ -101,7 +102,7 @@ public class SoapServiceCreator {
         return null;
     }
 
-    private WsdlRequest createWsdlRequest(PostmanCollection.Request request, WsdlOperation operation) {
+    private WsdlRequest createWsdlRequest(Request request, WsdlOperation operation) {
         WsdlRequest wsdlRequest = null;
         if (operation != null) {
             logger.info("Creating [ {} ] wsdl request", request.getName());
