@@ -128,8 +128,6 @@ public class PostmanImporter {
                 project.setDescription(postmanCollection.getDescription());
                 List<Request> requests = postmanCollection.getRequests();
 
-                SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
-
                 for (Request request : requests) {
                     String uri = request.getUrl();
                     String requestName = request.getName();
@@ -146,6 +144,7 @@ public class PostmanImporter {
                     if (request.isSoap()) {
                         logger.info("Importing a SOAP request with URI [ {} ] - started", uri);
 
+                        SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
                         WsdlRequest wsdlRequest = soapServiceCreator.addSoapRequest(request);
 
                         if (StringUtils.hasContent(tests)) {
