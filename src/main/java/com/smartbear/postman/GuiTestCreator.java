@@ -42,8 +42,10 @@ public class GuiTestCreator implements TestCreator {
 
     @Override
     public void createTest(WsdlRequest request, String testCaseName) {
-        AddRequestToTestCaseAction addRequestToTestCaseAction = new AddRequestToTestCaseAction();
-        addRequestToTestCaseAction.perform(request, null);
+        Map<String, String> param = new HashMap<>();
+        param.put(TEST_CASE_NAME, testCaseName);
+        AddWsdlRequestToTestCaseSilentAction addWsdlRequestToTestCaseSilentAction = new AddWsdlRequestToTestCaseSilentAction();
+        addWsdlRequestToTestCaseSilentAction.perform(request, param);
     }
 
     @Override
