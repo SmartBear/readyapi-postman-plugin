@@ -103,20 +103,6 @@ public abstract class PostmanCollection {
         return headersList;
     }
 
-    public interface Request {
-        String getMode();
-        String getUrl();
-        String getName();
-        String getMethod();
-        String getDescription();
-        String getPreRequestScript();
-        String getTests();
-        List<Header> getHeaders();
-        String getBody();
-        String getGraphQlQuery();
-        String getGraphQlVariables();
-    }
-
     public interface Variable {
         String getId();
 

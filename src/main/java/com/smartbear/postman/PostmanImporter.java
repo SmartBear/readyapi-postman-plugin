@@ -20,7 +20,6 @@ import com.eviware.soapui.config.GraphQLTestRequestConfig;
 import com.eviware.soapui.config.RestParametersConfig;
 import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
-import com.eviware.soapui.impl.WsdlInterfaceFactory;
 import com.eviware.soapui.impl.actions.RestServiceBuilder;
 import com.eviware.soapui.impl.graphql.GraphQLTestRequest;
 import com.eviware.soapui.impl.rest.RestMethod;
@@ -41,8 +40,6 @@ import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.support.AbstractInterface;
 import com.eviware.soapui.impl.support.HttpUtils;
-import com.eviware.soapui.impl.wsdl.WsdlInterface;
-import com.eviware.soapui.impl.wsdl.WsdlOperation;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
@@ -53,7 +50,6 @@ import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.registry.GraphQLTestRequestTestStepFactory;
-import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.testsuite.Assertable;
@@ -63,32 +59,28 @@ import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.types.StringToStringsMap;
-import com.eviware.soapui.support.xml.XmlUtils;
 import com.eviware.x.dialogs.Worker;
 import com.eviware.x.dialogs.XProgressDialog;
 import com.eviware.x.dialogs.XProgressMonitor;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
+import com.smartbear.postman.collection.Request;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.postman.script.ScriptContext;
 import com.smartbear.postman.utils.PostmanJsonUtil;
+import com.smartbear.postman.utils.SoapServiceCreator;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.xmlbeans.XmlException;
-import org.apache.xmlbeans.XmlObject;
-import org.apache.xmlbeans.XmlOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,7 +89,6 @@ import java.util.Map;
 import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationStrategy.REUSE_MODEL;
 
 public class PostmanImporter {
-    public static final String WSDL_SUFFIX = "?WSDL";
     private static final String GRAPHQL_MODE = "graphql";
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private static String foldersAmount;
@@ -135,15 +126,14 @@ public class PostmanImporter {
                     return null;
                 }
                 project.setDescription(postmanCollection.getDescription());
-                List<PostmanCollection.Request> requests = postmanCollection.getRequests();
-                for (PostmanCollection.Request request : requests) {
+                List<Request> requests = postmanCollection.getRequests();
+
+                for (Request request : requests) {
                     String uri = request.getUrl();
                     String requestName = request.getName();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
                     String rawModeData = request.getBody();
-
-                    logger.info("Importing a request with URI [" + uri + "] - started");
 
                     if (StringUtils.hasContent(preRequestScript)) {
                         processPreRequestScript(preRequestScript, project);
@@ -151,24 +141,18 @@ public class PostmanImporter {
 
                     Assertable assertable = null;
 
-                    if (isWsdlRequest(uri)) {
-                        String operationName = getOperationName(rawModeData);
-                        WsdlRequest wsdlRequest = addWsdlRequest(project, request.getMethod(), uri,
-                                operationName, rawModeData);
+                    if (request.isSoap()) {
+                        logger.info("Importing a SOAP request with URI [ {} ] - started", uri);
 
-                        if (wsdlRequest != null) {
-                            addHttpHeaders(wsdlRequest, request.getHeaders(), project);
+                        SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
+                        WsdlRequest wsdlRequest = soapServiceCreator.addSoapRequest(request);
 
-                            if (StringUtils.hasContent(requestName)) {
-                                wsdlRequest.setName(requestName);
-                            }
-
-                            if (StringUtils.hasContent(tests)) {
-                                testCreator.createTest(wsdlRequest, collectionName);
-                                assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
-                            }
+                        if (StringUtils.hasContent(tests)) {
+                            testCreator.createTest(wsdlRequest, collectionName);
+                            assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                         }
                     } else if (isGraphQlRequest(request)) {
+                        logger.info("Importing a GraphQL request with URI [ {} ] - started", uri);
                         WsdlTestCase testCase = testCreator.createTestCase(project, collectionName);
                         GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
                         TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
@@ -187,9 +171,10 @@ public class PostmanImporter {
                             }
                         }
                     } else {
+                        logger.info("Importing a REST request with URI [ {} ] - started", uri);
                         RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
                         if (restRequest == null) {
-                            logger.error("Could not import " + request.getMethod() + " request with URI [" + uri + "]");
+                            logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
 
@@ -211,7 +196,7 @@ public class PostmanImporter {
                         addAssertions(tests, project, assertable);
                     }
 
-                    logger.info("Importing a request with URI [" + uri + "] - done");
+                    logger.info("Importing a request with URI [ {} ] - done", uri);
                 }
 
                 List<PostmanCollection.Variable> variables = postmanCollection.getVariables();
@@ -263,20 +248,6 @@ public class PostmanImporter {
         }
     }
 
-    private String getOperationName(String xml) {
-        try {
-            XmlObject xmlObject = XmlUtils.createXmlObject(xml, new XmlOptions());
-            String xpath = "//*:Body/*[1]";
-            XmlObject[] nodes = xmlObject.selectPath(xpath);
-            if (nodes.length > 0) {
-                return nodes[0].getDomNode().getLocalName();
-            }
-        } catch (XmlException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     void addAssertions(String tests, WsdlProject project, Assertable assertable) {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
         PostmanScriptParser parser = new PostmanScriptParser();
@@ -310,46 +281,9 @@ public class PostmanImporter {
             currentRequest = builder.createRestServiceFromPostman(project, uri,
                     RestRequestInterface.HttpMethod.valueOf(method), headers);
         } catch (Exception e) {
-           logger.error("Error while creating a REST service", e);
+            logger.error("Error while creating a REST service", e);
         }
         return currentRequest;
-    }
-
-    private WsdlRequest addWsdlRequest(WsdlProject project, String method, String uri, String operationName, String requestContent) {
-        WsdlRequest request = null;
-        ArrayList<WsdlInterface> interfaces = new ArrayList<>();
-        List<WsdlInterface> existingWsdlInterfaces = findExistingWsdlInterfaces(project, uri);
-        if (existingWsdlInterfaces.size() > 0) {
-            interfaces.addAll(existingWsdlInterfaces);
-        } else {
-            try {
-                interfaces.addAll(
-                        Arrays.asList(WsdlInterfaceFactory.importWsdl(project, uri, false)));
-            } catch (SoapUIException e) {
-                e.printStackTrace();
-            }
-        }
-
-        for (WsdlInterface wsdlInterface : interfaces) {
-            WsdlOperation operation = wsdlInterface.getOperationByName(operationName);
-            if (operation != null) {
-                request = operation.addNewRequest("Request 1");
-                request.setRequestContent(requestContent);
-                break;
-            }
-        }
-        return request;
-    }
-
-    private List<WsdlInterface> findExistingWsdlInterfaces(WsdlProject project, String uri) {
-        List<WsdlInterface> existingInterfaces = new ArrayList<>();
-        for (Interface iface : project.getInterfaceList()) {
-            if (iface instanceof WsdlInterface
-                    && ((WsdlInterface) iface).getDefinition().equals(uri)) {
-                existingInterfaces.add((WsdlInterface) iface);
-            }
-        }
-        return existingInterfaces;
     }
 
     private <T> T getTestRequestStep(WsdlProject project, Class<T> stepClass) {
@@ -386,11 +320,7 @@ public class PostmanImporter {
         }
     }
 
-    private boolean isWsdlRequest(String url) {
-        return StringUtils.hasContent(url) && url.toUpperCase().endsWith(WSDL_SUFFIX);
-    }
-
-    private boolean isGraphQlRequest(PostmanCollection.Request request) {
+    private boolean isGraphQlRequest(Request request) {
         String mode = request.getMode();
         return mode != null && mode.equals(GRAPHQL_MODE);
     }
@@ -514,7 +444,7 @@ public class PostmanImporter {
         int indexOfQuery = postmanUri.indexOf("?");
         if (indexOfQuery != -1) {
             return postmanUri.substring(0, indexOfQuery).replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}")
-                    + postmanUri.substring(indexOfQuery, postmanUri.length());
+                   + postmanUri.substring(indexOfQuery, postmanUri.length());
         } else {
             return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
         }
