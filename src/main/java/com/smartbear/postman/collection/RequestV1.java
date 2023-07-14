@@ -1,8 +1,6 @@
-package com.smartbear.postman.collection.v1;
+package com.smartbear.postman.collection;
 
 import com.smartbear.postman.ScriptType;
-import com.smartbear.postman.collection.PostmanCollection;
-import com.smartbear.postman.collection.Request;
 import net.sf.json.JSONObject;
 
 import java.util.List;

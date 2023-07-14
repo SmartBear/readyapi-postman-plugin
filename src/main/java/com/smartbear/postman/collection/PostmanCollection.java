@@ -33,7 +33,7 @@ public abstract class PostmanCollection {
     public abstract List<JSONObject> getFolders();
     public abstract List<Variable> getVariables();
 
-    public static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
+    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
         for (Object eventObject : events) {
             if (eventObject instanceof JSONObject) {
@@ -61,7 +61,7 @@ public abstract class PostmanCollection {
         return null;
     }
 
-    public static String getValue(JSONObject jsonObject, String name) {
+    protected static String getValue(JSONObject jsonObject, String name) {
         return getValue(jsonObject, name, "");
     }
 
@@ -77,7 +77,7 @@ public abstract class PostmanCollection {
         return defaultValue;
     }
 
-    public static String getValueFromObjectOrString(JSONObject jsonObject, String firstLevelField, String secondLevelField) {
+    protected static String getValueFromObjectOrString(JSONObject jsonObject, String firstLevelField, String secondLevelField) {
         Object firstLevelObject = jsonObject.get(firstLevelField);
         if (firstLevelObject instanceof JSONObject) {
             return getValue((JSONObject) firstLevelObject, secondLevelField);
@@ -87,7 +87,7 @@ public abstract class PostmanCollection {
         return null;
     }
 
-    public static List<Header> createHeaderList(String headersString) {
+    protected static List<Header> createHeaderList(String headersString) {
         if (StringUtils.isNullOrEmpty(headersString)) {
             return Collections.emptyList();
         }

@@ -1,14 +1,11 @@
-package com.smartbear.postman.collection.v1;
+package com.smartbear.postman.collection;
 
 import com.eviware.soapui.support.StringUtils;
 import com.smartbear.postman.ScriptType;
-import javax.annotation.Nullable;
-
-import com.smartbear.postman.collection.PostmanCollection;
-import com.smartbear.postman.collection.Request;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 

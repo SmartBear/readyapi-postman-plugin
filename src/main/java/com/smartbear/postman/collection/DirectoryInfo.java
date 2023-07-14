@@ -6,13 +6,13 @@ public class DirectoryInfo {
 
     private DirectoryInfo parent;
 
-    public DirectoryInfo(String name, String description, DirectoryInfo parent) {
+    protected DirectoryInfo(String name, String description, DirectoryInfo parent) {
         this.name = name;
         this.description = description;
         this.parent = parent;
     }
 
-    public static DirectoryInfo createRoot(String collectionName){
+    protected static DirectoryInfo createRoot(String collectionName){
         return new DirectoryInfo(collectionName, "", null);
     }
 

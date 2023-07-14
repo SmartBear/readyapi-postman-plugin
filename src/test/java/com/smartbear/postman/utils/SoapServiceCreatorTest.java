@@ -11,8 +11,6 @@ import com.eviware.soapui.support.SoapUIException;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
 import com.smartbear.postman.collection.Request;
-import com.smartbear.postman.utils.PostmanJsonUtil;
-import com.smartbear.postman.utils.SoapServiceCreator;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;

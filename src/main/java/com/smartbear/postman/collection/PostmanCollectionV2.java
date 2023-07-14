@@ -1,8 +1,5 @@
-package com.smartbear.postman.collection.v2;
+package com.smartbear.postman.collection;
 
-import com.smartbear.postman.collection.DirectoryInfo;
-import com.smartbear.postman.collection.PostmanCollection;
-import com.smartbear.postman.collection.Request;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
