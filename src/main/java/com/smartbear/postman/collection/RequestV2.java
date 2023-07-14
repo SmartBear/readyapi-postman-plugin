@@ -145,7 +145,7 @@ class RequestV2 implements Request {
     }
 
     @Override
-    public DirectoryInfo getFolderInfo() {
-        return directoryInfo;
+    public String getDirectoryPath() {
+        return directoryInfo.getPath();
     }
 }

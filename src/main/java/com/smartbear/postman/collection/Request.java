@@ -35,7 +35,7 @@ public interface Request {
         return null;
     }
 
-    default DirectoryInfo getFolderInfo() {
+    default String getDirectoryPath() {
         return null;
     }
 }

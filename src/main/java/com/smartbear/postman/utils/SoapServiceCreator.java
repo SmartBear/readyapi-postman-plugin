@@ -109,7 +109,7 @@ public class SoapServiceCreator {
             wsdlRequest = operation.addNewRequest(request.getName());
             wsdlRequest.setRequestContent(request.getBody());
 
-            wsdlRequest.setDescription("Imported from Postman collection, original directory: [" + request.getFolderInfo().getPath()+"]");
+            wsdlRequest.setDescription("Imported from Postman collection, original directory: [" + request.getDirectoryPath()+"]");
             addHttpHeaders(wsdlRequest, request.getHeaders(), project);
         }
         return wsdlRequest;

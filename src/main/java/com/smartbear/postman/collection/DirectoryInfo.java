@@ -1,6 +1,6 @@
 package com.smartbear.postman.collection;
 
-public class DirectoryInfo {
+class DirectoryInfo {
     private final String name;
     private final String description;
 
