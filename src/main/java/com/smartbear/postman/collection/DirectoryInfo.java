@@ -4,7 +4,7 @@ public class DirectoryInfo {
     private final String name;
     private final String description;
 
-    private DirectoryInfo parent;
+    private final DirectoryInfo parent;
 
     protected DirectoryInfo(String name, String description, DirectoryInfo parent) {
         this.name = name;
@@ -12,7 +12,7 @@ public class DirectoryInfo {
         this.parent = parent;
     }
 
-    protected static DirectoryInfo createRoot(String collectionName){
+    protected static DirectoryInfo createRoot(String collectionName) {
         return new DirectoryInfo(collectionName, "", null);
     }
 

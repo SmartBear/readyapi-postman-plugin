@@ -14,8 +14,8 @@ import java.util.List;
 class RequestV2 implements Request {
     private final JSONObject item;
     private final JSONObject request;
+    private final DirectoryInfo directoryInfo;
     private String url;
-    private DirectoryInfo directoryInfo;
 
     public RequestV2(JSONObject item, DirectoryInfo directoryInfo) {
         this.item = item;
