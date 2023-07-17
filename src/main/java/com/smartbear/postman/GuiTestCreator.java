@@ -16,11 +16,11 @@
 
 package com.smartbear.postman;
 
+import com.eviware.soapui.impl.graphql.GraphQLRequest;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.actions.request.AddRestRequestToTestCaseSilentAction;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
-import com.eviware.soapui.impl.wsdl.actions.request.AddRequestToTestCaseAction;
 import com.eviware.soapui.impl.wsdl.actions.support.AbstractAddToTestCaseAction;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.model.ModelItem;
@@ -46,6 +46,14 @@ public class GuiTestCreator implements TestCreator {
         param.put(TEST_CASE_NAME, testCaseName);
         AddWsdlRequestToTestCaseSilentAction addWsdlRequestToTestCaseSilentAction = new AddWsdlRequestToTestCaseSilentAction();
         addWsdlRequestToTestCaseSilentAction.perform(request, param);
+    }
+
+    @Override
+    public void createTest(GraphQLRequest request, String testCaseName) {
+        Map<String, String> param = new HashMap<>();
+        param.put(TEST_CASE_NAME, testCaseName);
+        AddGraphQLRequestToTestCaseSilentAction addGraphQLRequestToTestCaseSilentAction = new AddGraphQLRequestToTestCaseSilentAction();
+        addGraphQLRequestToTestCaseSilentAction.perform(request, param);
     }
 
     @Override
