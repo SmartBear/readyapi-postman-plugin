@@ -31,7 +31,7 @@ public class DummyTestCreator implements TestCreator {
     @Override
     public void createTest(GraphQLRequest request, String testCaseName) {
         testCase = createTestCase(request.getProject(), testCaseName);
-        String stepName = request.getMethod().getName() + " - " + request.getName();
+        String stepName = request.getType() + " - " + request.getName();
         if (GraphQLOperationGroupEnumConfig.MUTATION.toString().equals(request.getType())) {
             GraphQLMutationTestStepFactory mutationTestStepFactory = new GraphQLMutationTestStepFactory();
             testCase.addTestStep(mutationTestStepFactory.createConfig(request, stepName));
