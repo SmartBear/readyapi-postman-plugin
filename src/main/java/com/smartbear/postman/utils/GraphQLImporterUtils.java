@@ -5,9 +5,8 @@ import com.eviware.soapui.impl.graphql.GraphQLOperation;
 import com.eviware.soapui.impl.graphql.GraphQLOperationGroup;
 import com.eviware.soapui.impl.graphql.GraphQLRequest;
 import com.eviware.soapui.impl.graphql.GraphQLService;
-import com.eviware.soapui.impl.graphql.GraphQLServiceFactory;
+import com.eviware.soapui.impl.graphql.support.GraphQLImporter;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
-import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.StringUtils;
 import com.smartbear.postman.VariableUtils;
 import com.smartbear.postman.collection.Request;
@@ -82,8 +81,8 @@ public class GraphQLImporterUtils {
             services.addAll(existingGraphQLlServices);
         } else {
             try {
-                GraphQLService graphQLService = (GraphQLService) project.addNewInterface(ModelItemNamer.createName(
-                        "GraphQL Service", project.getInterfaceList()), GraphQLServiceFactory.GRAPHQL_TYPE);
+                GraphQLImporter importer = new GraphQLImporter(project);
+                GraphQLService graphQLService = importer.importGraphQL(url);
                 graphQLService.setDefinitionUrl(url);
                 graphQLService.addEndpoint(url);
                 services.add(graphQLService);
