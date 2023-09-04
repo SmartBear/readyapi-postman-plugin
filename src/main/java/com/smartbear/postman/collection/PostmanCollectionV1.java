@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class PostmanCollectionV1 extends PostmanCollection {
     public static final String REQUESTS = "requests";
     public static final String EVENTS = "events";
