@@ -78,20 +78,15 @@ public class PostmanImporter {
 
     public WsdlProject importPostmanCollection(WorkspaceImpl workspace, String filePath) {
         WsdlProject project = null;
-        String postmanJson = null;
-        XProgressDialog collectionImportProgressDialog = UISupport.getDialogs().createProgressDialog("Import Collection",
-                0, "Importing the collection...", false);
-        PostmanImporterWorker worker = new PostmanImporterWorker(filePath);
-        try {
-            collectionImportProgressDialog.run(worker);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        postmanJson = worker.getPostmanJson();
+        String postmanJson = getPostmanImporterWorker(filePath).getPostmanJson();
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject) {
                 PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection((JSONObject) json);
+                if (postmanCollection == null) {
+                    logger.error("Error while extracting Postman collection");
+                    return null;
+                }
                 String collectionName = postmanCollection.getName();
                 foldersAmount = Integer.toString(postmanCollection.getFolders().size());
                 requestsAmount = Integer.toString(postmanCollection.getRequests().size());
@@ -181,6 +176,18 @@ public class PostmanImporter {
             }
         }
         return project;
+    }
+
+    private PostmanImporterWorker getPostmanImporterWorker(String filePath) {
+        XProgressDialog collectionImportProgressDialog = UISupport.getDialogs().createProgressDialog("Import Collection",
+                0, "Importing the collection...", false);
+        PostmanImporterWorker worker = new PostmanImporterWorker(filePath);
+        try {
+            collectionImportProgressDialog.run(worker);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return worker;
     }
 
     private static String createProjectName(String collectionName, List<? extends Project> projectList) {
