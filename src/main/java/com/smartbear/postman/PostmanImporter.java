@@ -17,29 +17,11 @@
 package com.smartbear.postman;
 
 import com.eviware.soapui.config.GraphQLTestRequestConfig;
-import com.eviware.soapui.config.RestParametersConfig;
 import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
-import com.eviware.soapui.impl.actions.RestServiceBuilder;
 import com.eviware.soapui.impl.graphql.GraphQLTestRequest;
-import com.eviware.soapui.impl.rest.RestMethod;
 import com.eviware.soapui.impl.rest.RestRequest;
-import com.eviware.soapui.impl.rest.RestRequestInterface;
-import com.eviware.soapui.impl.rest.RestRequestInterface.HttpMethod;
-import com.eviware.soapui.impl.rest.RestResource;
-import com.eviware.soapui.impl.rest.RestService;
-import com.eviware.soapui.impl.rest.RestServiceFactory;
-import com.eviware.soapui.impl.rest.RestURIParser;
-import com.eviware.soapui.impl.rest.actions.support.NewRestResourceActionBase.ParamLocation;
-import com.eviware.soapui.impl.rest.support.RestParamProperty;
-import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder;
-import com.eviware.soapui.impl.rest.support.RestParamsPropertyHolder.ParameterStyle;
-import com.eviware.soapui.impl.rest.support.RestURIParserImpl;
-import com.eviware.soapui.impl.rest.support.RestUtils;
-import com.eviware.soapui.impl.rest.support.XmlBeansRestParamsTestPropertyHolder;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
-import com.eviware.soapui.impl.support.AbstractInterface;
-import com.eviware.soapui.impl.support.HttpUtils;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
@@ -50,10 +32,8 @@ import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.registry.GraphQLTestRequestTestStepFactory;
-import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.testsuite.Assertable;
-import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.ModelItemNamer;
 import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
@@ -70,26 +50,20 @@ import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.postman.script.ScriptContext;
 import com.smartbear.postman.utils.PostmanJsonUtil;
+import com.smartbear.postman.utils.RestServiceCreator;
 import com.smartbear.postman.utils.SoapServiceCreator;
 import net.sf.json.JSON;
-import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationStrategy.REUSE_MODEL;
 
 public class PostmanImporter {
     private static final String GRAPHQL_MODE = "graphql";
@@ -136,7 +110,6 @@ public class PostmanImporter {
                     String requestName = request.getName();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
-                    String rawModeData = request.getBody();
 
                     if (StringUtils.hasContent(preRequestScript)) {
                         processPreRequestScript(preRequestScript, project);
@@ -175,37 +148,10 @@ public class PostmanImporter {
                         }
                     } else {
                         logger.info("Importing a REST request with URI [ {} ] - started", uri);
-                        RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
+                        RestRequest restRequest = new RestServiceCreator(project).getRestRequest(request);
                         if (restRequest == null) {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
-                        }
-
-                        if (StringUtils.hasContent(requestName)) {
-                            restRequest.setName(requestName);
-                        }
-
-                        if (HttpUtils.canHavePayload(restRequest.getMethod()) && StringUtils.hasContent(rawModeData)) {
-                            if ("formdata".equals(request.getMode())) {
-                                JSON dataJson = new PostmanJsonUtil().parseTrimmedText(rawModeData);
-                                if (dataJson instanceof JSONArray) {
-                                    JSONArray dataArray = (JSONArray) dataJson;
-                                    Arrays.stream(dataArray.toArray()).forEach(d -> {
-                                        if (d instanceof JSONObject) {
-                                            JSONObject object = (JSONObject) d;
-                                            String key = object.getString("key");
-                                            String value = object.getString("value");
-
-                                            restRequest.getParams().addProperty(key);
-                                            restRequest.getParams().setPropertyValue(key, value);
-                                        }
-                                    });
-                                }
-                                restRequest.setMediaType(MediaType.MULTIPART_FORM_DATA);
-                                restRequest.setPostQueryString(true);
-                            } else {
-                                restRequest.setRequestContent(rawModeData);
-                            }
                         }
 
                         if (StringUtils.hasContent(tests)) {
@@ -262,13 +208,6 @@ public class PostmanImporter {
         }
     }
 
-    private void addRestHeaders(RestParamsPropertyHolder params, List<PostmanCollection.Header> headers) {
-        for (PostmanCollection.Header header : headers) {
-            RestParamProperty property = params.addProperty(header.getKey());
-            property.setStyle(ParameterStyle.HEADER);
-            property.setValue(header.getValue());
-        }
-    }
 
     void addAssertions(String tests, WsdlProject project, Assertable assertable) {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
@@ -296,18 +235,6 @@ public class PostmanImporter {
         }
     }
 
-    private RestRequest addRestRequest(WsdlProject project, String method, String uri, List<PostmanCollection.Header> headers) {
-        RestRequest currentRequest = null;
-        PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
-        try {
-            currentRequest = builder.createRestServiceFromPostman(project, uri,
-                    RestRequestInterface.HttpMethod.valueOf(method), headers);
-        } catch (Exception e) {
-            logger.error("Error while creating a REST service", e);
-        }
-        return currentRequest;
-    }
-
     private <T> T getTestRequestStep(WsdlProject project, Class<T> stepClass) {
         if (project.getTestSuiteCount() > 0) {
             WsdlTestSuite testSuite = project.getTestSuiteAt(project.getTestSuiteCount() - 1);
@@ -322,24 +249,6 @@ public class PostmanImporter {
             }
         }
         return null;
-    }
-
-    private void convertParameters(RestParamsPropertyHolder propertyHolder, WsdlProject project) {
-        for (TestProperty property : propertyHolder.getPropertyList()) {
-            if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == ParameterStyle.TEMPLATE) {
-                property.setValue("{{" + property.getName() + "}}");
-            }
-            String convertedValue = VariableUtils.convertVariables(property.getValue(), project);
-
-            property.setValue(convertedValue);
-            if (property instanceof RestParamProperty && StringUtils.hasContent(property.getDefaultValue())) {
-                if (((RestParamProperty) property).getStyle() == ParameterStyle.TEMPLATE) {
-                    ((RestParamProperty) property).setDefaultValue("{{" + property.getName() + "}}");
-                }
-                convertedValue = VariableUtils.convertVariables(property.getDefaultValue(), project);
-                ((RestParamProperty) property).setDefaultValue(convertedValue);
-            }
-        }
     }
 
     private boolean isGraphQlRequest(Request request) {
@@ -379,96 +288,6 @@ public class PostmanImporter {
                     "ImportPostmanCollection", paramsForImportPostmnaCollection);
         } catch (Throwable e) {
             logger.error("Error while sending analytics", e);
-        }
-    }
-
-    private class PostmanRestServiceBuilder extends RestServiceBuilder {
-        public RestRequest createRestServiceFromPostman(final WsdlProject paramWsdlProject,
-                                                        String uri,
-                                                        HttpMethod httpMethod,
-                                                        List<PostmanCollection.Header> headers) throws MalformedURLException {
-            RestResource restResource;
-            RestURIParser uriParser = new RestURIParserImpl(uri);
-            String endpoint = StringUtils.hasContent(uriParser.getScheme())
-                    ? uriParser.getEndpoint()
-                    : uriParser.getAuthority();
-
-            String resourcePath = convertTemplateProperties(uriParser.getResourcePath());
-
-            if (endpoint.contains("{{")) {
-                restResource = createResource(
-                        ModelCreationStrategy.REUSE_MODEL,
-                        paramWsdlProject,
-                        VariableUtils.convertVariables(endpoint, paramWsdlProject),
-                        resourcePath,
-                        uriParser.getResourceName());
-            } else {
-                restResource = createResource(
-                        ModelCreationStrategy.REUSE_MODEL,
-                        paramWsdlProject,
-                        endpoint + resourcePath);
-            }
-
-            RestMethod restMethod = addNewMethod(
-                    ModelCreationStrategy.CREATE_NEW_MODEL,
-                    restResource,
-                    httpMethod);
-
-            RestRequest restRequest = addNewRequest(restMethod);
-            RestParamsPropertyHolder params = extractParams(resourcePath, uriParser.getQuery());
-            addRestHeaders(params, headers);
-            convertParameters(params, paramWsdlProject);
-
-            RestParamsPropertyHolder requestPropertyHolder = restMethod.getParams();
-            copyParameters(params, requestPropertyHolder);
-
-            return restRequest;
-        }
-
-        protected RestParamsPropertyHolder extractParams(String path, String queryString) {
-            RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
-                    RestParametersConfig.Factory.newInstance(), ParamLocation.METHOD);
-
-            RestUtils.extractTemplateParamsFromResourcePath(params, path);
-
-            if (StringUtils.hasContent(queryString)) {
-                RestUtils.extractParamsFromQueryString(params, queryString);
-            }
-
-            return params;
-        }
-
-        protected RestResource createResource(ModelCreationStrategy creationStrategy, WsdlProject project, String host, String resourcePath, String resourceName) {
-            RestService restService = null;
-
-            if (creationStrategy == REUSE_MODEL) {
-                AbstractInterface<?, ? extends Operation> existingInterface = project.getInterfaceByName(host);
-                if (existingInterface instanceof RestService && ArrayUtils.contains(existingInterface.getEndpoints(), host)) {
-                    restService = (RestService) existingInterface;
-                }
-            }
-            if (restService == null) {
-                restService = (RestService) project.addNewInterface(host, RestServiceFactory.REST_TYPE);
-                restService.addEndpoint(host);
-            }
-            if (creationStrategy == REUSE_MODEL) {
-                RestResource existingResource = restService.getResourceByFullPath(RestResource.removeMatrixParams(resourcePath));
-                if (existingResource != null) {
-                    return existingResource;
-                }
-            }
-
-            return restService.addNewResource(resourceName, resourcePath);
-        }
-    }
-
-    private String convertTemplateProperties(String postmanUri) {
-        int indexOfQuery = postmanUri.indexOf("?");
-        if (indexOfQuery != -1) {
-            return postmanUri.substring(0, indexOfQuery).replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}")
-                   + postmanUri.substring(indexOfQuery, postmanUri.length());
-        } else {
-            return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
         }
     }
 
