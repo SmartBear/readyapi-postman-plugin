@@ -36,14 +36,11 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationStrategy.REUSE_MODEL;
-
 public class RestServiceCreator {
     private static final Logger logger = LoggerFactory.getLogger(RestServiceCreator.class);
     private final WsdlProject project;
     private String uri;
     private String rawModeData;
-
 
     public RestServiceCreator(WsdlProject project) {
         this.project = project;
@@ -111,7 +108,6 @@ public class RestServiceCreator {
 
             if (endpoint.contains("{{")) {
                 restResource = createResource(
-                        ModelCreationStrategy.REUSE_MODEL,
                         VariableUtils.convertVariables(endpoint, project),
                         resourcePath,
                         uriParser.getResourceName());
@@ -151,24 +147,20 @@ public class RestServiceCreator {
             return params;
         }
 
-        protected RestResource createResource(ModelCreationStrategy creationStrategy, String host, String resourcePath, String resourceName) {
+        protected RestResource createResource(String host, String resourcePath, String resourceName) {
             RestService restService = null;
 
-            if (creationStrategy == REUSE_MODEL) {
-                AbstractInterface<?, ? extends Operation> existingInterface = project.getInterfaceByName(host);
-                if (existingInterface instanceof RestService && ArrayUtils.contains(existingInterface.getEndpoints(), host)) {
-                    restService = (RestService) existingInterface;
-                }
+            AbstractInterface<?, ? extends Operation> existingInterface = project.getInterfaceByName(host);
+            if (existingInterface instanceof RestService && ArrayUtils.contains(existingInterface.getEndpoints(), host)) {
+                restService = (RestService) existingInterface;
             }
             if (restService == null) {
                 restService = (RestService) project.addNewInterface(host, RestServiceFactory.REST_TYPE);
                 restService.addEndpoint(host);
             }
-            if (creationStrategy == REUSE_MODEL) {
-                RestResource existingResource = restService.getResourceByFullPath(RestResource.removeMatrixParams(resourcePath));
-                if (existingResource != null) {
-                    return existingResource;
-                }
+            RestResource existingResource = restService.getResourceByFullPath(RestResource.removeMatrixParams(resourcePath));
+            if (existingResource != null) {
+                return existingResource;
             }
 
             return restService.addNewResource(resourceName, resourcePath);
