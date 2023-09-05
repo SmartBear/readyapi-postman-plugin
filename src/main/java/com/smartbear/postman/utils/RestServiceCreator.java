@@ -40,68 +40,66 @@ import static com.eviware.soapui.impl.actions.RestServiceBuilder.ModelCreationSt
 
 public class RestServiceCreator {
     private static final Logger logger = LoggerFactory.getLogger(RestServiceCreator.class);
-    private WsdlProject project;
+    private final WsdlProject project;
+    private String uri;
+    private String rawModeData;
+
 
     public RestServiceCreator(WsdlProject project) {
         this.project = project;
     }
 
-    public RestRequest getRestRequest(Request request) {
-        String uri = request.getUrl();
-        String requestName = request.getName();
+    public RestRequest addRestRequest(Request request) {
+        uri = request.getUrl();
+        rawModeData = request.getBody();
 
-        String rawModeData = request.getBody();
+        PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
 
-        RestRequest restRequest = addRestRequest(project, request.getMethod(), uri, request.getHeaders());
-        if (restRequest == null) {
+        RestRequest restRequest;
+        try {
+            restRequest = builder.createRestServiceFromPostman(request.getMethod(), request.getHeaders());
+        } catch (Exception e) {
+            logger.error("Error while creating a REST service", e);
             return null;
         }
 
+        String requestName = request.getName();
         if (StringUtils.hasContent(requestName)) {
             restRequest.setName(requestName);
         }
 
-        if (HttpUtils.canHavePayload(restRequest.getMethod()) && StringUtils.hasContent(rawModeData)) {
-            if ("formdata".equals(request.getMode())) {
-                JSON dataJson = new PostmanJsonUtil().parseTrimmedText(rawModeData);
-                if (dataJson instanceof JSONArray) {
-                    JSONArray dataArray = (JSONArray) dataJson;
-                    Arrays.stream(dataArray.toArray()).forEach(d -> {
-                        if (d instanceof JSONObject) {
-                            JSONObject object = (JSONObject) d;
-                            String key = object.getString("key");
-                            String value = object.getString("value");
-
-                            restRequest.getParams().addProperty(key);
-                            restRequest.getParams().setPropertyValue(key, value);
-                        }
-                    });
-                }
-                restRequest.setMediaType(MediaType.MULTIPART_FORM_DATA);
-                restRequest.setPostQueryString(true);
-            } else {
-                restRequest.setRequestContent(rawModeData);
-            }
-        }
+        addRequestBody(request, restRequest);
         return restRequest;
     }
 
-    private RestRequest addRestRequest(WsdlProject project, String method, String uri, List<PostmanCollection.Header> headers) {
-        RestRequest currentRequest = null;
-        PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
-        try {
-            currentRequest = builder.createRestServiceFromPostman(project, uri,
-                    RestRequestInterface.HttpMethod.valueOf(method), headers);
-        } catch (Exception e) {
-            logger.error("Error while creating a REST service", e);
+    private void addRequestBody(Request request, RestRequest restRequest) {
+        if (!HttpUtils.canHavePayload(restRequest.getMethod()) || !StringUtils.hasContent(rawModeData)) {
+            return;
         }
-        return currentRequest;
+        if ("formdata".equals(request.getMode())) {
+            JSON dataJson = new PostmanJsonUtil().parseTrimmedText(rawModeData);
+            if (dataJson instanceof JSONArray) {
+                JSONArray dataArray = (JSONArray) dataJson;
+                Arrays.stream(dataArray.toArray()).forEach(d -> {
+                    if (d instanceof JSONObject) {
+                        JSONObject data = (JSONObject) d;
+                        String key = data.getString("key");
+                        String value = data.getString("value");
+
+                        restRequest.getParams().addProperty(key);
+                        restRequest.getParams().setPropertyValue(key, value);
+                    }
+                });
+            }
+            restRequest.setMediaType(MediaType.MULTIPART_FORM_DATA);
+            restRequest.setPostQueryString(true);
+        } else {
+            restRequest.setRequestContent(rawModeData);
+        }
     }
 
     private class PostmanRestServiceBuilder extends RestServiceBuilder {
-        public RestRequest createRestServiceFromPostman(final WsdlProject paramWsdlProject,
-                                                        String uri,
-                                                        RestRequestInterface.HttpMethod httpMethod,
+        public RestRequest createRestServiceFromPostman(String httpMethod,
                                                         List<PostmanCollection.Header> headers) throws MalformedURLException {
             RestResource restResource;
             RestURIParser uriParser = new RestURIParserImpl(uri);
@@ -114,26 +112,25 @@ public class RestServiceCreator {
             if (endpoint.contains("{{")) {
                 restResource = createResource(
                         ModelCreationStrategy.REUSE_MODEL,
-                        paramWsdlProject,
-                        VariableUtils.convertVariables(endpoint, paramWsdlProject),
+                        VariableUtils.convertVariables(endpoint, project),
                         resourcePath,
                         uriParser.getResourceName());
             } else {
                 restResource = createResource(
                         ModelCreationStrategy.REUSE_MODEL,
-                        paramWsdlProject,
+                        project,
                         endpoint + resourcePath);
             }
 
             RestMethod restMethod = addNewMethod(
                     ModelCreationStrategy.CREATE_NEW_MODEL,
                     restResource,
-                    httpMethod);
+                    RestRequestInterface.HttpMethod.valueOf(httpMethod));
 
             RestRequest restRequest = addNewRequest(restMethod);
             RestParamsPropertyHolder params = extractParams(resourcePath, uriParser.getQuery());
             addRestHeaders(params, headers);
-            convertParameters(params, paramWsdlProject);
+            convertParameters(params);
 
             RestParamsPropertyHolder requestPropertyHolder = restMethod.getParams();
             copyParameters(params, requestPropertyHolder);
@@ -154,7 +151,7 @@ public class RestServiceCreator {
             return params;
         }
 
-        protected RestResource createResource(ModelCreationStrategy creationStrategy, WsdlProject project, String host, String resourcePath, String resourceName) {
+        protected RestResource createResource(ModelCreationStrategy creationStrategy, String host, String resourcePath, String resourceName) {
             RestService restService = null;
 
             if (creationStrategy == REUSE_MODEL) {
@@ -188,7 +185,7 @@ public class RestServiceCreator {
         }
 
 
-        private void convertParameters(RestParamsPropertyHolder propertyHolder, WsdlProject project) {
+        private void convertParameters(RestParamsPropertyHolder propertyHolder) {
             for (TestProperty property : propertyHolder.getPropertyList()) {
                 if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == RestParamsPropertyHolder.ParameterStyle.TEMPLATE) {
                     property.setValue("{{" + property.getName() + "}}");

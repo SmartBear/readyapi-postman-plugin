@@ -148,7 +148,7 @@ public class PostmanImporter {
                         }
                     } else {
                         logger.info("Importing a REST request with URI [ {} ] - started", uri);
-                        RestRequest restRequest = new RestServiceCreator(project).getRestRequest(request);
+                        RestRequest restRequest = new RestServiceCreator(project).addRestRequest(request);
                         if (restRequest == null) {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
