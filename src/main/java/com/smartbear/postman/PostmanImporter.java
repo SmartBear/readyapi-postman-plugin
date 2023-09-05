@@ -72,15 +72,18 @@ import com.smartbear.postman.script.ScriptContext;
 import com.smartbear.postman.utils.PostmanJsonUtil;
 import com.smartbear.postman.utils.SoapServiceCreator;
 import net.sf.json.JSON;
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -183,7 +186,26 @@ public class PostmanImporter {
                         }
 
                         if (HttpUtils.canHavePayload(restRequest.getMethod()) && StringUtils.hasContent(rawModeData)) {
-                            restRequest.setRequestContent(rawModeData);
+                            if ("formdata".equals(request.getMode())) {
+                                JSON dataJson = new PostmanJsonUtil().parseTrimmedText(rawModeData);
+                                if (dataJson instanceof JSONArray) {
+                                    JSONArray dataArray = (JSONArray) dataJson;
+                                    Arrays.stream(dataArray.toArray()).forEach(d -> {
+                                        if (d instanceof JSONObject) {
+                                            JSONObject object = (JSONObject) d;
+                                            String key = object.getString("key");
+                                            String value = object.getString("value");
+
+                                            restRequest.getParams().addProperty(key);
+                                            restRequest.getParams().setPropertyValue(key, value);
+                                        }
+                                    });
+                                }
+                                restRequest.setMediaType(MediaType.MULTIPART_FORM_DATA);
+                                restRequest.setPostQueryString(true);
+                            } else {
+                                restRequest.setRequestContent(rawModeData);
+                            }
                         }
 
                         if (StringUtils.hasContent(tests)) {
