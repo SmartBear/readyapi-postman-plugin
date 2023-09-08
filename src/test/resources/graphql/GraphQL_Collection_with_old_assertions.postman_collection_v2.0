@@ -1,0 +1,134 @@
+{
+	"info": {
+		"_postman_id": "2efa981d-7cba-430f-bd0e-5e5e53fb3261",
+		"name": "Postman Collection (from GraphQL)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "mutations",
+			"item": [
+				{
+					"name": "addCustomer",
+					"event": [
+                    	{
+                    	    "listen": "test",
+                    		"script": {
+                    		    "exec": [
+                    			    "tests[\"Status code is 200\"] = responseCode.code === 200 || responseCode.code === 202; \r"
+                    			],
+                    			"type": "text/javascript"
+                    		}
+                    	}
+                    ],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation addCustomer ($name: String!, $email: String!, $age: Int!) {\n    addCustomer (name: $name, email: $email, age: $age) {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                disign\n                warranty\n                AnnualFailureRate\n            }\n        }\n        data {\n            LicenseType\n            Status\n        }\n    }\n}",
+								"variables": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"age\": 0\n}"
+							}
+						},
+						"url": "http://ubuntuserverlts.localhost.local:4100/schema.graphqls"
+					},
+					"response": []
+				},
+				{
+					"name": "editCustomer",
+					"event": [
+                    	{
+                    	    "listen": "test",
+                    		"script": {
+                    		    "exec": [
+                    			    "tests[\"Status code is 200\"] = responseCode.code === 200 || responseCode.code === 202; \r"
+                    			],
+                    			"type": "text/javascript"
+                    		}
+                    	}
+                    ],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation editCustomer ($id: String!, $name: String, $email: String, $age: Int, $extraData: Date) {\n    editCustomer (id: $id, name: $name, email: $email, age: $age, extraData: $extraData) {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                disign\n                warranty\n                AnnualFailureRate\n            }\n        }\n        data {\n            LicenseType\n            Status\n        }\n    }\n}",
+								"variables": "{\n  \"id\": \"\",\n  \"name\": \"\",\n  \"email\": \"\",\n  \"age\": 0,\n  \"extraData\": \"\"\n}"
+							}
+						},
+						"url": "http://ubuntuserverlts.localhost.local:4100/schema.graphqls"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "queries",
+			"item": [
+				{
+					"name": "customer",
+					"event": [
+                    	{
+                    	    "listen": "test",
+                    		"script": {
+                    		    "exec": [
+                    			    "tests[\"Status code is 200\"] = responseCode.code === 200 || responseCode.code === 202; \r"
+                    			],
+                    			"type": "text/javascript"
+                    		}
+                    	}
+                    ],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query customer ($id: String) {\n    customer (id: $id) {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                disign\n                warranty\n                AnnualFailureRate\n            }\n        }\n        data {\n            LicenseType\n            Status\n        }\n    }\n}",
+								"variables": "{\n  \"id\": \"\"\n}"
+							}
+						},
+						"url": "http://ubuntuserverlts.localhost.local:4100/schema.graphqls"
+					},
+					"response": []
+				},
+				{
+					"name": "customers",
+					"event": [
+                    	{
+                    	    "listen": "test",
+                    		"script": {
+                    		    "exec": [
+                    			    "tests[\"Status code is 200\"] = responseCode.code === 200 || responseCode.code === 202; \r"
+                    			],
+                    			"type": "text/javascript"
+                    		}
+                    	}
+                    ],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query customers {\n    customers {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                disign\n                warranty\n                AnnualFailureRate\n            }\n        }\n        data {\n            LicenseType\n            Status\n        }\n    }\n}",
+								"variables": "{}"
+							}
+						},
+						"url": "http://ubuntuserverlts.localhost.local:4100/schema.graphqls"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "http://ubuntuserverlts.localhost.local:4100/schema.graphqls",
+			"type": "any"
+		}
+	]
+}
