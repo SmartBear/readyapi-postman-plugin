@@ -16,33 +16,41 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertNull;
 
 public class PostmanCollectionFactoryTest {
-    private final String COLLECTION_V1_PATH = "src/test/resources/Postman_Echo.postman_collection";
-    private final String COLLECTION_V2_PATH = "src/test/resources/Postman_Echo.postman_collection_v2.0";
-    private final String COLLECTION_V2_1PATH = "src/test/resources/Postman_Echo.postman_collection_v2.1";
-    private final String COLLECTION_FROM_URL_PATH = "src/test/resources/Postman_Echo_from_url.postman_collection_v2.1";
+    private final String COLLECTION_V1_PATH = "/Postman_Echo.postman_collection";
+    private final String COLLECTION_V2_PATH = "/Postman_Echo.postman_collection_v2.0";
+    private final String COLLECTION_V2_1PATH = "/Postman_Echo.postman_collection_v2.1";
+    private final String COLLECTION_FROM_URL_PATH = "/Postman_Echo_from_url.postman_collection_v2.1";
 
     @Test
     public void postmanCollectionV1ImportIsNull() throws IOException {
-        PostmanCollection postmanCollection = getCollectionFromFile(COLLECTION_V1_PATH);
+        PostmanCollection postmanCollection = getCollectionFromFile(
+                getClass().getResource(COLLECTION_V1_PATH).getPath()
+        );
         assertNull(postmanCollection);
     }
 
     @Test
     public void postmanCollectionV2ImportsAsV2() throws IOException {
-        PostmanCollection postmanCollection = getCollectionFromFile(COLLECTION_V2_PATH);
+        PostmanCollection postmanCollection = getCollectionFromFile(
+                getClass().getResource(COLLECTION_V2_PATH).getPath()
+        );
         assertThat(postmanCollection, instanceOf(PostmanCollectionV2.class));
     }
 
     @Test
-    public void postmanCollectionV2_1ImportsAsV2_1() throws IOException {
-        PostmanCollection postmanCollection = getCollectionFromFile(COLLECTION_V2_1PATH);
-        assertThat(postmanCollection, instanceOf(PostmanCollectionV2_1.class));
+    public void postmanCollectionV2_1ImportsAsV2() throws IOException {
+        PostmanCollection postmanCollection = getCollectionFromFile(
+                getClass().getResource(COLLECTION_V2_1PATH).getPath()
+        );
+        assertThat(postmanCollection, instanceOf(PostmanCollectionV2.class));
     }
 
     @Test
-    public void postmanCollectionV2_1FromURLImportsAsV2_1() throws IOException {
-        PostmanCollection postmanCollection = getCollectionFromFile(COLLECTION_FROM_URL_PATH);
-        assertThat(postmanCollection, instanceOf(PostmanCollectionV2_1.class));
+    public void postmanCollectionV2_1FromURLImportsAsV2() throws IOException {
+        PostmanCollection postmanCollection = getCollectionFromFile(
+                getClass().getResource(COLLECTION_FROM_URL_PATH).getPath()
+        );
+        assertThat(postmanCollection, instanceOf(PostmanCollectionV2.class));
     }
 
     private PostmanCollection getCollectionFromFile(String collectionFilePath) throws IOException {
