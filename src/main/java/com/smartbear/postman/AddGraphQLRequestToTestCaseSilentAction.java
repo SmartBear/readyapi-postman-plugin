@@ -20,8 +20,8 @@ public class AddGraphQLRequestToTestCaseSilentAction extends AddGraphQLRequestTo
     public void perform(GraphQLRequest request, Object param) {
         WsdlProject project = request.getOperation().getInterface().getProject();
         WsdlTestCase testCase = null;
-        if (param instanceof HashMap && ((HashMap<?, ?>) param).get("testCaseName") != null) {
-            testCase = addNewTestSuiteAndTestCaseSilent(project, null, ((HashMap<?, ?>) param).get("testCaseName").toString());
+        if (param instanceof HashMap && ((HashMap<?, ?>) param).get(TEST_CASE_NAME) != null) {
+            testCase = addNewTestSuiteAndTestCaseSilent(project, null, ((HashMap<?, ?>) param).get(TEST_CASE_NAME).toString());
         }
 
         if (testCase != null) {

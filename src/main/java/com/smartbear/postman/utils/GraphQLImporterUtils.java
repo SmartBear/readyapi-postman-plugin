@@ -95,19 +95,11 @@ public class GraphQLImporterUtils {
     }
 
     private GraphQLOperationGroup getGraphQLOperationGroup(String graphQLRequestString, GraphQLService service) {
-        GraphQLOperationGroup operationGroup;
         if (graphQLRequestString.startsWith(GraphQLOperationGroupEnumConfig.MUTATION.toString())) {
-            operationGroup = service.getMutationsGroup();
-            if (operationGroup == null) {
-                operationGroup = service.addNewOperationGroup(GraphQLOperationGroupEnumConfig.MUTATION.toString());
-            }
+            return service.getMutationsGroup();
         } else {
-            operationGroup = service.getQueriesGroup();
-            if (operationGroup == null) {
-                operationGroup = service.addNewOperationGroup(GraphQLOperationGroupEnumConfig.QUERY.toString());
-            }
+            return service.getQueriesGroup();
         }
-        return operationGroup;
     }
 
 }
