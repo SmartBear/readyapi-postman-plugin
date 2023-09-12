@@ -17,27 +17,21 @@ public class PostmanCollectionFactory {
         if (collectionSharedViaAPI != null) {
             collectionObject = (JSONObject) collectionObject.get(COLLECTION);
         }
-
-        PostmanCollection collection = null;
-        Object infoSection = collectionObject.get(INFO);
-        if (infoSection != null) {
-            collection = getCollectionByVersion(collectionObject, (JSONObject) infoSection);
-        }
-        if (collection == null) {
-            throw new PostmanCollectionUnsupportedVersionException(UNSUPPORTED_VERSION_MESSAGE);
-        }
-        return collection;
+        return getCollectionByVersion(collectionObject);
     }
 
-    private static PostmanCollection getCollectionByVersion(JSONObject collectionObject, JSONObject infoSection) {
-        Object schemaField = infoSection.get(SCHEMA);
-        if (schemaField instanceof String) {
-            String collectionVersion = StringUtils
-                    .substringBetween((String) schemaField, "collection/v", "/collection.json");
-            if (VERSION_2.equals(collectionVersion) || VERSION_2_1.equals(collectionVersion)) {
-                return new PostmanCollectionV2(collectionObject);
+    private static PostmanCollection getCollectionByVersion(JSONObject collectionObject) throws PostmanCollectionUnsupportedVersionException {
+        Object infoSection = collectionObject.get(INFO);
+        if (infoSection != null) {
+            Object schemaField = ((JSONObject) infoSection).get(SCHEMA);
+            if (schemaField instanceof String) {
+                String collectionVersion = StringUtils
+                        .substringBetween((String) schemaField, "collection/v", "/collection.json");
+                if (VERSION_2.equals(collectionVersion) || VERSION_2_1.equals(collectionVersion)) {
+                    return new PostmanCollectionV2(collectionObject);
+                }
             }
         }
-        return null;
+        throw new PostmanCollectionUnsupportedVersionException(UNSUPPORTED_VERSION_MESSAGE);
     }
 }
