@@ -1,0 +1,34 @@
+{
+	"info": {
+		"_postman_id": "3fedb6e6-b81c-402a-959f-23e274d33a7d",
+		"name": "Parameterized endpoints collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "variableInsteadHost",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}/{{ResourceID}}?qparam={{queryParam}}",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"{{ResourceID}}"
+					],
+					"query": [
+						{
+							"key": "qparam",
+							"value": "{{queryParam}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

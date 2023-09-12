@@ -1,0 +1,78 @@
+{
+	"info": {
+		"_postman_id": "3a80bdfc-b44f-428c-aa88-710177cdaa6b",
+		"name": "REST Service 1 collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/ConStroka?x=abc&y=def",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"string1\", \"abc\");",
+							"postman.setGlobalVariable(\"string2\", \"def\");"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"tests[\"Body matches string\"] = responseBody.has(globals[\"string1\"]);",
+							"tests[\"Body is correct\"] = responseBody === \"\\\"abc def\\\"\";",
+							"tests[\"Content-Type is present\"] = postman.getResponseHeader(\"Content-Type\");",
+							"tests[\"Response time is less than 200ms\"] = responseTime < 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "header1",
+						"value": "af"
+					},
+					{
+						"key": "header2",
+						"value": "er"
+					}
+				],
+				"url": {
+					"raw": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/ConStroka?x={{string1}}&y={{string2}}",
+					"protocol": "http",
+					"host": [
+						"rapis02",
+						"aqa",
+						"com",
+						"ru"
+					],
+					"path": [
+						"WCFREST",
+						"Service.svc",
+						"ConStroka"
+					],
+					"query": [
+						{
+							"key": "x",
+							"value": "{{string1}}"
+						},
+						{
+							"key": "y",
+							"value": "{{string2}}"
+						}
+					]
+				},
+				"description": "RequestDescription"
+			},
+			"response": []
+		}
+	]
+}
