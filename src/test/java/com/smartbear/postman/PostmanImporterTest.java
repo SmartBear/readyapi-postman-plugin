@@ -28,6 +28,7 @@ import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
+import com.smartbear.postman.exceptions.PostmanCollectionUnsupportedVersionException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -109,26 +110,26 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportRestGetRequestFromTestsNode() {
+    public void testImportRestGetRequestFromTestsNode() throws PostmanCollectionUnsupportedVersionException {
         testImportRestGetRequest(REST_GET_COLLECTION_PATH);
     }
 
     @Test
-    public void testImportRestGetRequestFromEventsNode() {
+    public void testImportRestGetRequestFromEventsNode() throws PostmanCollectionUnsupportedVersionException {
         testImportRestGetRequest(REST_GET_COLLECTION_EVENTS_PATH);
     }
 
     @Test
-    public void testImportRestGetRequestFromCollection20() {
+    public void testImportRestGetRequestFromCollection20() throws PostmanCollectionUnsupportedVersionException {
         testImportRestGetRequest(REST_GET_COLLECTION_2_0_PATH);
     }
 
     @Test
-    public void testImportRestGetRequestFromCollection21() {
+    public void testImportRestGetRequestFromCollection21() throws PostmanCollectionUnsupportedVersionException {
         testImportRestGetRequest(REST_GET_COLLECTION_2_1_PATH);
     }
 
-    private void testImportRestGetRequest(String collectionPath) {
+    private void testImportRestGetRequest(String collectionPath) throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(collectionPath).getPath());
@@ -183,7 +184,7 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportRequestWithParameterizedEndpoint() {
+    public void testImportRequestWithParameterizedEndpoint() throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(PARAMETERIZED_COLLECTION_PATH).getPath());
@@ -259,26 +260,26 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportRestPostRequestFromTestsNode() {
+    public void testImportRestPostRequestFromTestsNode() throws PostmanCollectionUnsupportedVersionException {
         testImportRestPostRequest(REST_POST_COLLECTION_PATH);
     }
 
     @Test
-    public void testImportRestPostRequestFromEventsNode() {
+    public void testImportRestPostRequestFromEventsNode() throws PostmanCollectionUnsupportedVersionException {
         testImportRestPostRequest(REST_POST_COLLECTION_EVENTS_PATH);
     }
 
     @Test
-    public void testImportRestPostRequestFromCollection20() {
+    public void testImportRestPostRequestFromCollection20() throws PostmanCollectionUnsupportedVersionException {
         testImportRestPostRequest(REST_POST_COLLECTION_2_0_PATH);
     }
 
     @Test
-    public void testImportRestPostRequestFromCollection21() {
+    public void testImportRestPostRequestFromCollection21() throws PostmanCollectionUnsupportedVersionException {
         testImportRestPostRequest(REST_POST_COLLECTION_2_1_PATH);
     }
 
-    public void testImportRestPostRequest(String collectionPath) {
+    public void testImportRestPostRequest(String collectionPath) throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(collectionPath).getPath());
@@ -321,7 +322,7 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportGraphQlRequests() {
+    public void testImportGraphQlRequests() throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(GRAPHQL_COLLECTION_2_0_PATH).getPath());
@@ -344,26 +345,26 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportWsdlRequestFromTestsNode() {
+    public void testImportWsdlRequestFromTestsNode() throws PostmanCollectionUnsupportedVersionException {
         testImportWsdlRequest(WSDL_COLLECTION_PATH);
     }
 
     @Test
-    public void testImportWsdlRequestFromEventsNode() {
+    public void testImportWsdlRequestFromEventsNode() throws PostmanCollectionUnsupportedVersionException {
         testImportWsdlRequest(WSDL_COLLECTION_EVENTS_PATH);
     }
 
     @Test
-    public void testImportWsdlRequestFromCollection20() {
+    public void testImportWsdlRequestFromCollection20() throws PostmanCollectionUnsupportedVersionException {
         testImportWsdlRequest(WSDL_COLLECTION_2_0_PATH);
     }
 
     @Test
-    public void testImportWsdlRequestFromCollection21() {
+    public void testImportWsdlRequestFromCollection21() throws PostmanCollectionUnsupportedVersionException {
         testImportWsdlRequest(WSDL_COLLECTION_2_1_PATH);
     }
 
-    public void testImportWsdlRequest(String collectionPath) {
+    public void testImportWsdlRequest(String collectionPath) throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(collectionPath).getPath());
@@ -391,7 +392,7 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testImportNewHttpMethods() {
+    public void testImportNewHttpMethods() throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(NEW_HTTP_METHODS_COLLECTION_2_1_PATH).getPath());
@@ -408,7 +409,7 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testSampleCollectionCreatesTheSameProjectFrom10and20() {
+    public void testSampleCollectionCreatesTheSameProjectFrom10and20() throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject expectedProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
@@ -419,7 +420,7 @@ public class PostmanImporterTest {
     }
 
     @Test
-    public void testSampleCollectionCreatesTheSameProjectFrom10and21() {
+    public void testSampleCollectionCreatesTheSameProjectFrom10and21() throws PostmanCollectionUnsupportedVersionException {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject expectedProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(SAMPLE_COLLECTION_PATH).getPath());
