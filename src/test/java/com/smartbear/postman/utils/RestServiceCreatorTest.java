@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -24,6 +25,9 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 public class RestServiceCreatorTest {
     WsdlProject project;
@@ -32,13 +36,16 @@ public class RestServiceCreatorTest {
     @Before
     public void setUp() throws XmlException, IOException, SoapUIException {
         project = new WsdlProjectFactory().createNew();
-        creator = new RestServiceCreator(project);
+        creator = spy(new RestServiceCreator(project));
     }
 
     @Test
     public void importFormData() throws IOException {
         // given
         PostmanCollection collection = getCollectionFromFile(RestServiceCreatorTest.class.getResource("/rest/multipart_collection.json"));
+
+        URL attachmentUri = RestServiceCreatorTest.class.getResource("/rest/attachment.txt");
+        doReturn(new File(attachmentUri.getPath())).when(creator).getAttachmentFile(any());
 
         // when
         collection.getRequests().forEach(creator::addRestRequest);
@@ -54,9 +61,13 @@ public class RestServiceCreatorTest {
                 .put("Special", "!@#$%&*()^_+=`~")
                 .put("Not Select", "Disabled")
                 .put("more", ",./';[]}{\":?><|\\\\")
+                .put("file", attachmentUri.toString())
                 .build();
 
+        assertThat(request.getPropertyCount(), is(params.size()));
         params.forEach((name, value) -> assertThat(request.getPropertyValue(name), equalTo(value)));
+
+        assertThat(request.getAttachmentCount(), is(1));
 
         assertThat(request.getMediaType(), equalTo(MediaType.MULTIPART_FORM_DATA));
         assertThat(request.isPostQueryString(), is(true));

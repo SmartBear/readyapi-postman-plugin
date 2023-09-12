@@ -32,6 +32,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
@@ -80,8 +82,9 @@ public class RestServiceCreator {
                 Arrays.stream(dataArray.toArray()).forEach(d -> {
                     if (d instanceof JSONObject) {
                         JSONObject data = (JSONObject) d;
+
                         String key = data.getString("key");
-                        String value = data.getString("value");
+                        String value = getFormValue(request, restRequest, data, key);
 
                         restRequest.getParams().addProperty(key);
                         restRequest.getParams().setPropertyValue(key, value);
@@ -93,6 +96,39 @@ public class RestServiceCreator {
         } else {
             restRequest.setRequestContent(rawModeData);
         }
+    }
+
+    private String getFormValue(Request request, RestRequest restRequest, JSONObject data, String key) {
+        String value;
+        String type = data.getString("type");
+
+        if ("file".equals(type)) {
+            value = processFileType(data, restRequest, request.getName(), key);
+        } else {
+            value = data.getString("value");
+        }
+        return value;
+    }
+
+    private String processFileType(JSONObject data, RestRequest restRequest, String requestName, String formKey) {
+        File attachmentFile = getAttachmentFile(data);
+        if (!attachmentFile.exists()) {
+            logger.error("attachment file [{}] in [{}] - [{}] doesn't exist", new Object[]{attachmentFile.toURI(), requestName, formKey});
+            return "";
+        }
+
+        try {
+            restRequest.attachFile(attachmentFile, false);
+        } catch (IOException e) {
+            logger.error("Could not attach file [{}] in [{}] - [{}]", new Object[]{attachmentFile.toURI(), requestName, formKey});
+            return "";
+        }
+        return attachmentFile.toURI().toString();
+    }
+
+    protected File getAttachmentFile(JSONObject data) {
+        String src = data.getString("src");
+        return new File(src);
     }
 
     private class PostmanRestServiceBuilder extends RestServiceBuilder {
