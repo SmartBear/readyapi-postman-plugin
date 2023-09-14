@@ -38,7 +38,7 @@ import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.List;
 
-public class RestServiceCreator {
+public class RestServiceCreator extends RestServiceBuilder {
     private static final Logger logger = LoggerFactory.getLogger(RestServiceCreator.class);
     private final WsdlProject project;
     private String uri;
@@ -52,11 +52,9 @@ public class RestServiceCreator {
         uri = request.getUrl();
         rawModeData = request.getBody();
 
-        PostmanRestServiceBuilder builder = new PostmanRestServiceBuilder();
-
         RestRequest restRequest;
         try {
-            restRequest = builder.createRestServiceFromPostman(request.getMethod(), request.getHeaders());
+            restRequest = createRestServiceFromPostman(request.getMethod(), request.getHeaders());
         } catch (Exception e) {
             logger.error("Error while creating a REST service", e);
             return null;
@@ -131,112 +129,111 @@ public class RestServiceCreator {
         return new File(src);
     }
 
-    private class PostmanRestServiceBuilder extends RestServiceBuilder {
-        public RestRequest createRestServiceFromPostman(String httpMethod,
-                                                        List<PostmanCollection.Header> headers) throws MalformedURLException {
-            RestResource restResource;
-            RestURIParser uriParser = new RestURIParserImpl(uri);
-            String endpoint = StringUtils.hasContent(uriParser.getScheme())
-                    ? uriParser.getEndpoint()
-                    : uriParser.getAuthority();
 
-            String resourcePath = convertTemplateProperties(uriParser.getResourcePath());
+    public RestRequest createRestServiceFromPostman(String httpMethod,
+                                                    List<PostmanCollection.Header> headers) throws MalformedURLException {
+        RestResource restResource;
+        RestURIParser uriParser = new RestURIParserImpl(uri);
+        String endpoint = StringUtils.hasContent(uriParser.getScheme())
+                ? uriParser.getEndpoint()
+                : uriParser.getAuthority();
 
-            if (endpoint.contains("{{")) {
-                restResource = createResource(
-                        VariableUtils.convertVariables(endpoint, project),
-                        resourcePath,
-                        uriParser.getResourceName());
-            } else {
-                restResource = createResource(
-                        ModelCreationStrategy.REUSE_MODEL,
-                        project,
-                        endpoint + resourcePath);
-            }
+        String resourcePath = convertTemplateProperties(uriParser.getResourcePath());
 
-            RestMethod restMethod = addNewMethod(
-                    ModelCreationStrategy.CREATE_NEW_MODEL,
-                    restResource,
-                    RestRequestInterface.HttpMethod.valueOf(httpMethod));
-
-            RestRequest restRequest = addNewRequest(restMethod);
-            RestParamsPropertyHolder params = extractParams(resourcePath, uriParser.getQuery());
-            addRestHeaders(params, headers);
-            convertParameters(params);
-
-            RestParamsPropertyHolder requestPropertyHolder = restMethod.getParams();
-            copyParameters(params, requestPropertyHolder);
-
-            return restRequest;
+        if (endpoint.contains("{{")) {
+            restResource = createResource(
+                    VariableUtils.convertVariables(endpoint, project),
+                    resourcePath,
+                    uriParser.getResourceName());
+        } else {
+            restResource = createResource(
+                    ModelCreationStrategy.REUSE_MODEL,
+                    project,
+                    endpoint + resourcePath);
         }
 
-        protected RestParamsPropertyHolder extractParams(String path, String queryString) {
-            RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
-                    RestParametersConfig.Factory.newInstance(), NewRestResourceActionBase.ParamLocation.METHOD);
+        RestMethod restMethod = addNewMethod(
+                ModelCreationStrategy.CREATE_NEW_MODEL,
+                restResource,
+                RestRequestInterface.HttpMethod.valueOf(httpMethod));
 
-            RestUtils.extractTemplateParamsFromResourcePath(params, path);
+        RestRequest restRequest = addNewRequest(restMethod);
+        RestParamsPropertyHolder params = extractParams(resourcePath, uriParser.getQuery());
+        addRestHeaders(params, headers);
+        convertParameters(params);
 
-            if (StringUtils.hasContent(queryString)) {
-                RestUtils.extractParamsFromQueryString(params, queryString);
-            }
+        RestParamsPropertyHolder requestPropertyHolder = restMethod.getParams();
+        copyParameters(params, requestPropertyHolder);
 
-            return params;
+        return restRequest;
+    }
+
+    protected RestParamsPropertyHolder extractParams(String path, String queryString) {
+        RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
+                RestParametersConfig.Factory.newInstance(), NewRestResourceActionBase.ParamLocation.METHOD);
+
+        RestUtils.extractTemplateParamsFromResourcePath(params, path);
+
+        if (StringUtils.hasContent(queryString)) {
+            RestUtils.extractParamsFromQueryString(params, queryString);
         }
 
-        protected RestResource createResource(String host, String resourcePath, String resourceName) {
-            RestService restService = null;
+        return params;
+    }
 
-            AbstractInterface<?, ? extends Operation> existingInterface = project.getInterfaceByName(host);
-            if (existingInterface instanceof RestService && ArrayUtils.contains(existingInterface.getEndpoints(), host)) {
-                restService = (RestService) existingInterface;
-            }
-            if (restService == null) {
-                restService = (RestService) project.addNewInterface(host, RestServiceFactory.REST_TYPE);
-                restService.addEndpoint(host);
-            }
-            RestResource existingResource = restService.getResourceByFullPath(RestResource.removeMatrixParams(resourcePath));
-            if (existingResource != null) {
-                return existingResource;
-            }
+    protected RestResource createResource(String host, String resourcePath, String resourceName) {
+        RestService restService = null;
 
-            return restService.addNewResource(resourceName, resourcePath);
+        AbstractInterface<?, ? extends Operation> existingInterface = project.getInterfaceByName(host);
+        if (existingInterface instanceof RestService && ArrayUtils.contains(existingInterface.getEndpoints(), host)) {
+            restService = (RestService) existingInterface;
+        }
+        if (restService == null) {
+            restService = (RestService) project.addNewInterface(host, RestServiceFactory.REST_TYPE);
+            restService.addEndpoint(host);
+        }
+        RestResource existingResource = restService.getResourceByFullPath(RestResource.removeMatrixParams(resourcePath));
+        if (existingResource != null) {
+            return existingResource;
         }
 
-        private String convertTemplateProperties(String postmanUri) {
-            int indexOfQuery = postmanUri.indexOf("?");
-            if (indexOfQuery != -1) {
-                return postmanUri.substring(0, indexOfQuery).replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}")
-                       + postmanUri.substring(indexOfQuery, postmanUri.length());
-            } else {
-                return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
-            }
+        return restService.addNewResource(resourceName, resourcePath);
+    }
+
+    private String convertTemplateProperties(String postmanUri) {
+        int indexOfQuery = postmanUri.indexOf("?");
+        if (indexOfQuery != -1) {
+            return postmanUri.substring(0, indexOfQuery).replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}")
+                   + postmanUri.substring(indexOfQuery, postmanUri.length());
+        } else {
+            return postmanUri.replaceAll("\\{\\{", "{").replaceAll("\\}\\}", "}");
         }
+    }
 
 
-        private void convertParameters(RestParamsPropertyHolder propertyHolder) {
-            for (TestProperty property : propertyHolder.getPropertyList()) {
-                if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == RestParamsPropertyHolder.ParameterStyle.TEMPLATE) {
-                    property.setValue("{{" + property.getName() + "}}");
+    private void convertParameters(RestParamsPropertyHolder propertyHolder) {
+        for (TestProperty property : propertyHolder.getPropertyList()) {
+            if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == RestParamsPropertyHolder.ParameterStyle.TEMPLATE) {
+                property.setValue("{{" + property.getName() + "}}");
+            }
+            String convertedValue = VariableUtils.convertVariables(property.getValue(), project);
+
+            property.setValue(convertedValue);
+            if (property instanceof RestParamProperty && StringUtils.hasContent(property.getDefaultValue())) {
+                if (((RestParamProperty) property).getStyle() == RestParamsPropertyHolder.ParameterStyle.TEMPLATE) {
+                    ((RestParamProperty) property).setDefaultValue("{{" + property.getName() + "}}");
                 }
-                String convertedValue = VariableUtils.convertVariables(property.getValue(), project);
-
-                property.setValue(convertedValue);
-                if (property instanceof RestParamProperty && StringUtils.hasContent(property.getDefaultValue())) {
-                    if (((RestParamProperty) property).getStyle() == RestParamsPropertyHolder.ParameterStyle.TEMPLATE) {
-                        ((RestParamProperty) property).setDefaultValue("{{" + property.getName() + "}}");
-                    }
-                    convertedValue = VariableUtils.convertVariables(property.getDefaultValue(), project);
-                    ((RestParamProperty) property).setDefaultValue(convertedValue);
-                }
+                convertedValue = VariableUtils.convertVariables(property.getDefaultValue(), project);
+                ((RestParamProperty) property).setDefaultValue(convertedValue);
             }
         }
+    }
 
-        private void addRestHeaders(RestParamsPropertyHolder params, List<PostmanCollection.Header> headers) {
-            for (PostmanCollection.Header header : headers) {
-                RestParamProperty property = params.addProperty(header.getKey());
-                property.setStyle(RestParamsPropertyHolder.ParameterStyle.HEADER);
-                property.setValue(header.getValue());
-            }
+    private void addRestHeaders(RestParamsPropertyHolder params, List<PostmanCollection.Header> headers) {
+        for (PostmanCollection.Header header : headers) {
+            RestParamProperty property = params.addProperty(header.getKey());
+            property.setStyle(RestParamsPropertyHolder.ParameterStyle.HEADER);
+            property.setValue(header.getValue());
         }
     }
 }
