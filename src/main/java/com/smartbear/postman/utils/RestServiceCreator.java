@@ -22,11 +22,9 @@ import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.StringUtils;
 import com.smartbear.postman.VariableUtils;
+import com.smartbear.postman.collection.FormDataParameter;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.Request;
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +33,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Arrays;
 import java.util.List;
 
 public class RestServiceCreator extends RestServiceBuilder {
@@ -68,27 +65,20 @@ public class RestServiceCreator extends RestServiceBuilder {
 
         return restRequest;
     }
-
     private void addRequestBody(Request request, RestRequest restRequest) {
         if (!HttpUtils.canHavePayload(restRequest.getMethod()) || !StringUtils.hasContent(rawModeData)) {
             return;
         }
-        if ("formdata".equals(request.getMode())) {
-            JSON dataJson = new PostmanJsonUtil().parseTrimmedText(rawModeData);
-            if (dataJson instanceof JSONArray) {
-                JSONArray dataArray = (JSONArray) dataJson;
-                Arrays.stream(dataArray.toArray()).forEach(d -> {
-                    if (d instanceof JSONObject) {
-                        JSONObject data = (JSONObject) d;
-
-                        String key = data.getString("key");
-                        String value = getFormValue(request, restRequest, data, key);
-
-                        params.addProperty(key);
-                        params.setPropertyValue(key, value);
-                    }
-                });
+        if (request.isFormDataMode()) {
+            if (!params.isEmpty() && !request.getFormDataParameters().isEmpty()){
+                logger.warn("Importing form-data parameters into request [{}] with already defined args", request.getName());
             }
+
+            request.getFormDataParameters().forEach(parameter -> {
+                params.addProperty(parameter.getKey());
+                params.setPropertyValue(parameter.getKey(), getFormValue(parameter, request, restRequest));
+            });
+
             restRequest.setMediaType(MediaType.MULTIPART_FORM_DATA);
             restRequest.setPostQueryString(true);
         } else {
@@ -96,39 +86,35 @@ public class RestServiceCreator extends RestServiceBuilder {
         }
     }
 
-    private String getFormValue(Request request, RestRequest restRequest, JSONObject data, String key) {
+    private String getFormValue(FormDataParameter parameter, Request request, RestRequest restRequest) {
         String value;
-        String type = data.getString("type");
-
-        if ("file".equals(type)) {
-            value = processFileType(data, restRequest, request.getName(), key);
+        if (parameter.isFile()) {
+            value = processFileType(parameter, restRequest, request.getName());
         } else {
-            value = data.getString("value");
+            value = parameter.getValue();
         }
         return value;
     }
 
-    private String processFileType(JSONObject data, RestRequest restRequest, String requestName, String formKey) {
-        File attachmentFile = getAttachmentFile(data);
+    private String processFileType(FormDataParameter parameter, RestRequest restRequest, String requestName) {
+        File attachmentFile = getAttachmentFile(parameter.getValue());
         if (!attachmentFile.exists()) {
-            logger.error("attachment file [{}] in [{}] - [{}] doesn't exist", new Object[]{attachmentFile.toURI(), requestName, formKey});
+            logger.error("attachment file [{}] in [{}] - [{}] doesn't exist", new Object[]{attachmentFile.toURI(), requestName, parameter.getKey()});
             return "";
         }
 
         try {
             restRequest.attachFile(attachmentFile, false);
         } catch (IOException e) {
-            logger.error("Could not attach file [{}] in [{}] - [{}]", new Object[]{attachmentFile.toURI(), requestName, formKey});
+            logger.error("Could not attach file [{}] in [{}] - [{}]", new Object[]{attachmentFile.toURI(), requestName, parameter.getKey()});
             return "";
         }
         return attachmentFile.toURI().toString();
     }
 
-    protected File getAttachmentFile(JSONObject data) {
-        String src = data.getString("src");
-        return new File(src);
+    protected File getAttachmentFile(String path) {
+        return new File(path);
     }
-
 
     public RestRequest createRestServiceFromPostman(Request request) throws MalformedURLException {
         RestResource restResource;

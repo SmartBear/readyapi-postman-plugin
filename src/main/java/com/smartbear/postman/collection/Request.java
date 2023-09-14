@@ -2,6 +2,7 @@ package com.smartbear.postman.collection;
 
 import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface Request {
@@ -26,6 +27,14 @@ public interface Request {
     String getGraphQlQuery();
 
     String getGraphQlVariables();
+
+    default List<FormDataParameter> getFormDataParameters() {
+        return Collections.emptyList();
+    }
+
+    default boolean isFormDataMode() {
+        return false;
+    }
 
     default boolean isSoap() {
         return false;
