@@ -155,16 +155,16 @@ public class RestServiceCreator extends RestServiceBuilder {
     }
 
     protected RestParamsPropertyHolder extractParams(String path, String queryString) {
-        RestParamsPropertyHolder params = new XmlBeansRestParamsTestPropertyHolder(null,
+        RestParamsPropertyHolder paramsHolder = new XmlBeansRestParamsTestPropertyHolder(null,
                 RestParametersConfig.Factory.newInstance(), NewRestResourceActionBase.ParamLocation.METHOD);
 
-        RestUtils.extractTemplateParamsFromResourcePath(params, path);
+        RestUtils.extractTemplateParamsFromResourcePath(paramsHolder, path);
 
         if (StringUtils.hasContent(queryString)) {
-            RestUtils.extractParamsFromQueryString(params, queryString);
+            RestUtils.extractParamsFromQueryString(paramsHolder, queryString);
         }
 
-        return params;
+        return paramsHolder;
     }
 
     protected RestResource createResource(String host, String resourcePath, String resourceName) {
