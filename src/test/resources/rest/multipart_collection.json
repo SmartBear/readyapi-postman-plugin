@@ -49,6 +49,11 @@
 							"key": "file",
 							"type": "file",
 							"src": "TO_BE_MOCKED"
+						},
+						{
+							"key": "variable",
+							"type": "text",
+							"value": "{{variableValue}}"
 						}
 					]
 				},

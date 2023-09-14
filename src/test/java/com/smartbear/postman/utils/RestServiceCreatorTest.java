@@ -62,6 +62,7 @@ public class RestServiceCreatorTest {
                 .put("Not Select", "Disabled")
                 .put("more", ",./';[]}{\":?><|\\\\")
                 .put("file", attachmentUri.toString())
+                .put("variable", "${#Project#variableValue}")
                 .build();
 
         assertThat(request.getPropertyCount(), is(params.size()));

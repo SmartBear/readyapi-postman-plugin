@@ -43,6 +43,7 @@ public class RestServiceCreator extends RestServiceBuilder {
     private final WsdlProject project;
     private String uri;
     private String rawModeData;
+    private RestParamsPropertyHolder params;
 
     public RestServiceCreator(WsdlProject project) {
         this.project = project;
@@ -54,7 +55,7 @@ public class RestServiceCreator extends RestServiceBuilder {
 
         RestRequest restRequest;
         try {
-            restRequest = createRestServiceFromPostman(request.getMethod(), request.getHeaders());
+            restRequest = createRestServiceFromPostman(request);
         } catch (Exception e) {
             logger.error("Error while creating a REST service", e);
             return null;
@@ -65,7 +66,6 @@ public class RestServiceCreator extends RestServiceBuilder {
             restRequest.setName(requestName);
         }
 
-        addRequestBody(request, restRequest);
         return restRequest;
     }
 
@@ -84,8 +84,8 @@ public class RestServiceCreator extends RestServiceBuilder {
                         String key = data.getString("key");
                         String value = getFormValue(request, restRequest, data, key);
 
-                        restRequest.getParams().addProperty(key);
-                        restRequest.getParams().setPropertyValue(key, value);
+                        params.addProperty(key);
+                        params.setPropertyValue(key, value);
                     }
                 });
             }
@@ -130,8 +130,7 @@ public class RestServiceCreator extends RestServiceBuilder {
     }
 
 
-    public RestRequest createRestServiceFromPostman(String httpMethod,
-                                                    List<PostmanCollection.Header> headers) throws MalformedURLException {
+    public RestRequest createRestServiceFromPostman(Request request) throws MalformedURLException {
         RestResource restResource;
         RestURIParser uriParser = new RestURIParserImpl(uri);
         String endpoint = StringUtils.hasContent(uriParser.getScheme())
@@ -155,12 +154,13 @@ public class RestServiceCreator extends RestServiceBuilder {
         RestMethod restMethod = addNewMethod(
                 ModelCreationStrategy.CREATE_NEW_MODEL,
                 restResource,
-                RestRequestInterface.HttpMethod.valueOf(httpMethod));
+                RestRequestInterface.HttpMethod.valueOf(request.getMethod()));
 
         RestRequest restRequest = addNewRequest(restMethod);
-        RestParamsPropertyHolder params = extractParams(resourcePath, uriParser.getQuery());
-        addRestHeaders(params, headers);
-        convertParameters(params);
+        params = extractParams(resourcePath, uriParser.getQuery());
+        addRestHeaders(request.getHeaders());
+        addRequestBody(request, restRequest);
+        convertParameters();
 
         RestParamsPropertyHolder requestPropertyHolder = restMethod.getParams();
         copyParameters(params, requestPropertyHolder);
@@ -211,8 +211,8 @@ public class RestServiceCreator extends RestServiceBuilder {
     }
 
 
-    private void convertParameters(RestParamsPropertyHolder propertyHolder) {
-        for (TestProperty property : propertyHolder.getPropertyList()) {
+    private void convertParameters() {
+        for (TestProperty property : params.getPropertyList()) {
             if (property instanceof RestParamProperty && ((RestParamProperty) property).getStyle() == RestParamsPropertyHolder.ParameterStyle.TEMPLATE) {
                 property.setValue("{{" + property.getName() + "}}");
             }
@@ -229,7 +229,7 @@ public class RestServiceCreator extends RestServiceBuilder {
         }
     }
 
-    private void addRestHeaders(RestParamsPropertyHolder params, List<PostmanCollection.Header> headers) {
+    private void addRestHeaders(List<PostmanCollection.Header> headers) {
         for (PostmanCollection.Header header : headers) {
             RestParamProperty property = params.addProperty(header.getKey());
             property.setStyle(RestParamsPropertyHolder.ParameterStyle.HEADER);
