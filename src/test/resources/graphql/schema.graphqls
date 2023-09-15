@@ -1,0 +1,46 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    customer(id: String): Customer
+    customers: [Customer]
+}
+
+type Mutation {
+    addCustomer(name: String!, email: String!, age: Int!): Customer
+    editCustomer(id: String!, name: String, email: String, age: Int, extraData: Date): Customer
+}
+
+type Customer {
+    id: String
+    name: String
+    email: String
+    age: Int
+    status: Boolean
+    products: [Product]
+    data: ExtraInfo
+}
+
+type ExtraInfo {
+    licenseType: String #LicenseType
+    status: String #Status
+}
+
+type Product {
+    productID: Int
+    productName: String
+    quantity: Int
+    info: AdditionalInfo
+}
+
+type AdditionalInfo {
+    made: String
+    design: String
+    warranty: String
+    annualFailureRate: Float #AnnualFailureRate
+}
+
+"""Date custom scalar type"""
+scalar Date

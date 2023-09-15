@@ -123,7 +123,7 @@ public class PostmanImporter {
                         logger.info("Importing a GraphQL request with URI [ {} ] - started", uri);
 
                         GraphQLImporterUtils graphQLImporterUtils = new GraphQLImporterUtils();
-                        GraphQLRequest graphQLRequest = graphQLImporterUtils.addGraphQLRequest(project, uri, request);
+                        GraphQLRequest graphQLRequest = graphQLImporterUtils.addGraphQLRequest(project, request);
                         if (graphQLRequest == null) {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;

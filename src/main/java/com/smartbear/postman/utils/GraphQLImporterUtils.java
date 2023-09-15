@@ -26,8 +26,8 @@ public class GraphQLImporterUtils {
         return mode != null && mode.equals(GRAPHQL_MODE);
     }
 
-    public GraphQLRequest addGraphQLRequest(WsdlProject project, String uri, Request request) {
-        GraphQLRequest graphQLRequest = createGraphQLRequest(project, uri, request);
+    public GraphQLRequest addGraphQLRequest(WsdlProject project, Request request) {
+        GraphQLRequest graphQLRequest = createGraphQLRequest(project, request.getUrl(), request);
 
         if (graphQLRequest != null) {
             if (StringUtils.hasContent(request.getName())) {
@@ -36,7 +36,7 @@ public class GraphQLImporterUtils {
             if (StringUtils.hasContent(request.getBody())) {
                 graphQLRequest.setRequestContent(request.getBody());
             }
-            graphQLRequest.setEndpoint(VariableUtils.convertVariables(uri, project));
+            graphQLRequest.setEndpoint(VariableUtils.convertVariables(request.getUrl(), project));
             graphQLRequest.setQuery(request.getGraphQlQuery());
             graphQLRequest.setVariables(request.getGraphQlVariables());
         }
@@ -82,9 +82,11 @@ public class GraphQLImporterUtils {
         } else {
             try {
                 GraphQLImporter importer = new GraphQLImporter(project);
-                GraphQLService graphQLService = importer.importGraphQL(url);
+                GraphQLService graphQLService = importer.importGraphQL(url, false);
                 graphQLService.setDefinitionUrl(url);
                 graphQLService.addEndpoint(url);
+                graphQLService.addNewOperationGroup(GraphQLOperationGroupEnumConfig.MUTATION.toString());
+                graphQLService.addNewOperationGroup(GraphQLOperationGroupEnumConfig.QUERY.toString());
                 services.add(graphQLService);
             } catch (Exception e) {
                 logger.error("Error while creating a GraphQL service", e);

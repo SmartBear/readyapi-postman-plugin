@@ -1,0 +1,185 @@
+{
+	"info": {
+		"_postman_id": "36f18c21-9744-4a15-a1cc-64204ae309b4",
+		"name": "Postman Collection (from GraphQL) Copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "mutations 123123",
+			"item": [
+				{
+					"name": "editCustomer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation editCustomer ($id: String!, $name: String, $email: String, $age: Int, $extraData: Date) {\n    editCustomer (id: $id, name: $name, email: $email, age: $age, extraData: $extraData) {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                warranty\n            }\n        }\n    }\n}",
+								"variables": "{\n  \"id\": \"\",\n  \"name\": \"\",\n  \"email\": \"\",\n  \"age\": 0,\n  \"extraData\": \"\"\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addCustomer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "mutation addCustomer ($name: String!, $email: String!, $age: Int!) {\n    addCustomer (name: $name, email: $email, age: $age) {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                warranty\n            }\n        }\n    }\n}",
+								"variables": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"age\": 0\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "queries",
+			"item": [
+				{
+					"name": "customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query customer ($id: String) {\n    customer (id: $id) {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                warranty\n            }\n        }\n    }\n}",
+								"variables": "{\n  \"id\": \"\"\n}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "customers",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query customers {\n    customers {\n        id\n        name\n        email\n        age\n        status\n        products {\n            productID\n            productName\n            quantity\n            info {\n                made\n                warranty\n            }\n        }\n    }\n}",
+								"variables": "{}"
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/graphql",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "country PL",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Query {\r\n  country(code: \"PL\") {\r\n    name\r\n    native\r\n    capital\r\n    emoji\r\n    currency\r\n    languages {\r\n      code\r\n      name\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://countries.trevorblades.com/graphql",
+							"protocol": "https",
+							"host": [
+								"countries",
+								"trevorblades",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "country UA",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "graphql",
+							"graphql": {
+								"query": "query Query {\r\n  country(code: \"UA\") {\r\n    name\r\n    native\r\n    capital\r\n    emoji\r\n    currency\r\n    languages {\r\n      code\r\n      name\r\n    }\r\n  }\r\n}",
+								"variables": ""
+							}
+						},
+						"url": {
+							"raw": "https://countries.trevorblades.com/graphql",
+							"protocol": "https",
+							"host": [
+								"countries",
+								"trevorblades",
+								"com"
+							],
+							"path": [
+								"graphql"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "",
+			"type": "any"
+		}
+	]
+}
