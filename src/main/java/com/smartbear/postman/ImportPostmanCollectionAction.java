@@ -21,7 +21,6 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.support.PathUtils;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
-import com.eviware.soapui.plugins.ActionConfiguration;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.action.support.AbstractSoapUIAction;
@@ -30,16 +29,44 @@ import com.eviware.x.form.support.ADialogBuilder;
 import com.eviware.x.form.support.AField;
 import com.eviware.x.form.support.AField.AFieldType;
 import com.eviware.x.form.support.AForm;
+import com.smartbear.ready.core.Logging;
+import com.smartbear.ready.core.ReadyApiCoreModule;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configuration;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
 import static com.smartbear.postman.PostmanImporter.sendAnalytics;
 
 public class ImportPostmanCollectionAction extends AbstractSoapUIAction<WorkspaceImpl> {
+    private static final Logger logger = LoggerFactory.getLogger(ImportPostmanCollectionAction.class);
     private XFormDialog dialog;
 
     public ImportPostmanCollectionAction() {
         super("Import Postman Collection", "Imports a Postman collection into ReadyAPI");
+
+        initLogger();
+    }
+
+    private void initLogger() {
+        String packageName = "com.smartbear.postman";
+
+        Configuration configuration = ((LoggerContext) LogManager.getContext(false)).getConfiguration();
+
+        if (!configuration.getLoggers().containsKey(packageName)) {
+            LoggerConfig loggerConfig = new LoggerConfig(packageName, Level.INFO, true);
+            configuration.addLogger(packageName, loggerConfig);
+
+            String logTabName = ReadyApiCoreModule.READY_API_NAME + " Log";
+            Logging.getLogMonitor().getLogArea(logTabName).addLogger(packageName, true);
+
+            logger.info("Postman logger added to {}", logTabName);
+        }
     }
 
     @Override
