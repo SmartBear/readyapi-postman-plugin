@@ -1,0 +1,65 @@
+{
+	"info": {
+		"_postman_id": "519067ce-fe46-4205-90f5-48c04d769f18",
+		"name": "Multipart/form-data",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "28372928"
+	},
+	"item": [
+		{
+			"name": "POST multipart/form-data with text parameters",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "pl",
+							"value": "'a'",
+							"type": "text"
+						},
+						{
+							"key": "qu",
+							"value": "\"b\"",
+							"type": "text"
+						},
+						{
+							"key": "sa",
+							"value": "d",
+							"type": "text"
+						},
+						{
+							"key": "Special",
+							"value": "!@#$%&*()^_+=`~",
+							"type": "text"
+						},
+						{
+							"key": "Not Select",
+							"value": "Disabled",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "more",
+							"value": ",./';[]}{\":?><|\\\\",
+							"type": "text"
+						},
+						{
+							"key": "file",
+							"type": "file",
+							"src": "TO_BE_MOCKED"
+						},
+						{
+							"key": "variable",
+							"type": "text",
+							"value": "{{variableValue}}"
+						}
+					]
+				},
+				"url": "https://postman-echo.com/post"
+			},
+			"response": []
+		}
+	]
+}

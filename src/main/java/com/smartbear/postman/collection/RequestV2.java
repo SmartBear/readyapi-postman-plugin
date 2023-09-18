@@ -2,14 +2,20 @@ package com.smartbear.postman.collection;
 
 import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
 import com.smartbear.postman.ScriptType;
+import com.smartbear.postman.utils.PostmanJsonUtil;
+import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlOptions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 class RequestV2 implements Request {
     private final JSONObject item;
@@ -118,6 +124,40 @@ class RequestV2 implements Request {
         }
 
         return "";
+    }
+
+    @Override
+    public List<FormDataParameter> getFormDataParameters() {
+        List<FormDataParameter> parameters = new LinkedList<>();
+        JSON dataJson = new PostmanJsonUtil().parseTrimmedText(getBody());
+
+        Map<String, String> typeToValue = new HashMap<>();
+        typeToValue.put("file", "src");
+        typeToValue.put("text", "value");
+
+        Map<String, FormDataParameter.FormDataType> stringToFormDataType = new HashMap<>();
+        stringToFormDataType.put("text", FormDataParameter.FormDataType.TEXT);
+        stringToFormDataType.put("file", FormDataParameter.FormDataType.FILE);
+
+        if (dataJson instanceof JSONArray) {
+            JSONArray dataArray = (JSONArray) dataJson;
+            Arrays.stream(dataArray.toArray())
+                    .filter(JSONObject.class::isInstance)
+                    .map(d -> (JSONObject) d)
+                    .forEach(data -> {
+                        String key = data.getString("key");
+                        String type = data.getString("type");
+
+                        String value = data.getString(typeToValue.get(type));
+                        parameters.add(new FormDataParameter(stringToFormDataType.get(type), key, value));
+                    });
+        }
+        return parameters;
+    }
+
+    @Override
+    public boolean isFormDataMode() {
+        return "formdata".equals(getMode());
     }
 
     @Override
