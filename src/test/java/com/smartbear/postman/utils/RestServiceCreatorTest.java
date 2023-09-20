@@ -8,6 +8,7 @@ import com.eviware.soapui.support.SoapUIException;
 import com.google.common.collect.ImmutableMap;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
+import com.smartbear.postman.exceptions.PostmanCollectionUnsupportedVersionException;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
@@ -40,7 +41,7 @@ public class RestServiceCreatorTest {
     }
 
     @Test
-    public void importFormData() throws IOException {
+    public void importFormData() throws Exception {
         // given
         PostmanCollection collection = getCollectionFromFile(RestServiceCreatorTest.class.getResource("/rest/multipart_collection.json"));
 
@@ -74,7 +75,7 @@ public class RestServiceCreatorTest {
         assertThat(request.isPostQueryString(), is(true));
     }
 
-    private PostmanCollection getCollectionFromFile(URL collectionUrl) throws IOException {
+    private PostmanCollection getCollectionFromFile(URL collectionUrl) throws Exception {
         String postmanJson = IOUtils.toString(
                 collectionUrl,
                 StandardCharsets.UTF_8
