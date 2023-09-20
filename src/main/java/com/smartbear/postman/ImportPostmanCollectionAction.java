@@ -74,11 +74,11 @@ public class ImportPostmanCollectionAction extends AbstractSoapUIAction<Workspac
         }
     }
 
-    private int getTestStepsAmount(WsdlProject project) {
+    protected static int getTestStepsAmount(WsdlProject project) {
         int testStepsAmount = 0;
         for (WsdlTestSuite testSuite : project.getTestSuiteList()) {
             for (WsdlTestCase testCase : testSuite.getTestCaseList()) {
-                testStepsAmount =+ testCase.getTestStepCount();
+                testStepsAmount += testCase.getTestStepCount();
             }
         }
         return testStepsAmount;
