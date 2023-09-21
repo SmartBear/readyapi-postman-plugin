@@ -45,6 +45,7 @@ import com.eviware.x.dialogs.XProgressMonitor;
 import com.smartbear.postman.collection.PostmanCollection;
 import com.smartbear.postman.collection.PostmanCollectionFactory;
 import com.smartbear.postman.collection.Request;
+import com.smartbear.postman.exceptions.PostmanCollectionUnsupportedVersionException;
 import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
@@ -76,18 +77,9 @@ public class PostmanImporter {
         this.testCreator = testCreator;
     }
 
-    public WsdlProject importPostmanCollection(WorkspaceImpl workspace, String filePath) {
+    public WsdlProject importPostmanCollection(WorkspaceImpl workspace, String filePath) throws PostmanCollectionUnsupportedVersionException {
         WsdlProject project = null;
-        String postmanJson = null;
-        XProgressDialog collectionImportProgressDialog = UISupport.getDialogs().createProgressDialog("Import Collection",
-                0, "Importing the collection...", false);
-        PostmanImporterWorker worker = new PostmanImporterWorker(filePath);
-        try {
-            collectionImportProgressDialog.run(worker);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        postmanJson = worker.getPostmanJson();
+        String postmanJson = getPostmanImporterWorker(filePath).getPostmanJson();
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject) {
@@ -181,6 +173,18 @@ public class PostmanImporter {
             }
         }
         return project;
+    }
+
+    private PostmanImporterWorker getPostmanImporterWorker(String filePath) {
+        XProgressDialog collectionImportProgressDialog = UISupport.getDialogs().createProgressDialog("Import Collection",
+                0, "Importing the collection...", false);
+        PostmanImporterWorker worker = new PostmanImporterWorker(filePath);
+        try {
+            collectionImportProgressDialog.run(worker);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return worker;
     }
 
     private static String createProjectName(String collectionName, List<? extends Project> projectList) {

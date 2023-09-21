@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "356e99f0-e698-4deb-8c30-f55807869faf",
+		"name": "REST Service 1 collection",
+		"description": "Postman collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "SOAP Date request",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Status code is 200\"] = responseCode.code === 200;",
+							"tests[\"Status code is 200\"] = responseCode.code !== 401;",
+							"tests[\"Response time is less than 300ms\"] = responseTime < 300;"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept-Encoding",
+						"value": "gzip,deflate"
+					},
+					{
+						"key": "Content-Type",
+						"value": "text/xml"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "\"http://localhost/test_service/Service1.asmx/Date\""
+					},
+					{
+						"key": "Content-Length",
+						"value": "228"
+					},
+					{
+						"key": "Host",
+						"value": "rapis02.aqa.com.ru"
+					},
+					{
+						"key": "Connection",
+						"value": "Keep-Alive"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Apache-HttpClient/4.5.2 (Java/1.8.0_77)"
+					},
+					{
+						"key": "test-header",
+						"value": "test"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://localhost/test_service/Service1.asmx\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n      <ser:Date/>\r\n   </soapenv:Body>\r\n</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL",
+					"protocol": "http",
+					"host": [
+						"rapis02",
+						"aqa",
+						"com",
+						"ru"
+					],
+					"path": [
+						"SOAP",
+						"Service1.asmx"
+					],
+					"query": [
+						{
+							"key": "WSDL",
+							"value": ""
+						}
+					]
+				},
+				"description": "Has test header"
+			},
+			"response": []
+		},
+		{
+			"name": "SOAP Ran request",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"soap_key1\", \"soap_value1\");"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"postman.setGlobalVariable(\"soap_key2\", \"soap_value2\");",
+							"tests[\"Body matches string\"] = responseBody.has(\"DateResponse\");",
+							"tests[\"Date is present\"] = postman.getResponseHeader(\"Date\");"
+						]
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept-Encoding",
+						"value": "gzip,deflate"
+					},
+					{
+						"key": "Content-Type",
+						"value": "text/xml"
+					},
+					{
+						"key": "SOAPAction",
+						"value": "\"http://localhost/test_service/Service1.asmx/Date\""
+					},
+					{
+						"key": "Content-Length",
+						"value": "228"
+					},
+					{
+						"key": "Host",
+						"value": "rapis02.aqa.com.ru"
+					},
+					{
+						"key": "Connection",
+						"value": "Keep-Alive"
+					},
+					{
+						"key": "User-Agent",
+						"value": "Apache-HttpClient/4.5.2 (Java/1.8.0_77)"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://localhost/test_service/Service1.asmx\">\r\n   <soapenv:Header/>\r\n   <soapenv:Body>\r\n      <ser:Ran>\r\n         <ser:x>5</ser:x>\r\n      </ser:Ran>\r\n   </soapenv:Body>\r\n</soapenv:Envelope>"
+				},
+				"url": {
+					"raw": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL",
+					"protocol": "http",
+					"host": [
+						"rapis02",
+						"aqa",
+						"com",
+						"ru"
+					],
+					"path": [
+						"SOAP",
+						"Service1.asmx"
+					],
+					"query": [
+						{
+							"key": "WSDL",
+							"value": ""
+						}
+					]
+				},
+				"description": "Set properties:\nvariable_key1:variable_value1\nvariable_key2:variable_value2"
+			},
+			"response": []
+		}
+	]
+}

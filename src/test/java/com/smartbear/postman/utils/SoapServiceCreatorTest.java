@@ -40,7 +40,7 @@ public class SoapServiceCreatorTest {
     }
 
     @Test
-    public void testAddingInterfaceWithOneRequestSoap12() throws IOException {
+    public void testAddingInterfaceWithOneRequestSoap12() throws Exception {
         // given
         URL collectionUrl = SoapServiceCreator.class.getResource("/soap/continents/continents_collection_12_v20.json");
         Request request = getRequests(collectionUrl).get(0);
@@ -57,7 +57,7 @@ public class SoapServiceCreatorTest {
     }
 
     @Test
-    public void testAddingInterfaceWithOneRequestSoap11() throws IOException {
+    public void testAddingInterfaceWithOneRequestSoap11() throws Exception {
         // given
         URL collectionUrl = SoapServiceCreator.class.getResource("/soap/continents/continents_collection_11_v20.json");
 
@@ -113,7 +113,7 @@ public class SoapServiceCreatorTest {
         assertEquals("Imported from Postman collection, original directory: [Continents collection/Continents]", request.getDescription());
     }
     @Test
-    public void testMultipleInterfaces() throws IOException {
+    public void testMultipleInterfaces() throws Exception {
         // given
         URL collectionUrl = SoapServiceCreator.class.getResource("/soap/public_soap_apis/soap_apis_collection.json");
 
@@ -141,7 +141,7 @@ public class SoapServiceCreatorTest {
         return project.getInterfaceList().stream().map(WsdlInterface.class::cast).collect(Collectors.toList());
     }
 
-    private List<Request> getRequests(URL collectionUrl) throws IOException {
+    private List<Request> getRequests(URL collectionUrl) throws Exception {
         String postmanJson = IOUtils.toString(
                 collectionUrl,
                 StandardCharsets.UTF_8
