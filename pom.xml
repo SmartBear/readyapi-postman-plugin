@@ -22,7 +22,7 @@
     </repositories>
 
     <properties>
-        <ready-api-version>3.47.0</ready-api-version>
+        <ready-api-version>3.49.0-SNAPSHOT</ready-api-version>
     </properties>
 
     <dependencies>
