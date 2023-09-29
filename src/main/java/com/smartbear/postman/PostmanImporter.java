@@ -16,10 +16,8 @@
 
 package com.smartbear.postman;
 
-import com.eviware.soapui.config.GraphQLTestRequestConfig;
-import com.eviware.soapui.config.TestStepConfig;
 import com.eviware.soapui.impl.WorkspaceImpl;
-import com.eviware.soapui.impl.graphql.GraphQLTestRequest;
+import com.eviware.soapui.impl.graphql.GraphQLRequest;
 import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.support.AbstractHttpRequest;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
@@ -27,11 +25,10 @@ import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.WsdlTestSuite;
 import com.eviware.soapui.impl.wsdl.support.wsdl.UrlClientLoader;
 import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
-import com.eviware.soapui.impl.wsdl.teststeps.GraphQLTestRequestTestStep;
+import com.eviware.soapui.impl.wsdl.teststeps.GraphQLTestRequestTestStepWithSchema;
 import com.eviware.soapui.impl.wsdl.teststeps.RestTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
-import com.eviware.soapui.impl.wsdl.teststeps.registry.GraphQLTestRequestTestStepFactory;
 import com.eviware.soapui.model.project.Project;
 import com.eviware.soapui.model.testsuite.Assertable;
 import com.eviware.soapui.support.ModelItemNamer;
@@ -50,6 +47,7 @@ import com.smartbear.postman.script.PostmanScriptParser;
 import com.smartbear.postman.script.PostmanScriptTokenizer;
 import com.smartbear.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.postman.script.ScriptContext;
+import com.smartbear.postman.utils.GraphQLImporterUtils;
 import com.smartbear.postman.utils.PostmanJsonUtil;
 import com.smartbear.postman.utils.RestServiceCreator;
 import com.smartbear.postman.utils.SoapServiceCreator;
@@ -66,8 +64,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.smartbear.postman.utils.GraphQLImporterUtils.isGraphQlRequest;
+
 public class PostmanImporter {
-    private static final String GRAPHQL_MODE = "graphql";
+
     private static final Logger logger = LoggerFactory.getLogger(PostmanImporter.class);
     private static String foldersAmount;
     private static String requestsAmount;
@@ -121,22 +121,17 @@ public class PostmanImporter {
                         }
                     } else if (isGraphQlRequest(request)) {
                         logger.info("Importing a GraphQL request with URI [ {} ] - started", uri);
-                        WsdlTestCase testCase = testCreator.createTestCase(project, collectionName);
-                        GraphQLTestRequestTestStepFactory stepFactory = new GraphQLTestRequestTestStepFactory();
-                        TestStepConfig stepConfig = stepFactory.createNewTestStep(testCase, requestName);
-                        GraphQLTestRequestConfig graphQlConfig = (GraphQLTestRequestConfig) stepConfig.getConfig();
-                        graphQlConfig.setEndpoint(VariableUtils.convertVariables(uri, project));
-                        graphQlConfig.setMethod(request.getMethod());
-                        WsdlTestStep testStep = testCase.insertTestStep(stepConfig, -1);
-                        if (testStep instanceof GraphQLTestRequestTestStep) {
-                            GraphQLTestRequestTestStep graphQlTestStep = (GraphQLTestRequestTestStep) testStep;
-                            GraphQLTestRequest graphQLTestRequest = graphQlTestStep.getTestRequest();
-                            graphQLTestRequest.setQuery(request.getGraphQlQuery());
-                            graphQLTestRequest.setVariables(request.getGraphQlVariables());
-                            addHttpHeaders(graphQLTestRequest, request.getHeaders(), project);
-                            if (StringUtils.hasContent(tests)) {
-                                assertable = graphQlTestStep;
-                            }
+
+                        GraphQLImporterUtils graphQLImporterUtils = new GraphQLImporterUtils();
+                        GraphQLRequest graphQLRequest = graphQLImporterUtils.addGraphQLRequest(project, request);
+                        if (graphQLRequest == null) {
+                            logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
+                            continue;
+                        }
+
+                        if (StringUtils.hasContent(tests)) {
+                            testCreator.createTest(graphQLRequest, collectionName);
+                            assertable = getTestRequestStep(project, GraphQLTestRequestTestStepWithSchema.class);
                         }
                     } else {
                         logger.info("Importing a REST request with URI [ {} ] - started", uri);
@@ -253,11 +248,6 @@ public class PostmanImporter {
             }
         }
         return null;
-    }
-
-    private boolean isGraphQlRequest(Request request) {
-        String mode = request.getMode();
-        return mode != null && mode.equals(GRAPHQL_MODE);
     }
 
     /**

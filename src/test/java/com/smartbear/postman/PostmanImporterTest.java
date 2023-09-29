@@ -58,7 +58,7 @@ public class PostmanImporterTest {
     public static final String SAMPLE_COLLECTION_2_0_PATH = "/Postman_Echo.postman_collection_v2.0";
     public static final String SAMPLE_COLLECTION_2_1_PATH = "/Postman_Echo.postman_collection_v2.1";
     public static final String NEW_HTTP_METHODS_COLLECTION_2_1_PATH = "/New_Methods_Collection.postman_collection_v2.1";
-    public static final String GRAPHQL_COLLECTION_2_0_PATH = "/GraphQL_Collection.postman_collection_v2.0";
+    public static final String GRAPHQL_COLLECTION_OLD_ASSERTIONS_2_0_PATH = "/graphql/GraphQL_Collection_with_old_assertions.postman_collection_v2.0";
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String GRAPHQL_COLLECTION_NAME = "Postman Collection (from GraphQL)";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
@@ -320,7 +320,7 @@ public class PostmanImporterTest {
     public void testImportGraphQlRequests() throws Exception {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
-                PostmanImporterTest.class.getResource(GRAPHQL_COLLECTION_2_0_PATH).getPath());
+                PostmanImporterTest.class.getResource(GRAPHQL_COLLECTION_OLD_ASSERTIONS_2_0_PATH).getPath());
 
         assertEquals("Project should be named after collection", GRAPHQL_COLLECTION_NAME, postmanProject.getName());
         assertEquals("Project should have 1 test suite", 1, postmanProject.getTestSuiteCount());

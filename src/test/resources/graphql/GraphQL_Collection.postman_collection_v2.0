@@ -20,7 +20,7 @@
 								"variables": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"age\": 0\n}"
 							}
 						},
-						"url": "http://rapis02.aqa.com.ru:4000/graphql"
+						"url": "/graphql/schema.graphqls"
 					},
 					"response": []
 				},
@@ -36,7 +36,7 @@
 								"variables": "{\n  \"id\": \"\",\n  \"name\": \"\",\n  \"email\": \"\",\n  \"age\": 0,\n  \"extraData\": \"\"\n}"
 							}
 						},
-						"url": "http://rapis02.aqa.com.ru:4000/graphql"
+						"url": "/graphql/schema.graphqls"
 					},
 					"response": []
 				}
@@ -57,7 +57,7 @@
 								"variables": "{\n  \"id\": \"\"\n}"
 							}
 						},
-						"url": "http://rapis02.aqa.com.ru:4000/graphql"
+						"url": "/graphql/schema.graphqls"
 					},
 					"response": []
 				},
@@ -73,7 +73,7 @@
 								"variables": "{}"
 							}
 						},
-						"url": "http://rapis02.aqa.com.ru:4000/graphql"
+						"url": "/graphql/schema.graphqls"
 					},
 					"response": []
 				}
