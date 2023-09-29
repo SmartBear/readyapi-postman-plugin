@@ -15,8 +15,8 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.XmlException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -33,7 +33,7 @@ public class SoapServiceCreatorTest {
     WsdlProject project;
     SoapServiceCreator creator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws XmlException, IOException, SoapUIException {
         project = new WsdlProjectFactory().createNew();
         creator = new SoapServiceCreator(project);

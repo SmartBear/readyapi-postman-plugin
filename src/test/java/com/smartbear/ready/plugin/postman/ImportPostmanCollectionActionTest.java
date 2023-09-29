@@ -7,13 +7,13 @@ import com.eviware.soapui.impl.wsdl.testcase.WsdlTestCase;
 import com.eviware.soapui.impl.wsdl.teststeps.registry.PropertiesStepFactory;
 import com.eviware.soapui.support.SoapUIException;
 import org.apache.xmlbeans.XmlException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 import static com.smartbear.ready.plugin.postman.ImportPostmanCollectionAction.getTestStepsAmount;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ImportPostmanCollectionActionTest {
 

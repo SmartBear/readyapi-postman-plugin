@@ -11,8 +11,8 @@ import com.smartbear.ready.plugin.postman.collection.Request;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -20,9 +20,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -35,7 +35,7 @@ public class GraphQLImporterUtilsTest {
     private WsdlProject project;
     private GraphQLImporterUtils graphQLImporter;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         project = new WsdlProjectFactory().createNew();
         graphQLImporter = new GraphQLImporterUtils();
@@ -46,23 +46,23 @@ public class GraphQLImporterUtilsTest {
         importPostmanCollectionIntoProject(GRAPHQL_COLLECTION_WITH_ONE_INTERFACE);
         GraphQLService service = (GraphQLService) project.getInterfaceList().get(0);
 
-        assertNotNull("Service is created", service);
-        assertEquals("Project contains one interface",1, project.getInterfaceCount());
+        assertNotNull(service, "Service is created");
+        assertEquals(1, project.getInterfaceCount(), "Project contains one interface");
         serviceContainsTwoOperationGroups(service);
-        assertEquals("Service contains 2 mutations", 2, service.getMutationsGroup().getOperationCount());
-        assertEquals("Service contains 2 queries", 2, service.getQueriesGroup().getOperationCount());
+        assertEquals(2, service.getMutationsGroup().getOperationCount(), "Service contains 2 mutations");
+        assertEquals(2, service.getQueriesGroup().getOperationCount(), "Service contains 2 queries");
 
         validateCustomersServiceOperationNames(service);
     }
 
     private void serviceContainsTwoOperationGroups(GraphQLService service) {
-        assertEquals("Service contains 2 operation groups", 2, service.getOperationCount());
+        assertEquals(2, service.getOperationCount(), "Service contains 2 operation groups");
     }
 
     private void validateOperationNames(List<String> operationNames, GraphQLOperationGroup operationGroup) {
         operationNames.forEach(operationName ->
-                assertTrue(String.format("Operation name %s matches actual operation name", operationName),
-                        operationGroup.getOperationList().stream().anyMatch(it -> it.getName().equals(operationName)))
+                assertTrue(operationGroup.getOperationList().stream().anyMatch(it -> it.getName().equals(operationName)),
+                        String.format("Operation name %s matches actual operation name", operationName))
         );
     }
 
@@ -74,14 +74,18 @@ public class GraphQLImporterUtilsTest {
                 .map(GraphQLService.class::cast)
                 .collect(Collectors.toList());
 
-        assertEquals("Project contains 2 interfaces", 2, project.getInterfaceCount());
+        assertEquals(2, project.getInterfaceCount(), "Project contains 2 interfaces");
 
-        assertEquals("First service contains 2 mutations", 2, services.get(0).getMutationsGroup().getOperationCount());
-        assertEquals("First service contains 2 queries", 2, services.get(0).getQueriesGroup().getOperationCount());
+        assertEquals(2, services.get(0).getMutationsGroup().getOperationCount(),
+                "First service contains 2 mutations");
+        assertEquals(2, services.get(0).getQueriesGroup().getOperationCount(),
+                "First service contains 2 queries");
         serviceContainsTwoOperationGroups(services.get(0));
 
-        assertEquals("Second service contains 2 queries", 2, services.get(1).getQueriesGroup().getOperationCount());
-        assertEquals("Second service has no mutations", 0, services.get(1).getMutationsGroup().getOperationCount());
+        assertEquals(2, services.get(1).getQueriesGroup().getOperationCount(),
+                "Second service contains 2 queries");
+        assertEquals(0, services.get(1).getMutationsGroup().getOperationCount(),
+                "Second service has no mutations");
         serviceContainsTwoOperationGroups(services.get(1));
 
         validateCustomersServiceOperationNames(services.get(0));
