@@ -12,8 +12,8 @@ import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.XmlException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -33,7 +33,7 @@ public class RestServiceCreatorTest {
     WsdlProject project;
     RestServiceCreator creator;
 
-    @Before
+    @BeforeEach
     public void setUp() throws XmlException, IOException, SoapUIException {
         project = new WsdlProjectFactory().createNew();
         creator = spy(new RestServiceCreator(project));

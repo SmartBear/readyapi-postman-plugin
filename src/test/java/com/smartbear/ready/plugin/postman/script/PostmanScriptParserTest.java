@@ -11,16 +11,16 @@ import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.security.assertion.InvalidHttpStatusCodesAssertion;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
 import com.eviware.soapui.support.SoapUIException;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -38,7 +38,7 @@ public class PostmanScriptParserTest {
     private WsdlProject project;
     private Assertable assertable;
 
-    @Before
+    @BeforeEach
     public void prepare() {
         project = new WsdlProject();
         assertable = mock(Assertable.class);
@@ -69,12 +69,12 @@ public class PostmanScriptParserTest {
         parseScript(script, context);
 
         TestProperty property1 = project.getProperty(PROPERTY1_NAME);
-        assertNotNull("Property1 is missing", property1);
-        assertEquals("Property1 has wrong value", PROPERTY1_VALUE, property1.getValue());
+        assertNotNull(property1, "Property1 is missing");
+        assertEquals(PROPERTY1_VALUE, property1.getValue(), "Property1 has wrong value");
 
         TestProperty property2 = project.getProperty(PROPERTY2_NAME);
-        assertNotNull("Property2 is missing", property2);
-        assertEquals("Property2 has wrong value", PROPERTY2_VALUE, property2.getValue());
+        assertNotNull(property2, "Property2 is missing");
+        assertEquals(PROPERTY2_VALUE, property2.getValue(), "Property2 has wrong value");
     }
 
     @Test

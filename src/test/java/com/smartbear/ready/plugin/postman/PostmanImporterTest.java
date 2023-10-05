@@ -28,9 +28,9 @@ import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,7 +38,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class PostmanImporterTest {
@@ -95,7 +98,7 @@ public class PostmanImporterTest {
     private File workspaceFile;
     private WorkspaceImpl workspace;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         workspaceFile = new File(TEST_WORKSPACE_FILE_PATH);
         workspace = new WorkspaceImpl(workspaceFile.getAbsolutePath(), null);
@@ -130,42 +133,42 @@ public class PostmanImporterTest {
                 PostmanImporterTest.class.getResource(collectionPath).getPath());
 
         TestProperty property1 = postmanProject.getProperty(PROPERTY1_NAME);
-        assertNotNull("Property1 is missing", property1);
-        assertEquals("Property1 has wrong value", PROPERTY1_VALUE, property1.getValue());
+        assertNotNull(property1, "Property1 is missing");
+        assertEquals(PROPERTY1_VALUE, property1.getValue(), "Property1 has wrong value");
 
         TestProperty property2 = postmanProject.getProperty(PROPERTY2_NAME);
-        assertNotNull("Property2 is missing", property2);
-        assertEquals("Property2 has wrong value", PROPERTY2_VALUE, property2.getValue());
+        assertNotNull(property2, "Property2 is missing");
+        assertEquals(PROPERTY2_VALUE, property2.getValue(), "Property2 has wrong value");
 
-        assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
+        assertEquals(COLLECTION_NAME, postmanProject.getName(), "Project should be named after collection");
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
-        assertEquals("Project should have 1 interface", 1, interfaceMap.size());
+        assertEquals(1, interfaceMap.size(), "Project should have 1 interface");
         Interface service = postmanProject.getInterfaceAt(0);
         assertThat(service, instanceOf(RestService.class));
 
         RestService restService = (RestService) service;
         List<RestResource> resources = restService.getResourceList();
-        assertEquals("Service should have 1 resource", 1, resources.size());
+        assertEquals(1, resources.size(), "Service should have 1 resource");
         RestResource resource = resources.get(0);
-        assertEquals("Resource has wrong name", makeResourceName(GET_PATH), resource.getName());
-        assertEquals("Resource has wrong path", GET_PATH, resource.getPath());
+        assertEquals(makeResourceName(GET_PATH), resource.getName(), "Resource has wrong name");
+        assertEquals(GET_PATH, resource.getPath(), "Resource has wrong path");
 
 
-        assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
+        assertEquals(1, resource.getRestMethodCount(), "Resource should have 1 method");
         RestMethod method = resource.getRestMethodAt(0);
-        assertEquals("Wrong method", HttpMethod.GET, method.getMethod());
-        assertEquals("Method should have 1 request", 1, method.getRequestCount());
+        assertEquals(HttpMethod.GET, method.getMethod(), "Wrong method");
+        assertEquals(1, method.getRequestCount(), "Method should have 1 request");
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", REQUEST_NAME, request.getName());
-        assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
+        assertEquals(REQUEST_NAME, request.getName(), "Request has wrong name");
+        assertEquals(REST_ENDPOINT, request.getEndpoint(), "Request has wrong endpoint");
         checkParams(postmanProject, request.getParams());
         List<RestParamProperty> headers = getParamsOfStyle(request.getParams(), ParameterStyle.HEADER);
-        assertEquals("Request must have 2 headers", 2, headers.size());
+        assertEquals(2, headers.size(), "Request must have 2 headers");
         for (RestParamProperty header : headers) {
             if (header.getName().equals(HEADER1_NAME)) {
-                assertEquals("Header1 has wrong value", HEADER1_VALUE, header.getValue());
+                assertEquals(HEADER1_VALUE, header.getValue(), "Header1 has wrong value");
             } else {
-                assertEquals("Header2 has wrong value", HEADER2_VALUE, header.getValue());
+                assertEquals(HEADER2_VALUE, header.getValue(), "Header2 has wrong value");
             }
         }
 
@@ -185,60 +188,60 @@ public class PostmanImporterTest {
                 PostmanImporterTest.class.getResource(PARAMETERIZED_COLLECTION_2_1_PATH).getPath());
 
         TestProperty hostParam = postmanProject.getProperty("host");
-        assertNotNull("host property is missing", hostParam);
+        assertNotNull(hostParam, "host property is missing");
 
         TestProperty resourceIdParam = postmanProject.getProperty("ResourceID");
-        assertNotNull("ResourceID property is missing", resourceIdParam);
+        assertNotNull(resourceIdParam, "ResourceID property is missing");
 
         TestProperty queryParam = postmanProject.getProperty("queryParam");
-        assertNotNull("queryParam property is missing", queryParam);
+        assertNotNull(queryParam, "queryParam property is missing");
 
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
-        assertEquals("Project should have 1 interfaces", 1, interfaceMap.size());
+        assertEquals(1, interfaceMap.size(), "Project should have 1 interfaces");
 
         Interface service = postmanProject.getInterfaceAt(0);
         assertThat(service, instanceOf(RestService.class));
 
         RestService restService = (RestService) service;
         List<RestResource> resources = restService.getResourceList();
-        assertEquals("Service should have 1 resource", 1, resources.size());
+        assertEquals(1, resources.size(), "Service should have 1 resource");
         RestResource resource = resources.get(0);
-        assertEquals("Resource has wrong name", PARAMETERIZED_RESOURCE_NAME, resource.getName());
-        assertEquals("Resource has wrong path", PARAMETERIZED_RESOURCE_PATH, resource.getPath());
+        assertEquals(PARAMETERIZED_RESOURCE_NAME, resource.getName(), "Resource has wrong name");
+        assertEquals(PARAMETERIZED_RESOURCE_PATH, resource.getPath(), "Resource has wrong path");
 
-        assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
+        assertEquals(1, resource.getRestMethodCount(), "Resource should have 1 method");
         RestMethod method = resource.getRestMethodAt(0);
-        assertEquals("Wrong method", HttpMethod.GET, method.getMethod());
-        assertEquals("Method should have 1 request", 1, method.getRequestCount());
+        assertEquals(HttpMethod.GET, method.getMethod(), "Wrong method");
+        assertEquals(1, method.getRequestCount(), "Method should have 1 request");
 
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", PARAMETERIZED_REQUEST_NAME, request.getName());
-        assertEquals("Request has wrong endpoint", PARAMETERIZED_ENDPOINT, request.getEndpoint());
+        assertEquals(PARAMETERIZED_REQUEST_NAME, request.getName(), "Request has wrong name");
+        assertEquals(PARAMETERIZED_ENDPOINT, request.getEndpoint(), "Request has wrong endpoint");
 
-        assertEquals("Object should have 2 params", 2, request.getPropertyCount());
+        assertEquals(2, request.getPropertyCount(), "Object should have 2 params");
 
         RestParamProperty parameter1 = request.getProperty(TEMPLATE_PARAMETER_NAME);
-        assertNotNull("Template property has not found", parameter1);
-        assertEquals("Template property has wrong style", TEMPLATE_PARAMETER_STYLE, parameter1.getStyle());
-        assertEquals("Template property has wrong value", TEMPLATE_PARAMETER_VALUE, parameter1.getValue());
+        assertNotNull(parameter1, "Template property has not found");
+        assertEquals(TEMPLATE_PARAMETER_STYLE, parameter1.getStyle(), "Template property has wrong style");
+        assertEquals(TEMPLATE_PARAMETER_VALUE, parameter1.getValue(), "Template property has wrong value");
 
         RestParamProperty parameter2 = request.getProperty(QUERY_PARAMETER_NAME);
-        assertNotNull("Query property has not found", parameter2);
-        assertEquals("Query property has wrong style", QUERY_PARAMETER_STYLE, parameter2.getStyle());
-        assertEquals("Query property has wrong value", QUERY_PARAMETER_VALUE, parameter2.getValue());
+        assertNotNull(parameter2, "Query property has not found");
+        assertEquals(QUERY_PARAMETER_STYLE, parameter2.getStyle(), "Query property has wrong style");
+        assertEquals(QUERY_PARAMETER_VALUE, parameter2.getValue(), "Query property has wrong value");
     }
 
     private void checkParams(WsdlProject postmanProject, RestParamsPropertyHolder propertyHolder) {
         List<RestParamProperty> params = getParamsOfStyle(propertyHolder, ParameterStyle.QUERY);
-        assertEquals("Object should have 2 params", 2, params != null ? params.size() : 0);
+        assertEquals(2, params != null ? params.size() : 0, "Object should have 2 params");
         RestParamProperty parameter1 = propertyHolder.getProperty(PARAMETER1_NAME);
-        assertNotNull("Property 1 has not found", parameter1);
+        assertNotNull(parameter1, "Property 1 has not found");
         ParameterStyle style = parameter1.getStyle();
-        assertEquals("Parameter has wrong style", PARAMETER1_STYLE, style);
-        assertEquals("Property has wrong value", PARAMETER1_VALUE, parameter1.getValue());
+        assertEquals(PARAMETER1_STYLE, style, "Parameter has wrong style");
+        assertEquals(PARAMETER1_VALUE, parameter1.getValue(), "Property has wrong value");
 
         String expandedParameter1 = PropertyExpander.expandProperties(postmanProject.getContext(), parameter1.getValue());
-        assertEquals("Expansion of parameter1 is wrong", PROPERTY1_VALUE, expandedParameter1);
+        assertEquals(PROPERTY1_VALUE, expandedParameter1, "Expansion of parameter1 is wrong");
     }
 
     private List<RestParamProperty> getParamsOfStyle(RestParamsPropertyHolder propertyHolder, ParameterStyle style) {
@@ -279,30 +282,30 @@ public class PostmanImporterTest {
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(collectionPath).getPath());
 
-        assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
+        assertEquals(COLLECTION_NAME, postmanProject.getName(), "Project should be named after collection");
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
-        assertEquals("Project should have 1 interface", 1, interfaceMap.size());
+        assertEquals(1, interfaceMap.size(), "Project should have 1 interface");
         Interface service = postmanProject.getInterfaceAt(0);
         assertThat(service, instanceOf(RestService.class));
 
         RestService restService = (RestService) service;
         List<RestResource> resources = restService.getResourceList();
-        assertEquals("Service should have 1 resource", 1, resources.size());
+        assertEquals(1, resources.size(), "Service should have 1 resource");
         RestResource resource = resources.get(0);
 
-        assertEquals("Resource has wrong name", makeResourceName(POST_PATH), resource.getName());
-        assertEquals("Resource has wrong path", POST_PATH, resource.getPath());
+        assertEquals(makeResourceName(POST_PATH), resource.getName(), "Resource has wrong name");
+        assertEquals(POST_PATH, resource.getPath(), "Resource has wrong path");
         List<RestParamProperty> params = getParamsOfStyle(resource.getParams(), ParameterStyle.QUERY);
-        assertEquals("Resource should have 0 query params", 0, params != null ? params.size() : 0);
+        assertEquals(0, params != null ? params.size() : 0, "Resource should have 0 query params");
 
 
-        assertEquals("Resource should have 1 method", 1, resource.getRestMethodCount());
+        assertEquals(1, resource.getRestMethodCount(), "Resource should have 1 method");
         RestMethod method = resource.getRestMethodAt(0);
-        assertEquals("Wrong method", HttpMethod.POST, method.getMethod());
-        assertEquals("Method should have 1 request", 1, method.getRequestCount());
+        assertEquals(HttpMethod.POST, method.getMethod(), "Wrong method");
+        assertEquals(1, method.getRequestCount(), "Method should have 1 request");
         RestRequest request = method.getRequestAt(0);
-        assertEquals("Request has wrong name", POST_REQUEST_NAME, request.getName());
-        assertEquals("Request has wrong endpoint", REST_ENDPOINT, request.getEndpoint());
+        assertEquals(POST_REQUEST_NAME, request.getName(), "Request has wrong name");
+        assertEquals(REST_ENDPOINT, request.getEndpoint(), "Request has wrong endpoint");
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
@@ -312,8 +315,8 @@ public class PostmanImporterTest {
 
         RestTestRequest testRequest = testStep.getTestRequest();
         List<RestParamProperty> requestParams = getParamsOfStyle(testRequest.getParams(), ParameterStyle.QUERY);
-        assertEquals("Request should have 0 query params", 0, requestParams != null ? requestParams.size() : 0);
-        assertEquals("Request should have test body", REST_POST_BODY_VALUE, request.getRequestContent());
+        assertEquals(0, requestParams != null ? requestParams.size() : 0, "Request should have 0 query params");
+        assertEquals(REST_POST_BODY_VALUE, request.getRequestContent(), "Request should have test body");
     }
 
     @Test
@@ -322,15 +325,15 @@ public class PostmanImporterTest {
         WsdlProject postmanProject = importer.importPostmanCollection(workspace,
                 PostmanImporterTest.class.getResource(GRAPHQL_COLLECTION_OLD_ASSERTIONS_2_0_PATH).getPath());
 
-        assertEquals("Project should be named after collection", GRAPHQL_COLLECTION_NAME, postmanProject.getName());
-        assertEquals("Project should have 1 test suite", 1, postmanProject.getTestSuiteCount());
+        assertEquals(GRAPHQL_COLLECTION_NAME, postmanProject.getName(), "Project should be named after collection");
+        assertEquals(1, postmanProject.getTestSuiteCount(), "Project should have 1 test suite");
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
-        assertEquals("Test suite should have 1 test case", 1, testSuite.getTestCaseCount());
+        assertEquals(1, testSuite.getTestCaseCount(), "Test suite should have 1 test case");
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
-        assertEquals("Test case should have 4 steps", GRAPHQL_REQUESTS.length, testCase.getTestStepCount());
+        assertEquals(GRAPHQL_REQUESTS.length, testCase.getTestStepCount(), "Test case should have 4 steps");
         for (int i = 0; i < 4; i++) {
             WsdlTestStep testStep = testCase.getTestStepAt(i);
-            assertEquals("Test step '" + GRAPHQL_REQUESTS[i] + "' is missing", GRAPHQL_REQUESTS[i], testStep.getName());
+            assertEquals(GRAPHQL_REQUESTS[i], testStep.getName(), "Test step '" + GRAPHQL_REQUESTS[i] + "' is missing");
         }
     }
 
@@ -366,18 +369,18 @@ public class PostmanImporterTest {
 
         assertEquals("Project should be named after collection", COLLECTION_NAME, postmanProject.getName());
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
-        assertEquals("Project should have 2 interface", 2, interfaceMap.size());
+        assertEquals(2, interfaceMap.size(), "Project should have 2 interface");
         Interface service = postmanProject.getInterfaceAt(0);
         assertThat(service, instanceOf(WsdlInterface.class));
 
         WsdlInterface wsdlInterface = (WsdlInterface) service;
         WsdlOperation operation = wsdlInterface.getOperationByName(OPERATION_NAME);
-        assertNotNull("Operation is missing", operation);
+        assertNotNull(operation, "Operation is missing");
 
-        assertEquals("Operation should have 1 request", 1, operation.getRequestCount());
+        assertEquals(1, operation.getRequestCount(), "Operation should have 1 request");
         WsdlRequest request = operation.getRequestAt(0);
-        assertEquals("Request has wrong name", WSDL_REQUEST_NAME, request.getName());
-        assertEquals("Request has wrong endpoint", SOAP_ENDPOINT, request.getEndpoint());
+        assertEquals(WSDL_REQUEST_NAME, request.getName(), "Request has wrong name");
+        assertEquals(SOAP_ENDPOINT, request.getEndpoint(), "Request has wrong endpoint");
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
@@ -393,14 +396,14 @@ public class PostmanImporterTest {
                 PostmanImporterTest.class.getResource(NEW_HTTP_METHODS_COLLECTION_2_1_PATH).getPath());
 
         Map<String, Interface> interfaceMap = postmanProject.getInterfaces();
-        assertEquals("Project should have 1 interface", 1, interfaceMap.size());
+        assertEquals(1, interfaceMap.size(), "Project should have 1 interface");
         Interface service = postmanProject.getInterfaceAt(0);
         assertThat(service, instanceOf(RestService.class));
         RestService restService = (RestService) service;
         List<RestResource> resources = restService.getResourceList();
-        assertEquals("Service should have 1 resource", 1, resources.size());
+        assertEquals(1, resources.size(), "Service should have 1 resource");
         RestResource resource = resources.get(0);
-        assertEquals("Resource should have 5 methods", 5, resource.getRestMethodCount());
+        assertEquals(5, resource.getRestMethodCount(), "Resource should have 5 methods");
     }
 
     @Test
@@ -415,37 +418,36 @@ public class PostmanImporterTest {
     }
 
     private void compareProjects(WsdlProject expectedProject, WsdlProject actualProject) {
-        assertEquals("Different number of properties", expectedProject.getPropertyCount(), actualProject.getPropertyCount());
+        assertEquals(expectedProject.getPropertyCount(), actualProject.getPropertyCount(), "Different number of properties");
 
-        assertEquals("Different number of interfaces", expectedProject.getInterfaceCount(), actualProject.getInterfaceCount());
+        assertEquals(expectedProject.getInterfaceCount(), actualProject.getInterfaceCount(), "Different number of interfaces");
         if (expectedProject.getInterfaceCount() == 1) {
             assertThat("Wrong interface type",
                     actualProject.getInterfaceAt(0), instanceOf(expectedProject.getInterfaceAt(0).getClass()));
         }
-        assertEquals("Wrong number of operations", expectedProject.getInterfaceAt(0).getOperationCount(),
-                actualProject.getInterfaceAt(0).getOperationCount());
+        assertEquals(expectedProject.getInterfaceAt(0).getOperationCount(),
+                actualProject.getInterfaceAt(0).getOperationCount(), "Wrong number of operations");
 
-        assertEquals("Wrong number of test suites", expectedProject.getTestSuiteCount(), actualProject.getTestSuiteCount());
-        assertEquals("Wrong number of test cases", expectedProject.getTestSuiteAt(0).getTestCaseCount(),
-                actualProject.getTestSuiteAt(0).getTestCaseCount());
+        assertEquals(expectedProject.getTestSuiteCount(), actualProject.getTestSuiteCount(), "Wrong number of test suites");
+        assertEquals(expectedProject.getTestSuiteAt(0).getTestCaseCount(),
+                actualProject.getTestSuiteAt(0).getTestCaseCount(), "Wrong number of test cases");
 
         WsdlTestCase expectedTestCase = expectedProject.getTestSuiteAt(0).getTestCaseAt(0);
         WsdlTestCase actualTestCase = actualProject.getTestSuiteAt(0).getTestCaseAt(0);
-        assertEquals("Wrong number of test steps", expectedTestCase.getTestStepCount(),
-                actualTestCase.getTestStepCount());
+        assertEquals(expectedTestCase.getTestStepCount(), actualTestCase.getTestStepCount(), "Wrong number of test steps");
         for (TestStep testStep : expectedTestCase.getTestStepList()) {
             RestTestRequestStep expectedTestStep = (RestTestRequestStep) testStep;
             RestTestRequest expectedRequest = expectedTestStep.getTestRequest();
             RestTestRequestStep actualTestStep = getRestTestStepForRequest(actualTestCase,
                     expectedTestStep.getRestMethod().getRequestById(expectedRequest.getId()).getName());
-            assertNotNull("No test step with name " + expectedTestStep.getName(), actualTestStep);
-            assertTrue("Number of assertions is less than expected for step " + expectedTestStep.getName(),
-                    actualTestStep.getAssertionCount() >= expectedTestStep.getAssertionCount());
+            assertNotNull(actualTestStep, "No test step with name " + expectedTestStep.getName());
+            assertTrue(actualTestStep.getAssertionCount() >= expectedTestStep.getAssertionCount(),
+                    "Number of assertions is less than expected for step " + expectedTestStep.getName());
             RestTestRequest actualRequest = actualTestStep.getTestRequest();
-            assertTrue("Number of paramters is less than expected for step " + expectedTestStep.getName(),
-                    actualRequest.getParams().size() >= expectedRequest.getParams().size());
-            assertEquals("Payloads don't match for step " + expectedTestStep.getName(),
-                    expectedRequest.getRequestContent(), actualRequest.getRequestContent());
+            assertTrue(actualRequest.getParams().size() >= expectedRequest.getParams().size(),
+                    "Number of paramters is less than expected for step " + expectedTestStep.getName());
+            assertEquals(expectedRequest.getRequestContent(), actualRequest.getRequestContent(),
+                    "Payloads don't match for step " + expectedTestStep.getName());
         }
     }
 
@@ -460,7 +462,7 @@ public class PostmanImporterTest {
         return null;
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         if (workspaceFile.exists()) {
             workspaceFile.delete();
