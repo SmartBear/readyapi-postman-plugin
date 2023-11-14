@@ -5,7 +5,7 @@ This repository contains source code files for the Postman Plugin for ReadyAPI. 
 ## Plugin Info
 
 - Author: SmartBear Software (http://smartbear.com)
-- Plugin version: 2.0.1
+- Plugin version: 3.0.0
 
 ## Requirements
 
