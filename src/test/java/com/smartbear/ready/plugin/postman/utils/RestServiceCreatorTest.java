@@ -15,7 +15,7 @@ import org.apache.xmlbeans.XmlException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
