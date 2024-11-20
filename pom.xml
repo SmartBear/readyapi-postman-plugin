@@ -7,7 +7,7 @@
 
     <groupId>com.smartbear.soapui.plugins</groupId>
     <artifactId>readyapi-postman-plugin</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
 
     <name>ReadyAPI Postman Plugin</name>
     <description>Creates ReadyAPI projects and tests based on Postman collections</description>
@@ -22,7 +22,7 @@
     </repositories>
 
     <properties>
-        <ready-api-version>3.52.0</ready-api-version>
+        <ready-api-version>3.57.0-XMLBEANS-SNAPSHOT</ready-api-version>
         <java.version>17</java.version>
     </properties>
 
