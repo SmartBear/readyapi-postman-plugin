@@ -22,7 +22,7 @@
     </repositories>
 
     <properties>
-        <ready-api-version>3.57.0-XMLBEANS-SNAPSHOT</ready-api-version>
+        <ready-api-version>3.57.0-SNAPSHOT</ready-api-version>
         <java.version>17</java.version>
     </properties>
 
