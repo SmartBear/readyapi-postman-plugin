@@ -47,4 +47,9 @@ public class AddChaiAssertionCommand implements AddAssertionCommand {
         }
         return null;
     }
+
+    @Override
+    public void addCondition(String condition) {
+
+    }
 }

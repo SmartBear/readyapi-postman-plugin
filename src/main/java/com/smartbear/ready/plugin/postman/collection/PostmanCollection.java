@@ -37,7 +37,7 @@ public abstract class PostmanCollection {
     public abstract String getAuth();
     public abstract String getVersion();
 
-    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
+    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName, boolean isPostmanCollectionV2) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
         List<Pattern> commentRegexPatterns = List.of(Pattern.compile("(.*?)(//.*)"), Pattern.compile("(.*?)(/\\*.*)"));
         Pattern onlyCommentPattern = Pattern.compile("^ *(//|/\\*).*");

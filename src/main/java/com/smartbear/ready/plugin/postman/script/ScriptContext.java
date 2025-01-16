@@ -62,6 +62,7 @@ public class ScriptContext {
 
         PostmanObject responseBodyObject = new PostmanObject(new AddEqualsAssertionCommand(assertable));
         responseBodyObject.addCommand(new AddSimpleContainsAssertionCommand(assertable));
+        responseBodyObject.addCommand(new AddChaiAssertionCommand(assertable));
         context.addObject(RESPONSE_BODY, responseBodyObject);
 
         PostmanObject globalsObject = new PostmanObject();
