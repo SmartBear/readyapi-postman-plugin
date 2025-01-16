@@ -35,7 +35,7 @@ public abstract class PostmanCollection {
     public abstract String getAuth();
     public abstract String getVersion();
 
-    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
+    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName, boolean isPostmanCollectionV2) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
         for (Object eventObject : events) {
             if (eventObject instanceof JSONObject) {
@@ -49,7 +49,7 @@ public abstract class PostmanCollection {
                     StringBuffer scriptBuffer = new StringBuffer();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
                     for (Object scriptLine : scriptLines) {
-                        if (scriptBuffer.length() > 0) {
+                        if (!scriptBuffer.isEmpty() && !isPostmanCollectionV2) {
                             scriptBuffer.append(SCRIPT_LINE_DELIMITER);
                         }
                         scriptBuffer.append(scriptLine);

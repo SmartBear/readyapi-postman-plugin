@@ -46,6 +46,7 @@ import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
 import com.smartbear.ready.plugin.postman.exceptions.PostmanCollectionUnsupportedVersionException;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptParser;
+import com.smartbear.ready.plugin.postman.script.PostmanScriptParserV2;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.ready.plugin.postman.script.ScriptContext;
@@ -76,6 +77,9 @@ public class PostmanImporter {
     private static String requestsAmount;
     private final TestCreator testCreator;
     private final VaultVariableResolver resolver;
+    private final String INFO = "info";
+    private final String SCHEMA = "schema";
+    private final String V2 = "v2";
 
     public PostmanImporter(TestCreator testCreator) {
         this.testCreator = testCreator;
@@ -115,6 +119,9 @@ public class PostmanImporter {
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
                     RequestAuthProfile authProfile = request.getAuthProfileWithName();
+                    String requestName = request.getName();
+                    String preRequestScript = request.getPreRequestScript(isPostmanCollectionV2);
+                    String testsV1 = request.getTests(false);
 
                     if (StringUtils.hasContent(preRequestScript)) {
                         processPreRequestScript(preRequestScript, project);
@@ -145,7 +152,7 @@ public class PostmanImporter {
                         }
                         authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), graphQLRequest);
 
-                        if (StringUtils.hasContent(tests)) {
+                        if (StringUtils.hasContent(testsV1)) {
                             testCreator.createTest(graphQLRequest, collectionName);
                             assertable = getTestRequestStep(project, GraphQLTestRequestTestStepWithSchema.class);
                         }
@@ -158,14 +165,18 @@ public class PostmanImporter {
                         }
                         authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), restRequest);
 
-                        if (StringUtils.hasContent(tests)) {
+                        if (StringUtils.hasContent(testsV1)) {
                             testCreator.createTest(restRequest, collectionName);
                             assertable = getTestRequestStep(project, RestTestRequestStep.class);
                         }
                     }
 
                     if (assertable != null) {
-                        addAssertions(tests, project, assertable);
+                        if (isPostmanCollectionV2){
+                            String testsV2 = request.getTests(true);
+                            addAssertionsV2(testsV2, project, assertable);
+                        }
+                        addAssertions(testsV1, project, assertable);
                     }
 
                     logger.info("Importing a request with URI [ {} ] - done", uri);
@@ -249,6 +260,12 @@ public class PostmanImporter {
         }
     }
 
+    void addAssertionsV2(String tests, WsdlProject project, Assertable assertable) {
+        PostmanScriptParserV2 parser = new PostmanScriptParserV2();
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        parser.parse(tests, context);
+    }
+
     private void processPreRequestScript(String preRequestScript, WsdlProject project) {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
         PostmanScriptParser parser = new PostmanScriptParser();
@@ -276,6 +293,13 @@ public class PostmanImporter {
             }
         }
         return null;
+    }
+
+    private boolean isPostmanCollectionV2(JSON json){
+        if(json == null){
+            return false;
+        }
+        return ((JSONObject) json).getJSONObject(INFO).get(SCHEMA).toString().contains(V2);
     }
 
     /**

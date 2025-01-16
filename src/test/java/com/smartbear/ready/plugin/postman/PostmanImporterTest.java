@@ -21,6 +21,7 @@ import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.TestAssertionRegistry;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.ChaiAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
@@ -67,6 +68,7 @@ public class PostmanImporterTest {
     public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get_Collection.postman_collection_v2.0";
     public static final String REST_GET_COLLECTION_2_1_PATH = "/REST_Get_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_2_0_PATH = "/REST_Post_Collection.postman_collection_v2.0";
+    public static final String REST_POST_COLLECTION_2_0_CHAI_PATH = "/REST_Post_Collection.postman_collection_v2.0_chai";
     public static final String REST_POST_COLLECTION_2_1_PATH = "/REST_Post_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_2_1_EVENTS_PATH = "/REST_Post_Collection_events.postman_collection_v2.1";
     public static final String PARAMETERIZED_COLLECTION_2_1_PATH = "/Parameterized_Endpoint_Collection.postman_collection_v2.1";
@@ -306,6 +308,11 @@ public class PostmanImporterTest {
     }
 
     @Test
+    public void testImportRestPostRequestFromCollectionChai20() throws Exception {
+        testImportRestChaiRequestWithChai(REST_POST_COLLECTION_2_0_CHAI_PATH);
+    }
+
+    @Test
     public void testImportRestPostRequestFromCollection20() throws Exception {
         testImportRestPostRequest(REST_POST_COLLECTION_2_0_PATH);
     }
@@ -355,6 +362,20 @@ public class PostmanImporterTest {
         List<RestParamProperty> requestParams = getParamsOfStyle(testRequest.getParams(), ParameterStyle.QUERY);
         assertEquals(0, requestParams != null ? requestParams.size() : 0, "Request should have 0 query params");
         assertEquals(REST_POST_BODY_VALUE, request.getRequestContent(), "Request should have test body");
+    }
+
+    public void testImportRestChaiRequestWithChai(String collectionPath) throws Exception {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(workspace,
+                PostmanImporterTest.class.getResource(collectionPath).getPath());
+
+        WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
+        WsdlTestCase testCase = testSuite.getTestCaseAt(0);
+        RestTestRequestStep testStep = (RestTestRequestStep) testCase.getTestStepAt(0);
+        assertThat(testStep.getAssertionAt(0), instanceOf(ChaiAssertion.class));
+        assertThat(testStep.getAssertionAt(1), instanceOf(ChaiAssertion.class));
+        assertThat(testStep.getAssertionAt(2), instanceOf(ValidHttpStatusCodesAssertion.class));
+        assertThat(testStep.getAssertionAt(3), instanceOf(SimpleContainsAssertion.class));
     }
 
     @Test

@@ -61,13 +61,13 @@ class RequestV2 implements Request {
     }
 
     @Override
-    public String getPreRequestScript() {
-        return PostmanCollection.getEventScript(item, ScriptType.PRE_REQUEST, PostmanCollectionV2.EVENT);
+    public String getPreRequestScript(boolean isPostmanCollectionV2) {
+        return PostmanCollection.getEventScript(item, ScriptType.PRE_REQUEST, PostmanCollectionV2.EVENT, isPostmanCollectionV2);
     }
 
     @Override
-    public String getTests() {
-        return PostmanCollection.getEventScript(item, ScriptType.TESTS, PostmanCollectionV2.EVENT);
+    public String getTests(boolean isPostmanCollectionV2) {
+        return PostmanCollection.getEventScript(item, ScriptType.TESTS, PostmanCollectionV2.EVENT, isPostmanCollectionV2);
     }
 
     @Override
