@@ -1,0 +1,18 @@
+{
+	"id": "c3221f26-ad2d-4c8d-a8fe-a1a0c101cd5d",
+	"name": "Test invalid json",
+	"values": [
+		{
+			"property": {
+				"test": true,
+				"test2": false
+			},
+			"property2": {
+				"axisY": -716926680.3442531,
+				"axisZ": 1763769837.9413128,
+				"axisX": 1572658929.2251368
+			},
+			"size": 1234
+		}
+	]
+}
