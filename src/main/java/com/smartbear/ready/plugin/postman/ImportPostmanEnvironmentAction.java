@@ -3,7 +3,6 @@ package com.smartbear.ready.plugin.postman;
 import com.eviware.soapui.impl.wsdl.WsdlProjectPro;
 import com.eviware.soapui.impl.wsdl.actions.environment.AbstractNewEnvironmentAction;
 
-import com.eviware.soapui.impl.wsdl.actions.environment.NewEnvironmentPropertyWrapper;
 import com.eviware.soapui.model.environment.Environment;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.x.form.XFormDialog;
@@ -102,7 +101,7 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
     private boolean variableWithGivenNameExists(String variableName, List<NewEnvironmentPropertyWrapper> propertiesMap) {
         return propertiesMap
                 .stream()
-                .anyMatch(v -> v.getKey().equals(variableName));
+                .anyMatch(v -> v.key().equals(variableName));
     }
 
     private void sendAnalyticsAction(String envName) {
