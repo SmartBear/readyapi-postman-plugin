@@ -39,7 +39,7 @@ class ImportPostmanEnvironmentActionTest {
     @Test
     void testIfEnvironmentWasCreated() throws IOException, URISyntaxException {
         PostmanEnvModel postmanEnvModel = loadEnvironmentFromFile(ENV_WITH_DUPLICATE_VALUES);
-        importPostmanEnvironmentAction.createEnvironmentAndPopulateFrom(postmanEnvModel);
+        importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModel);
         assertNotNull(project.getEnvironmentByName(postmanEnvModel.getName()));
     }
 
@@ -47,8 +47,8 @@ class ImportPostmanEnvironmentActionTest {
     void testIfEnvironmentWithTheSameNameWasCreatedOnlyOnce() throws IOException, URISyntaxException {
         PostmanEnvModel postmanEnvModel = loadEnvironmentFromFile(ENV_WITH_DUPLICATE_VALUES);
         PostmanEnvModel postmanEnvModelCopy = loadEnvironmentFromFile(ENV_WITH_DUPLICATE_VALUES);
-        importPostmanEnvironmentAction.createEnvironmentAndPopulateFrom(postmanEnvModel);
-        importPostmanEnvironmentAction.createEnvironmentAndPopulateFrom(postmanEnvModelCopy);
+        importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModel);
+        importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModelCopy);
 
         int environmentsWithTheSameName = (int) Arrays.stream(project.getEnvironmentNames())
                 .filter(en -> en.equals(postmanEnvModel.getName()))
@@ -60,7 +60,7 @@ class ImportPostmanEnvironmentActionTest {
     @Test
     void invalidDefinitionDoesNotCreateEnvironment() throws IOException, URISyntaxException {
         PostmanEnvModel postmanEnvModel = loadEnvironmentFromFile(JSON_WITH_RANDOM_DATA);
-        importPostmanEnvironmentAction.createEnvironmentAndPopulateFrom(postmanEnvModel);
+        importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModel);
         assertNull(project.getEnvironmentByName(postmanEnvModel.getName()));
     }
 
@@ -74,7 +74,7 @@ class ImportPostmanEnvironmentActionTest {
         project.getSettings().setString(ProjectSettings.SHADOW_PASSWORD, "password");
 
         PostmanEnvModel postmanEnvModel = loadEnvironmentFromFile(ENV_WITH_SECRET_VALUES);
-        importPostmanEnvironmentAction.createEnvironmentAndPopulateFrom(postmanEnvModel);
+        importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModel);
 
         postmanEnvModel.getValues().forEach(variable -> {
             TestProperty testProperty = project.getProjectProperty(variable.getKey());

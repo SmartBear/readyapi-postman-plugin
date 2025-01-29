@@ -51,7 +51,7 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
             String filePath = dialog.getFormField(LoadPostmanFile.FILE).getValue();
             try {
                 PostmanEnvModel postmanEnvModel = loadFromFile(filePath);
-                createEnvironmentAndPopulateFrom(postmanEnvModel);
+                addEnvironmentAndPopulateProperties(postmanEnvModel);
                 sendAnalyticsAction(postmanEnvModel.getName());
             } catch (Exception e) {
                 UISupport.getDialogs().showErrorMessage("Cannot import Postman environment.\n" + e.getMessage());
@@ -68,7 +68,7 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
         }
     }
 
-    protected void createEnvironmentAndPopulateFrom(PostmanEnvModel postmanEnvModel) {
+    protected void addEnvironmentAndPopulateProperties(PostmanEnvModel postmanEnvModel) {
         if (project.getEnvironmentByName(postmanEnvModel.getName()) != null) {
             UISupport.getDialogs().showErrorMessage(
                     String.format("An environment with the name %s already exists.", postmanEnvModel.getName()));
