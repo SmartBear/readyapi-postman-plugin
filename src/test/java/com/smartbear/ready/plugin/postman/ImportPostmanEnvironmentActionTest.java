@@ -40,7 +40,7 @@ class ImportPostmanEnvironmentActionTest {
     void testIfEnvironmentWasCreated() throws IOException, URISyntaxException {
         PostmanEnvModel postmanEnvModel = loadEnvironmentFromFile(ENV_WITH_DUPLICATE_VALUES);
         importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModel);
-        assertNotNull(project.getEnvironmentByName(postmanEnvModel.getName()));
+        assertNotNull(project.getEnvironmentByName(postmanEnvModel.name()));
     }
 
     @Test
@@ -51,7 +51,7 @@ class ImportPostmanEnvironmentActionTest {
         importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModelCopy);
 
         int environmentsWithTheSameName = (int) Arrays.stream(project.getEnvironmentNames())
-                .filter(en -> en.equals(postmanEnvModel.getName()))
+                .filter(en -> en.equals(postmanEnvModel.name()))
                 .count();
 
         assertEquals(1, environmentsWithTheSameName);
@@ -61,7 +61,7 @@ class ImportPostmanEnvironmentActionTest {
     void invalidDefinitionDoesNotCreateEnvironment() throws IOException, URISyntaxException {
         PostmanEnvModel postmanEnvModel = loadEnvironmentFromFile(JSON_WITH_RANDOM_DATA);
         importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModel);
-        assertNull(project.getEnvironmentByName(postmanEnvModel.getName()));
+        assertNull(project.getEnvironmentByName(postmanEnvModel.name()));
     }
 
     @Test
@@ -76,8 +76,8 @@ class ImportPostmanEnvironmentActionTest {
         PostmanEnvModel postmanEnvModel = loadEnvironmentFromFile(ENV_WITH_SECRET_VALUES);
         importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(postmanEnvModel);
 
-        postmanEnvModel.getValues().forEach(variable -> {
-            TestProperty testProperty = project.getProjectProperty(variable.getKey());
+        postmanEnvModel.values().forEach(variable -> {
+            TestProperty testProperty = project.getProjectProperty(variable.key());
             if (variable.isSecret()) {
                 assertTrue(((EncryptableTestProperty) testProperty).isEncrypted());
             }

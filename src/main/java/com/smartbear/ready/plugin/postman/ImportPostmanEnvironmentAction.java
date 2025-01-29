@@ -52,7 +52,7 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
             try {
                 PostmanEnvModel postmanEnvModel = loadFromFile(filePath);
                 addEnvironmentAndPopulateProperties(postmanEnvModel);
-                sendAnalyticsAction(postmanEnvModel.getName());
+                sendAnalyticsAction(postmanEnvModel.name());
             } catch (Exception e) {
                 UISupport.getDialogs().showErrorMessage("Cannot import Postman environment.\n" + e.getMessage());
             }
@@ -69,15 +69,15 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
     }
 
     protected void addEnvironmentAndPopulateProperties(PostmanEnvModel postmanEnvModel) {
-        if (project.getEnvironmentByName(postmanEnvModel.getName()) != null) {
+        if (project.getEnvironmentByName(postmanEnvModel.name()) != null) {
             UISupport.getDialogs().showErrorMessage(
-                    String.format("An environment with the name %s already exists.", postmanEnvModel.getName()));
+                    String.format("An environment with the name %s already exists.", postmanEnvModel.name()));
             return;
         }
         List<NewEnvironmentPropertyWrapper> newPropertiesMap = new ArrayList<>();
         Map<String, Integer> keyCountMap = new HashMap<>();
-        for (PostmanEnvVariable variable : postmanEnvModel.getValues()) {
-            String variableName = variable.getKey();
+        for (PostmanEnvVariable variable : postmanEnvModel.values()) {
+            String variableName = variable.key();
             if (isNullOrEmpty(variableName)) {
                 log.error("Variable name cannot be empty, it will not be imported.");
                 continue;
@@ -85,16 +85,16 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
             if (variableWithGivenNameExists(variableName, newPropertiesMap)) {
                 int count = keyCountMap.getOrDefault(variableName, 1);
                 variableName += " " + count;
-                keyCountMap.put(variable.getKey(), count + 1);
+                keyCountMap.put(variable.key(), count + 1);
             }
-            newPropertiesMap.add(new NewEnvironmentPropertyWrapper(variableName, variable.getValue(), variable.isSecret()));
+            newPropertiesMap.add(new NewEnvironmentPropertyWrapper(variableName, variable.value(), variable.isSecret()));
             project.addProperty(variableName);
         }
 
         if (newPropertiesMap.isEmpty()) {
             UISupport.getDialogs().showErrorMessage("No variables found in provided Postman environment.");
         } else {
-            addEnvironment(project, postmanEnvModel.getName(), newPropertiesMap);
+            addEnvironment(project, postmanEnvModel.name(), newPropertiesMap);
         }
     }
 
