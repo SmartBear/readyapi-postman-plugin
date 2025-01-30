@@ -34,7 +34,7 @@ import static com.eviware.soapui.support.StringUtils.isNullOrEmpty;
 public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction {
 
     private static final Logger log = LoggerFactory.getLogger(ImportPostmanEnvironmentAction.class);
-    private final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private final WsdlProjectPro project;
 
