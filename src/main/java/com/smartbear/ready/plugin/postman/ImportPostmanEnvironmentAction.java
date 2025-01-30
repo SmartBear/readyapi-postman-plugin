@@ -24,9 +24,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static com.eviware.soapui.support.StringUtils.isNullOrEmpty;
@@ -74,7 +72,7 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
                     String.format("An environment with the name %s already exists.", postmanEnvModel.name()));
             return;
         }
-        List<NewEnvironmentPropertyWrapper> newPropertiesMap = new ArrayList<>();
+        Map<String, NewEnvironmentPropertyWrapper> newPropertiesMap = new HashMap<>();
         Map<String, Integer> keyCountMap = new HashMap<>();
         for (PostmanEnvVariable variable : postmanEnvModel.values()) {
             String variableName = variable.key();
@@ -82,12 +80,12 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
                 log.error("Variable name cannot be empty, it will not be imported.");
                 continue;
             }
-            if (variableWithGivenNameExists(variableName, newPropertiesMap)) {
+            if (newPropertiesMap.get(variableName) != null) {
                 int count = keyCountMap.getOrDefault(variableName, 1);
                 variableName += " " + count;
                 keyCountMap.put(variable.key(), count + 1);
             }
-            newPropertiesMap.add(new NewEnvironmentPropertyWrapper(variableName, variable.value(), variable.isSecret()));
+            newPropertiesMap.put(variableName, new NewEnvironmentPropertyWrapper(variableName, variable.value(), variable.isSecret()));
             project.addProperty(variableName);
         }
 
@@ -96,12 +94,6 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
         } else {
             addEnvironment(project, postmanEnvModel.name(), newPropertiesMap);
         }
-    }
-
-    private boolean variableWithGivenNameExists(String variableName, List<NewEnvironmentPropertyWrapper> propertiesMap) {
-        return propertiesMap
-                .stream()
-                .anyMatch(v -> v.key().equals(variableName));
     }
 
     private void sendAnalyticsAction(String envName) {
