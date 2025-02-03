@@ -1,11 +1,13 @@
 package com.smartbear.ready.plugin.postman;
 
 import com.eviware.soapui.impl.wsdl.WsdlProjectPro;
+import com.eviware.soapui.model.environment.EnvironmentImpl;
 import com.eviware.soapui.model.testsuite.EncryptableTestProperty;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.settings.ProjectSettings;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.smartbear.ready.plugin.postman.collection.environment.PostmanEnvModel;
+import com.smartbear.ready.plugin.postman.collection.environment.PostmanEnvVariable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +27,8 @@ class ImportPostmanEnvironmentActionTest {
     private static final String ENV_WITH_DUPLICATE_VALUES = "/environments/env_with_duplicate_value_names.postman_environment.json";
     private static final String ENV_WITH_SECRET_VALUES = "/environments/env_with_secret_values.postman_environment.json";
     private static final String JSON_WITH_RANDOM_DATA = "/environments/invalid_format_env.json";
+    private static final String FIRST_ENV_WITH_THE_SAME_VALUE = "/environments/first_environment_with_the_same_value.json";
+    private static final String SECOND_ENV_WITH_THE_SAME_VALUE = "/environments/second_environment_with_the_same_value.json";
     private static final String TEXT_FILE = "/environments/random.txt";
 
     private ImportPostmanEnvironmentAction importPostmanEnvironmentAction;
@@ -83,6 +87,25 @@ class ImportPostmanEnvironmentActionTest {
             }
         });
         project.getSettings().setString(ProjectSettings.SHADOW_PASSWORD, null);
+    }
+
+    @Test
+    void propertiesWithTheSameNameAddedOnlyOnce() throws IOException, URISyntaxException {
+        PostmanEnvModel firstPostmanEnvModel = loadEnvironmentFromFile(FIRST_ENV_WITH_THE_SAME_VALUE);
+        importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(firstPostmanEnvModel);
+        PostmanEnvVariable duplicateVariable = firstPostmanEnvModel.values().get(0);
+
+        PostmanEnvModel secondPostmanEnvModel = loadEnvironmentFromFile(SECOND_ENV_WITH_THE_SAME_VALUE);
+        importPostmanEnvironmentAction.addEnvironmentAndPopulateProperties(secondPostmanEnvModel);
+
+        long duplicateVariableNameCount = Arrays.stream(project.getPropertyNames())
+                .filter(p -> p.equals(duplicateVariable.key()))
+                .count();
+        int firstEnvPropertiesCount = ((EnvironmentImpl) project.getEnvironmentByName(firstPostmanEnvModel.name()))
+                .getPropertiesCount();
+
+        assertEquals(1, duplicateVariableNameCount);
+        assertEquals(1, firstEnvPropertiesCount);
     }
 
     private PostmanEnvModel loadEnvironmentFromFile(String fileLocation) throws IOException, URISyntaxException {
