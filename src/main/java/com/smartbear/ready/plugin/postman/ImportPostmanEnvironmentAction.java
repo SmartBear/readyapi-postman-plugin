@@ -86,7 +86,9 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
                 keyCountMap.put(variable.key(), count + 1);
             }
             newPropertiesMap.put(variableName, new NewEnvironmentPropertyWrapper(variableName, variable.value(), variable.isSecret()));
-            project.addProperty(variableName);
+            if (project.getProperty(variableName) == null) {
+                project.addProperty(variableName);
+            }
         }
 
         if (newPropertiesMap.isEmpty()) {
