@@ -22,6 +22,7 @@ import com.eviware.soapui.support.UISupport;
 import com.smartbear.ready.core.ApplicationEnvironment;
 import com.eviware.soapui.SoapUICore;
 import com.eviware.soapui.impl.actions.ImportMethodFactory;
+import com.eviware.soapui.impl.wsdl.actions.environment.ImportEnvironmentFactory;
 
 @PluginConfiguration(groupId = "${project.groupId}",
     name = "${project.name}",
@@ -36,5 +37,7 @@ public class PluginConfig extends PluginAdapter {
         super();
         ApplicationEnvironment.getSoapUICore().getFactoryRegistry().addFactory(ImportMethodFactory.class,
                 new PostmanImportMethodFactory());
+        ApplicationEnvironment.getSoapUICore().getFactoryRegistry().addFactory(ImportEnvironmentFactory.class,
+                new PostmanImportEnvFactory());
     }
 }
