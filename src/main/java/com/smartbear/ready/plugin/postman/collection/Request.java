@@ -28,6 +28,12 @@ public interface Request {
 
     String getGraphQlVariables();
 
+    String getRequestAuth();
+
+    RequestAuthProfile getAuthProfileWithName();
+
+    DirectoryInfo getDirectory();
+
     default List<FormDataParameter> getFormDataParameters() {
         return Collections.emptyList();
     }

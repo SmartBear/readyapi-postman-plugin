@@ -21,6 +21,7 @@ class RequestV2 implements Request {
     private final JSONObject item;
     private final JSONObject request;
     private final DirectoryInfo directoryInfo;
+    private final RequestAuthProfile authProfileWithName;
     private String url;
 
     public RequestV2(JSONObject item, DirectoryInfo directoryInfo) {
@@ -33,6 +34,7 @@ class RequestV2 implements Request {
             url = requestObject.toString();
         }
         this.directoryInfo = directoryInfo;
+        this.authProfileWithName = new RequestAuthProfile(this);
     }
 
     @Override
@@ -127,6 +129,14 @@ class RequestV2 implements Request {
     }
 
     @Override
+    public String getRequestAuth() {
+        if (request == null) {
+            return "";
+        }
+        return PostmanCollection.getValue(request, PostmanCollectionV2.AUTH_PROFILE);
+    }
+
+    @Override
     public List<FormDataParameter> getFormDataParameters() {
         List<FormDataParameter> parameters = new LinkedList<>();
         JSON dataJson = new PostmanJsonUtil().parseTrimmedText(getBody());
@@ -187,5 +197,15 @@ class RequestV2 implements Request {
     @Override
     public String getDirectoryPath() {
         return directoryInfo.getPath();
+    }
+
+    @Override
+    public DirectoryInfo getDirectory() {
+        return directoryInfo;
+    }
+
+    @Override
+    public RequestAuthProfile getAuthProfileWithName() {
+        return authProfileWithName;
     }
 }
