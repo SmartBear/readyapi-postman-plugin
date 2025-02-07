@@ -22,20 +22,24 @@ public class PostmanCollectionFactory {
         return getCollectionByVersion(collectionObject);
     }
 
-    private static PostmanCollection getCollectionByVersion(JSONObject collectionObject) throws PostmanCollectionUnsupportedVersionException {
-        Object infoSection = collectionObject.get(INFO);
-        if (infoSection != null) {
-            Object schemaField = ((JSONObject) infoSection).get(SCHEMA);
-            if (schemaField instanceof String) {
-                Optional<String> collectionVersion = Arrays
-                        .stream(((String) schemaField).split("/"))
+    public static Optional<String> getCollectionVersionFromInfo(Object infoObject) {
+        if (infoObject != null) {
+            Object schemaField = ((JSONObject) infoObject).get(SCHEMA);
+            if (schemaField instanceof String schemaString) {
+                return Arrays.stream(schemaString.split("/"))
                         .filter(schemaPart -> schemaPart.matches(VERSION_REGEX)
                                 && (VERSION_2.equals(schemaPart) || VERSION_2_1.equals(schemaPart)))
                         .findAny();
-                if (collectionVersion.isPresent()) {
-                    return new PostmanCollectionV2(collectionObject);
-                }
             }
+        }
+        return Optional.empty();
+    }
+
+    private static PostmanCollection getCollectionByVersion(JSONObject collectionObject) throws PostmanCollectionUnsupportedVersionException {
+        Object infoSection = collectionObject.get(INFO);
+        Optional<String> collectionVersion = getCollectionVersionFromInfo(infoSection);
+        if (collectionVersion.isPresent()) {
+            return new PostmanCollectionV2(collectionObject);
         }
         throw new PostmanCollectionUnsupportedVersionException(UNSUPPORTED_VERSION_MESSAGE);
     }
