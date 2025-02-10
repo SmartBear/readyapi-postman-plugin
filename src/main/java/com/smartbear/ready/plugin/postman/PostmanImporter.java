@@ -39,6 +39,8 @@ import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.x.dialogs.Worker;
 import com.eviware.x.dialogs.XProgressDialog;
 import com.eviware.x.dialogs.XProgressMonitor;
+import com.smartbear.ready.plugin.postman.collection.RequestAuthProfile;
+import com.smartbear.ready.plugin.postman.collection.authorization.AuthorizationProfileImporter;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
@@ -95,13 +97,19 @@ public class PostmanImporter {
                     return null;
                 }
                 project.setDescription(postmanCollection.getDescription());
-                List<Request> requests = postmanCollection.getRequests();
 
+                AuthorizationProfileImporter authProfileFactory =
+                        new AuthorizationProfileImporter(project.getAuthRepository(), postmanCollection.getVersion());
+                if (StringUtils.hasContent(postmanCollection.getAuth())) {
+                    authProfileFactory.importAuthorizationProfile(postmanCollection.getAuth(), postmanCollection.getName(), project);
+                }
+
+                List<Request> requests = postmanCollection.getRequests();
                 for (Request request : requests) {
                     String uri = request.getUrl();
-                    String requestName = request.getName();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
+                    RequestAuthProfile authProfile = request.getAuthProfileWithName();
 
                     if (StringUtils.hasContent(preRequestScript)) {
                         processPreRequestScript(preRequestScript, project);
@@ -115,6 +123,9 @@ public class PostmanImporter {
                         SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
                         WsdlRequest wsdlRequest = soapServiceCreator.addSoapRequest(request);
 
+                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
+                            authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), wsdlRequest);
+                        }
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(wsdlRequest, collectionName);
                             assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
@@ -128,7 +139,9 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
-
+                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
+                            authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), graphQLRequest);
+                        }
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(graphQLRequest, collectionName);
                             assertable = getTestRequestStep(project, GraphQLTestRequestTestStepWithSchema.class);
@@ -140,7 +153,9 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
-
+                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
+                            authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), restRequest);
+                        }
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(restRequest, collectionName);
                             assertable = getTestRequestStep(project, RestTestRequestStep.class);
