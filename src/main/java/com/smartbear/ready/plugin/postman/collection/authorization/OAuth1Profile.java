@@ -18,6 +18,8 @@ public record OAuth1Profile(String consumerSecret, String consumerKey, String to
         setValueIfNotNull(callback, oAuth10AuthEntry::setRedirectURI);
         if (Boolean.TRUE.equals(addParamsToHeader)) {
             oAuth10AuthEntry.setAccessTokenPosition(AccessTokenPositionConfig.HEADER);
+        } else {
+            oAuth10AuthEntry.setAccessTokenPosition(AccessTokenPositionConfig.QUERY);
         }
     }
 }
