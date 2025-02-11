@@ -2,7 +2,6 @@ package com.smartbear.ready.plugin.postman.collection.authorization;
 
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.environmentspec.AuthProfileHolderContainer;
-import com.eviware.soapui.impl.AuthRepository.AuthEntries;
 import com.eviware.soapui.impl.AuthRepository.AuthRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -10,15 +9,16 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
-import org.json.JSONException;
-import org.json.JSONObject;
+import net.sf.json.JSONException;
+import net.sf.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class AuthorizationProfileImporter {
@@ -38,17 +38,18 @@ public class AuthorizationProfileImporter {
 
     private final AuthRepository authRepository;
     private final String collectionVersion;
+    private final BiMap<String, PostmanAuthProfile> importedProfiles = HashBiMap.create();
+    private final Map<String, Integer> profileNamesCounter = new HashMap<>();
 
     public AuthorizationProfileImporter(AuthRepository authRepository, String collectionVersion) {
         this.authRepository = authRepository;
         this.collectionVersion = collectionVersion;
     }
 
-    public void importAuthorizationProfile(String authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
+    public void importAuthorizationProfile(JSONObject authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
         try {
-            JSONObject authProfileJson = new JSONObject(authProfile);
-            String authType = authProfileJson.getString(PROFILE_TYPE);
-            String authProfileString = getAuthProfileString(authProfileJson, authType);
+            String authType = authProfile.getString(PROFILE_TYPE);
+            String authProfileString = getAuthProfileString(authProfile, authType);
             switch (authType) {
                 case NO_AUTH_TYPE -> objectToAttachAuth.setAuthProfile(AuthEntryTypeConfig.NO_AUTHORIZATION.toString());
                 case BASIC_AUTH_TYPE -> createBasicAuthProfile(authProfileString, profileName, objectToAttachAuth);
@@ -67,79 +68,73 @@ public class AuthorizationProfileImporter {
 
     private void createBasicAuthProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
         BasicAuthProfile basicAuthProfile = OBJECT_MAPPER.readValue(authString, BasicAuthProfile.class);
-
-        AuthEntries.BasicAuthEntry basicAuthEntry = (AuthEntries.BasicAuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.BASIC, profileName);
-        setIfNotNull(basicAuthProfile.password(), basicAuthEntry::setPassword);
-        setIfNotNull(basicAuthProfile.username(), basicAuthEntry::setUsername);
-
+        if (importedProfiles.containsValue(basicAuthProfile)) {
+            profileName = importedProfiles.inverse().get(basicAuthProfile);
+        } else {
+            profileName = incrementProfileNameIfExists(profileName);
+            basicAuthProfile.createBasicAuthEntry(profileName, authRepository);
+            importedProfiles.put(profileName, basicAuthProfile);
+        }
         objectToAttachAuth.setAuthProfile(profileName);
     }
 
     private void createAwsSignatureProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
         AwsSignatureProfile awsSignatureProfile = OBJECT_MAPPER.readValue(authString, AwsSignatureProfile.class);
-
-        AuthEntries.AwsSignatureAuthEntry awsSignatureAuthEntry = (AuthEntries.AwsSignatureAuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.AWS_SIGNATURE, profileName);
-        setIfNotNull(awsSignatureProfile.accessKey(), awsSignatureAuthEntry::setAccessKey);
-        setIfNotNull(awsSignatureProfile.secretKey(), awsSignatureAuthEntry::setSecretAccessKey);
-        setIfNotNull(awsSignatureProfile.region(), awsSignatureAuthEntry::setRegion);
-        setIfNotNull(awsSignatureProfile.service(), awsSignatureAuthEntry::setServiceName);
-
+        if (importedProfiles.containsValue(awsSignatureProfile)) {
+            profileName = importedProfiles.inverse().get(awsSignatureProfile);
+        } else {
+            profileName = incrementProfileNameIfExists(profileName);
+            awsSignatureProfile.createAwsSignatureEntry(profileName, authRepository);
+            importedProfiles.put(profileName, awsSignatureProfile);
+        }
         objectToAttachAuth.setAuthProfile(profileName);
     }
 
     private void createOAuth1Profile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
         OAuth1Profile oAuth1Profile = OBJECT_MAPPER.readValue(authString, OAuth1Profile.class);
-
-        AuthEntries.OAuth10AuthEntry oAuth10AuthEntry = (AuthEntries.OAuth10AuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.O_AUTH_1_0, profileName);
-
-        setIfNotNull(oAuth1Profile.consumerKey(), oAuth10AuthEntry::setConsumerKey);
-        setIfNotNull(oAuth1Profile.consumerSecret(), oAuth10AuthEntry::setConsumerSecret);
-        setIfNotNull(oAuth1Profile.token(), oAuth10AuthEntry::setAccessToken);
-        setIfNotNull(oAuth1Profile.tokenSecret(), oAuth10AuthEntry::setTokenSecret);
-        setIfNotNull(oAuth1Profile.callback(), oAuth10AuthEntry::setRedirectURI);
-
+        if (importedProfiles.containsValue(oAuth1Profile)) {
+            profileName = importedProfiles.inverse().get(oAuth1Profile);
+        } else {
+            profileName = incrementProfileNameIfExists(profileName);
+            oAuth1Profile.createOAuth1Entry(profileName, authRepository);
+            importedProfiles.put(profileName, oAuth1Profile);
+        }
         objectToAttachAuth.setAuthProfile(profileName);
     }
 
     private void createOAuth2Profile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
         OAuth2Profile oAuth2Profile = OBJECT_MAPPER.readValue(authString, OAuth2Profile.class);
-
-        AuthEntries.OAuth20AuthEntry oAuth20AuthEntry = (AuthEntries.OAuth20AuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.O_AUTH_2_0, profileName);
-        setIfNotNull(oAuth2Profile.clientId(), oAuth20AuthEntry::setClientID);
-        setIfNotNull(oAuth2Profile.clientSecret(), oAuth20AuthEntry::setClientSecret);
-        setIfNotNull(oAuth2Profile.accessTokenUrl(), oAuth20AuthEntry::setAccessTokenURI);
-        setIfNotNull(oAuth2Profile.authUrl(), oAuth20AuthEntry::setAuthorizationURI);
-        setIfNotNull(oAuth2Profile.redirect_uri(), oAuth20AuthEntry::setRedirectURI);
-        setIfNotNull(oAuth2Profile.scope(), oAuth20AuthEntry::setScope);
-        setIfNotNull(oAuth2Profile.state(), oAuth20AuthEntry::setState);
-
+        if (importedProfiles.containsValue(oAuth2Profile)) {
+            profileName = importedProfiles.inverse().get(oAuth2Profile);
+        } else {
+            profileName = incrementProfileNameIfExists(profileName);
+            oAuth2Profile.createOAuth2Entry(profileName, authRepository);
+            importedProfiles.put(profileName, oAuth2Profile);
+        }
         objectToAttachAuth.setAuthProfile(profileName);
     }
 
     private void createNtlmProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
         NtlmProfile ntlmProfile = OBJECT_MAPPER.readValue(authString, NtlmProfile.class);
-
-        AuthEntries.NTLMAuthEntry ntlmAuthEntry = (AuthEntries.NTLMAuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.NTLM, profileName);
-        setIfNotNull(ntlmProfile.username(), ntlmAuthEntry::setUsername);
-        setIfNotNull(ntlmProfile.password(), ntlmAuthEntry::setPassword);
-        setIfNotNull(ntlmProfile.domain(), ntlmAuthEntry::setDomain);
-
+        if (importedProfiles.containsValue(ntlmProfile)) {
+            profileName = importedProfiles.inverse().get(ntlmProfile);
+        } else {
+            profileName = incrementProfileNameIfExists(profileName);
+            ntlmProfile.createNtlmEntry(profileName, authRepository);
+            importedProfiles.put(profileName, ntlmProfile);
+        }
         objectToAttachAuth.setAuthProfile(profileName);
     }
 
     private void createDigestProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
         DigestProfile digestProfile = OBJECT_MAPPER.readValue(authString, DigestProfile.class);
-
-        AuthEntries.DigestAuthEntry digestAuthEntry = (AuthEntries.DigestAuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.DIGEST, profileName);
-        setIfNotNull(digestProfile.username(), digestAuthEntry::setUsername);
-        setIfNotNull(digestProfile.password(), digestAuthEntry::setPassword);
-
+        if (importedProfiles.containsValue(digestProfile)) {
+            profileName = importedProfiles.inverse().get(digestProfile);
+        } else {
+            profileName = incrementProfileNameIfExists(profileName);
+            digestProfile.createDigestAuthEntry(profileName, authRepository);
+            importedProfiles.put(profileName, digestProfile);
+        }
         objectToAttachAuth.setAuthProfile(profileName);
     }
 
@@ -151,8 +146,13 @@ public class AuthorizationProfileImporter {
         return authProfileJson.getJSONObject(authType).toString();
     }
 
-    private <T> void setIfNotNull(T value, Consumer<T> setter) {
-        Optional.ofNullable(value).ifPresent(setter);
+    private String incrementProfileNameIfExists(String profileName) {
+        if (importedProfiles.get(profileName) != null) {
+            int count = profileNamesCounter.getOrDefault(profileName, 1);
+            profileNamesCounter.put(profileName, count + 1);
+            profileName += " " + count;
+        }
+        return profileName;
     }
 
     private String mapKeyValueAuthProfileToObject(String json) throws JsonProcessingException {

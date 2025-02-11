@@ -129,11 +129,11 @@ class RequestV2 implements Request {
     }
 
     @Override
-    public String getRequestAuth() {
+    public JSONObject getRequestAuth() {
         if (request == null) {
-            return "";
+            return null;
         }
-        return PostmanCollection.getValue(request, PostmanCollectionV2.AUTH_PROFILE);
+        return JSONObject.fromObject(PostmanCollection.getValue(request, PostmanCollectionV2.AUTH_PROFILE));
     }
 
     @Override

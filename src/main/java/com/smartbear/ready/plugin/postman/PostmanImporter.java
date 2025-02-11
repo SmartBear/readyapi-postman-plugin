@@ -100,7 +100,7 @@ public class PostmanImporter {
 
                 AuthorizationProfileImporter authProfileFactory =
                         new AuthorizationProfileImporter(project.getAuthRepository(), postmanCollection.getVersion());
-                if (StringUtils.hasContent(postmanCollection.getAuth())) {
+                if (postmanCollection.getAuth() != null) {
                     authProfileFactory.importAuthorizationProfile(postmanCollection.getAuth(), postmanCollection.getName(), project);
                 }
 
@@ -123,7 +123,7 @@ public class PostmanImporter {
                         SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
                         WsdlRequest wsdlRequest = soapServiceCreator.addSoapRequest(request);
 
-                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
+                        if (authProfile.getAuthProfile() != null) {
                             authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), wsdlRequest);
                         }
                         if (StringUtils.hasContent(tests)) {
@@ -139,7 +139,7 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
-                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
+                        if (authProfile.getAuthProfile() != null) {
                             authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), graphQLRequest);
                         }
                         if (StringUtils.hasContent(tests)) {
@@ -153,7 +153,7 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
-                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
+                        if (authProfile.getAuthProfile() != null) {
                             authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), restRequest);
                         }
                         if (StringUtils.hasContent(tests)) {

@@ -1,13 +1,15 @@
 package com.smartbear.ready.plugin.postman.collection;
 
+import net.sf.json.JSONObject;
+
 public class DirectoryInfo {
     private final String name;
     private final String description;
 
     private final DirectoryInfo parent;
-    private final String authProfile;
+    private final JSONObject authProfile;
 
-    protected DirectoryInfo(String name, String description, DirectoryInfo parent, String authProfile) {
+    protected DirectoryInfo(String name, String description, DirectoryInfo parent, JSONObject authProfile) {
         this.name = name;
         this.description = description;
         this.parent = parent;
@@ -15,14 +17,14 @@ public class DirectoryInfo {
     }
 
     protected static DirectoryInfo createRoot(String collectionName) {
-        return new DirectoryInfo(collectionName, "", null, "");
+        return new DirectoryInfo(collectionName, "", null, null);
     }
 
     public String getName() {
         return name;
     }
 
-    public String getAuthProfile() {
+    public JSONObject getAuthProfile() {
         return authProfile;
     }
 
