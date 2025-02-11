@@ -1,16 +1,16 @@
 package com.smartbear.ready.plugin.postman.collection;
 
+import com.eviware.soapui.support.StringUtils;
 import javafx.util.Pair;
-import net.sf.json.JSONObject;
 
 public class RequestAuthProfile {
 
     private final String profileName;
-    private final JSONObject authProfile;
+    private final String authProfile;
 
     public RequestAuthProfile(Request request) {
-        if (request.getRequestAuth() == null) {
-            Pair<String, JSONObject> directoryAuthAndName = getParentFolderAuthProfile(request.getDirectory());
+        if (StringUtils.isNullOrEmpty(request.getRequestAuth())) {
+            Pair<String, String> directoryAuthAndName = getParentFolderAuthProfile(request.getDirectory());
             this.profileName = directoryAuthAndName.getKey();
             this.authProfile = directoryAuthAndName.getValue();
         } else {
@@ -23,15 +23,15 @@ public class RequestAuthProfile {
         return profileName;
     }
 
-    public JSONObject getAuthProfile() {
+    public String getAuthProfile() {
         return authProfile;
     }
 
-    private Pair<String, JSONObject> getParentFolderAuthProfile(DirectoryInfo directory) {
+    private Pair<String, String> getParentFolderAuthProfile(DirectoryInfo directory) {
         if (directory == null) {
-            return new Pair<>("", null);
+            return new Pair<>("", "");
         }
-        if ((directory.getAuthProfile() == null)) {
+        if (StringUtils.isNullOrEmpty(directory.getAuthProfile())) {
             return getParentFolderAuthProfile(directory.getParent());
         }
         return new Pair<>(directory.getPath(), directory.getAuthProfile());

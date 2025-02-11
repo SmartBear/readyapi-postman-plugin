@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.collect.BiMap;
@@ -46,10 +46,11 @@ public class AuthorizationProfileImporter {
         this.collectionVersion = collectionVersion;
     }
 
-    public void importAuthorizationProfile(JSONObject authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
+    public void importAuthorizationProfile(String authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
         try {
-            String authType = authProfile.getString(PROFILE_TYPE);
-            String authProfileString = getAuthProfileString(authProfile, authType);
+            JSONObject authProfileJson = new JSONObject(authProfile);
+            String authType = authProfileJson.getString(PROFILE_TYPE);
+            String authProfileString = getAuthProfileString(authProfileJson, authType);
             switch (authType) {
                 case NO_AUTH_TYPE -> objectToAttachAuth.setAuthProfile(AuthEntryTypeConfig.NO_AUTHORIZATION.toString());
                 case BASIC_AUTH_TYPE -> createBasicAuthProfile(authProfileString, profileName, objectToAttachAuth);
@@ -139,6 +140,9 @@ public class AuthorizationProfileImporter {
     }
 
     private String getAuthProfileString(JSONObject authProfileJson, String authType) throws JSONException, JsonProcessingException {
+        if (NO_AUTH_TYPE.equals(authType)) {
+            return "";
+        }
         if (collectionVersion.equals(PostmanCollectionFactory.VERSION_2_1)) {
             String authProfileContent = authProfileJson.getJSONArray(authType).toString();
             return mapKeyValueAuthProfileToObject(authProfileContent);

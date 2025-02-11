@@ -29,7 +29,7 @@ public interface Request {
 
     String getGraphQlVariables();
 
-    JSONObject getRequestAuth();
+    String getRequestAuth();
 
     RequestAuthProfile getAuthProfileWithName();
 

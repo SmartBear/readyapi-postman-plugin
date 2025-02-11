@@ -72,8 +72,8 @@ public class PostmanCollectionV2 extends PostmanCollection {
     }
 
     @Override
-    public JSONObject getAuth() {
-        return (JSONObject) postmanCollection.get(AUTH_PROFILE);
+    public String getAuth() {
+        return postmanCollection.getJSONObject(AUTH_PROFILE).toString();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
                                     item.getString(NAME),
                                     item.get(DESCRIPTION) != null ? item.getString(DESCRIPTION) : "",
                                     directoryInfo,
-                                    item.get(AUTH_PROFILE) != null ? item.getJSONObject(AUTH_PROFILE) : null));
+                                    item.get(AUTH_PROFILE) != null ? item.getString(AUTH_PROFILE) : ""));
                 } else {
                     requestList.add(new RequestV2(item, directoryInfo));
                 }
