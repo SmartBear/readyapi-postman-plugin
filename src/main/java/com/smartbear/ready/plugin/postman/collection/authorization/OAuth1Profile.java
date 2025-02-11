@@ -8,7 +8,8 @@ import com.eviware.soapui.impl.AuthRepository.AuthRepository;
 public record OAuth1Profile(String consumerSecret, String consumerKey, String token, String tokenSecret, String callback,
                             Boolean addParamsToHeader) implements PostmanAuthProfile {
 
-    public void createOAuth1Entry(String profileName, AuthRepository authRepository) {
+    @Override
+    public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.OAuth10AuthEntry oAuth10AuthEntry = (AuthEntries.OAuth10AuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.O_AUTH_1_0, profileName);
         setValueIfNotNull(consumerKey, oAuth10AuthEntry::setConsumerKey);

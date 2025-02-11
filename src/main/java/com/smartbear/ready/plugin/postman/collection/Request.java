@@ -1,7 +1,6 @@
 package com.smartbear.ready.plugin.postman.collection;
 
 import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
-import net.sf.json.JSONObject;
 
 import java.util.Collections;
 import java.util.List;

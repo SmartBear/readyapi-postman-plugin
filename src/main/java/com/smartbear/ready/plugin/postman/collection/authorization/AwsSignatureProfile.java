@@ -6,7 +6,8 @@ import com.eviware.soapui.impl.AuthRepository.AuthRepository;
 
 public record AwsSignatureProfile(String accessKey, String secretKey, String service, String region, String sessionToken) implements PostmanAuthProfile {
 
-    public void createAwsSignatureEntry(String profileName, AuthRepository authRepository) {
+    @Override
+    public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.AwsSignatureAuthEntry awsSignatureAuthEntry = (AuthEntries.AwsSignatureAuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.AWS_SIGNATURE, profileName);
         setValueIfNotNull(accessKey, awsSignatureAuthEntry::setAccessKey);

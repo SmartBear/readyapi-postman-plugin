@@ -51,89 +51,53 @@ public class AuthorizationProfileImporter {
             JSONObject authProfileJson = new JSONObject(authProfile);
             String authType = authProfileJson.getString(PROFILE_TYPE);
             String authProfileString = getAuthProfileString(authProfileJson, authType);
-            switch (authType) {
-                case NO_AUTH_TYPE -> objectToAttachAuth.setAuthProfile(AuthEntryTypeConfig.NO_AUTHORIZATION.toString());
-                case BASIC_AUTH_TYPE -> createBasicAuthProfile(authProfileString, profileName, objectToAttachAuth);
-                case AWS_SIGNATURE_AUTH_TYPE -> createAwsSignatureProfile(authProfileString, profileName, objectToAttachAuth);
-                case DIGEST_AUTH_TYPE -> createDigestProfile(authProfileString, profileName, objectToAttachAuth);
-                case NTLM_AUTH_TYPE -> createNtlmProfile(authProfileString, profileName, objectToAttachAuth);
-                case OAUTH1_AUTH_TYPE -> createOAuth1Profile(authProfileString, profileName, objectToAttachAuth);
-                case OAUTH2_AUTH_TYPE -> createOAuth2Profile(authProfileString, profileName, objectToAttachAuth);
-                default -> log.error("Unsupported authorization profile type: {}", authType);
+            if (NO_AUTH_TYPE.equals(authType)) {
+                objectToAttachAuth.setAuthProfile(AuthEntryTypeConfig.NO_AUTHORIZATION.toString());
+            } else {
+                PostmanAuthProfile profile = getProfileByType(authType, authProfileString);
+                if (profile != null) {
+                    createProfile(profile, profileName, objectToAttachAuth);
+                }
             }
         } catch (JSONException | JsonProcessingException e) {
             log.error("Error happened while processing auth profile JSON [{}]", authProfile, e);
         }
     }
 
-    private void createBasicAuthProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
-        BasicAuthProfile basicAuthProfile = OBJECT_MAPPER.readValue(authString, BasicAuthProfile.class);
-        if (importedProfiles.containsValue(basicAuthProfile)) {
-            profileName = importedProfiles.inverse().get(basicAuthProfile);
-        } else {
-            profileName = incrementProfileNameIfExists(profileName);
-            basicAuthProfile.createBasicAuthEntry(profileName, authRepository);
-            importedProfiles.put(profileName, basicAuthProfile);
+    private PostmanAuthProfile getProfileByType(String authType, String authProfileString) throws JsonProcessingException {
+        switch (authType) {
+            case BASIC_AUTH_TYPE -> {
+                return OBJECT_MAPPER.readValue(authProfileString, BasicAuthProfile.class);
+            }
+            case AWS_SIGNATURE_AUTH_TYPE -> {
+                return OBJECT_MAPPER.readValue(authProfileString, AwsSignatureProfile.class);
+            }
+            case DIGEST_AUTH_TYPE -> {
+                return OBJECT_MAPPER.readValue(authProfileString, DigestProfile.class);
+            }
+            case NTLM_AUTH_TYPE -> {
+                return OBJECT_MAPPER.readValue(authProfileString, NtlmProfile.class);
+            }
+            case OAUTH1_AUTH_TYPE -> {
+                return OBJECT_MAPPER.readValue(authProfileString, OAuth1Profile.class);
+            }
+            case OAUTH2_AUTH_TYPE -> {
+                return OBJECT_MAPPER.readValue(authProfileString, OAuth2Profile.class);
+            }
+            default -> {
+                log.error("Unsupported authorization profile type: {}", authType);
+                return null;
+            }
         }
-        objectToAttachAuth.setAuthProfile(profileName);
     }
 
-    private void createAwsSignatureProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
-        AwsSignatureProfile awsSignatureProfile = OBJECT_MAPPER.readValue(authString, AwsSignatureProfile.class);
-        if (importedProfiles.containsValue(awsSignatureProfile)) {
-            profileName = importedProfiles.inverse().get(awsSignatureProfile);
+    private void createProfile(PostmanAuthProfile authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
+        if (importedProfiles.containsValue(authProfile)) {
+            profileName = importedProfiles.inverse().get(authProfile);
         } else {
             profileName = incrementProfileNameIfExists(profileName);
-            awsSignatureProfile.createAwsSignatureEntry(profileName, authRepository);
-            importedProfiles.put(profileName, awsSignatureProfile);
-        }
-        objectToAttachAuth.setAuthProfile(profileName);
-    }
-
-    private void createOAuth1Profile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
-        OAuth1Profile oAuth1Profile = OBJECT_MAPPER.readValue(authString, OAuth1Profile.class);
-        if (importedProfiles.containsValue(oAuth1Profile)) {
-            profileName = importedProfiles.inverse().get(oAuth1Profile);
-        } else {
-            profileName = incrementProfileNameIfExists(profileName);
-            oAuth1Profile.createOAuth1Entry(profileName, authRepository);
-            importedProfiles.put(profileName, oAuth1Profile);
-        }
-        objectToAttachAuth.setAuthProfile(profileName);
-    }
-
-    private void createOAuth2Profile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
-        OAuth2Profile oAuth2Profile = OBJECT_MAPPER.readValue(authString, OAuth2Profile.class);
-        if (importedProfiles.containsValue(oAuth2Profile)) {
-            profileName = importedProfiles.inverse().get(oAuth2Profile);
-        } else {
-            profileName = incrementProfileNameIfExists(profileName);
-            oAuth2Profile.createOAuth2Entry(profileName, authRepository);
-            importedProfiles.put(profileName, oAuth2Profile);
-        }
-        objectToAttachAuth.setAuthProfile(profileName);
-    }
-
-    private void createNtlmProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
-        NtlmProfile ntlmProfile = OBJECT_MAPPER.readValue(authString, NtlmProfile.class);
-        if (importedProfiles.containsValue(ntlmProfile)) {
-            profileName = importedProfiles.inverse().get(ntlmProfile);
-        } else {
-            profileName = incrementProfileNameIfExists(profileName);
-            ntlmProfile.createNtlmEntry(profileName, authRepository);
-            importedProfiles.put(profileName, ntlmProfile);
-        }
-        objectToAttachAuth.setAuthProfile(profileName);
-    }
-
-    private void createDigestProfile(String authString, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
-        DigestProfile digestProfile = OBJECT_MAPPER.readValue(authString, DigestProfile.class);
-        if (importedProfiles.containsValue(digestProfile)) {
-            profileName = importedProfiles.inverse().get(digestProfile);
-        } else {
-            profileName = incrementProfileNameIfExists(profileName);
-            digestProfile.createDigestAuthEntry(profileName, authRepository);
-            importedProfiles.put(profileName, digestProfile);
+            authProfile.createAuthEntry(profileName, authRepository);
+            importedProfiles.put(profileName, authProfile);
         }
         objectToAttachAuth.setAuthProfile(profileName);
     }

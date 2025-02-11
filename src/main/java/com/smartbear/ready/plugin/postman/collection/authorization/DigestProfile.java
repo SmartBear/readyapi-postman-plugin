@@ -6,7 +6,8 @@ import com.eviware.soapui.impl.AuthRepository.AuthRepository;
 
 public record DigestProfile(String username, String password) implements PostmanAuthProfile {
 
-    public void createDigestAuthEntry(String profileName, AuthRepository authRepository) {
+    @Override
+    public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.DigestAuthEntry digestAuthEntry = (AuthEntries.DigestAuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.DIGEST, profileName);
         setValueIfNotNull(username, digestAuthEntry::setUsername);

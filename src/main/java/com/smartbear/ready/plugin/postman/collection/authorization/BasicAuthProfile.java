@@ -6,7 +6,8 @@ import com.eviware.soapui.impl.AuthRepository.AuthRepository;
 
 public record BasicAuthProfile (String username, String password) implements PostmanAuthProfile {
 
-    public void createBasicAuthEntry(String profileName, AuthRepository authRepository) {
+    @Override
+    public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.BasicAuthEntry basicAuthEntry = (AuthEntries.BasicAuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.BASIC, profileName);
         setValueIfNotNull(password, basicAuthEntry::setPassword);
