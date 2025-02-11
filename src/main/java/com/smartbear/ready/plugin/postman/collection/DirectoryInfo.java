@@ -15,7 +15,7 @@ public class DirectoryInfo {
     }
 
     protected static DirectoryInfo createRoot(String collectionName) {
-        return new DirectoryInfo(collectionName, "", null, null);
+        return new DirectoryInfo(collectionName, "", null, "");
     }
 
     public String getName() {
