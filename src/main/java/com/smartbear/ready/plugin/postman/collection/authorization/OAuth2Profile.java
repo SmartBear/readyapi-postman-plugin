@@ -27,19 +27,19 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
     public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.OAuth20AuthEntry oAuth20AuthEntry = (AuthEntries.OAuth20AuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.O_AUTH_2_0, profileName);
-        setValueIfNotNull(clientId(), oAuth20AuthEntry::setClientID);
-        setValueIfNotNull(clientSecret(), oAuth20AuthEntry::setClientSecret);
-        setValueIfNotNull(accessTokenUrl(), oAuth20AuthEntry::setAccessTokenURI);
-        setValueIfNotNull(authUrl(), oAuth20AuthEntry::setAuthorizationURI);
-        setValueIfNotNull(redirect_uri(), oAuth20AuthEntry::setRedirectURI);
-        setValueIfNotNull(scope(), oAuth20AuthEntry::setScope);
-        setValueIfNotNull(state(), oAuth20AuthEntry::setState);
-        setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type()), oAuth20AuthEntry::setOAuth2Flow);
-        setValueIfNotNull(ADD_TOKEN_TO.get(addTokenTo()), oAuth20AuthEntry::setAccessTokenPosition);
-        if ("authorization_code_with_pkce".equals(grant_type())) {
+        setValueIfNotNull(clientId, oAuth20AuthEntry::setClientID);
+        setValueIfNotNull(clientSecret, oAuth20AuthEntry::setClientSecret);
+        setValueIfNotNull(accessTokenUrl, oAuth20AuthEntry::setAccessTokenURI);
+        setValueIfNotNull(authUrl, oAuth20AuthEntry::setAuthorizationURI);
+        setValueIfNotNull(redirect_uri, oAuth20AuthEntry::setRedirectURI);
+        setValueIfNotNull(scope, oAuth20AuthEntry::setScope);
+        setValueIfNotNull(state, oAuth20AuthEntry::setState);
+        setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type), oAuth20AuthEntry::setOAuth2Flow);
+        setValueIfNotNull(ADD_TOKEN_TO.get(addTokenTo), oAuth20AuthEntry::setAccessTokenPosition);
+        if ("authorization_code_with_pkce".equals(grant_type)) {
             oAuth20AuthEntry.setEnablePKCE(true);
         }
-        if ("header".equals(client_authentication())) {
+        if ("header".equals(client_authentication)) {
             oAuth20AuthEntry.setUseAuthHeader(true);
         }
     }
