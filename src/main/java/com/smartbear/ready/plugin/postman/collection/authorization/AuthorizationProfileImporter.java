@@ -54,8 +54,7 @@ public class AuthorizationProfileImporter {
             switch (authType) {
                 case NO_AUTH_TYPE -> objectToAttachAuth.setAuthProfile(AuthEntryTypeConfig.NO_AUTHORIZATION.toString());
                 case BASIC_AUTH_TYPE -> createBasicAuthProfile(authProfileString, profileName, objectToAttachAuth);
-                case AWS_SIGNATURE_AUTH_TYPE ->
-                        createAwsSignatureProfile(authProfileString, profileName, objectToAttachAuth);
+                case AWS_SIGNATURE_AUTH_TYPE -> createAwsSignatureProfile(authProfileString, profileName, objectToAttachAuth);
                 case DIGEST_AUTH_TYPE -> createDigestProfile(authProfileString, profileName, objectToAttachAuth);
                 case NTLM_AUTH_TYPE -> createNtlmProfile(authProfileString, profileName, objectToAttachAuth);
                 case OAUTH1_AUTH_TYPE -> createOAuth1Profile(authProfileString, profileName, objectToAttachAuth);

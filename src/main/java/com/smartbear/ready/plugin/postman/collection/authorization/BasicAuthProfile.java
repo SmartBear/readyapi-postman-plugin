@@ -9,7 +9,7 @@ public record BasicAuthProfile (String username, String password) implements Pos
     public void createBasicAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.BasicAuthEntry basicAuthEntry = (AuthEntries.BasicAuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.BASIC, profileName);
-        setValueIfNotNull(password(), basicAuthEntry::setPassword);
-        setValueIfNotNull(username(), basicAuthEntry::setUsername);
+        setValueIfNotNull(password, basicAuthEntry::setPassword);
+        setValueIfNotNull(username, basicAuthEntry::setUsername);
     }
 }

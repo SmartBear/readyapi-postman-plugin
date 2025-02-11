@@ -9,9 +9,8 @@ public record NtlmProfile(String username, String password, String domain) imple
     public void createNtlmEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.NTLMAuthEntry ntlmAuthEntry = (AuthEntries.NTLMAuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.NTLM, profileName);
-        setValueIfNotNull(username(), ntlmAuthEntry::setUsername);
-        setValueIfNotNull(password(), ntlmAuthEntry::setPassword);
-        setValueIfNotNull(domain(), ntlmAuthEntry::setDomain);
+        setValueIfNotNull(username, ntlmAuthEntry::setUsername);
+        setValueIfNotNull(password, ntlmAuthEntry::setPassword);
+        setValueIfNotNull(domain, ntlmAuthEntry::setDomain);
     }
-
 }

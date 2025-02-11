@@ -9,8 +9,8 @@ public record DigestProfile(String username, String password) implements Postman
     public void createDigestAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.DigestAuthEntry digestAuthEntry = (AuthEntries.DigestAuthEntry) authRepository
                 .createEntry(AuthEntryTypeConfig.DIGEST, profileName);
-        setValueIfNotNull(username(), digestAuthEntry::setUsername);
-        setValueIfNotNull(password(), digestAuthEntry::setPassword);
+        setValueIfNotNull(username, digestAuthEntry::setUsername);
+        setValueIfNotNull(password, digestAuthEntry::setPassword);
     }
 }
 

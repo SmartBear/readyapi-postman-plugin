@@ -1,5 +1,6 @@
 package com.smartbear.ready.plugin.postman.collection.authorization;
 
+import com.eviware.soapui.config.AccessTokenPositionConfig;
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.config.OAuth2FlowConfig;
 import com.eviware.soapui.impl.AuthRepository.AuthEntries;
@@ -9,14 +10,18 @@ import java.util.Map;
 
 public record OAuth2Profile(String clientId, String clientSecret, String scope, String state, String accessTokenUrl,
                             String refreshTokenUrl, String authUrl, String redirect_uri, String grant_type,
-                            String client_authentication) implements PostmanAuthProfile {
+                            String client_authentication, String addTokenTo) implements PostmanAuthProfile {
 
-    public static final Map<String, OAuth2FlowConfig.Enum> GRANT_TYPE_MAP = Map.of(
+    private static final Map<String, OAuth2FlowConfig.Enum> GRANT_TYPE_MAP = Map.of(
             "implicit", OAuth2FlowConfig.IMPLICIT_GRANT,
             "authorization_code_with_pkce", OAuth2FlowConfig.AUTHORIZATION_CODE_GRANT,
             "authorization_code", OAuth2FlowConfig.AUTHORIZATION_CODE_GRANT,
             "password_credentials", OAuth2FlowConfig.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
             "client_credentials", OAuth2FlowConfig.CLIENT_CREDENTIALS_GRANT);
+
+    private static final Map<String, AccessTokenPositionConfig.Enum> ADD_TOKEN_TO = Map.of(
+            "queryParams", AccessTokenPositionConfig.QUERY,
+            "header", AccessTokenPositionConfig.HEADER);
 
     public void createOAuth2Entry(String profileName, AuthRepository authRepository) {
         AuthEntries.OAuth20AuthEntry oAuth20AuthEntry = (AuthEntries.OAuth20AuthEntry) authRepository
@@ -29,6 +34,7 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
         setValueIfNotNull(scope(), oAuth20AuthEntry::setScope);
         setValueIfNotNull(state(), oAuth20AuthEntry::setState);
         setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type()), oAuth20AuthEntry::setOAuth2Flow);
+        setValueIfNotNull(ADD_TOKEN_TO.get(addTokenTo()), oAuth20AuthEntry::setAccessTokenPosition);
         if ("authorization_code_with_pkce".equals(grant_type())) {
             oAuth20AuthEntry.setEnablePKCE(true);
         }
