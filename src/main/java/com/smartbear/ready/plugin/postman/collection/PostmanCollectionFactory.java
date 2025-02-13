@@ -20,10 +20,8 @@ public class PostmanCollectionFactory {
 
     private static PostmanCollection getCollectionByVersion(JSONObject collectionObject) throws PostmanCollectionUnsupportedVersionException {
         Object infoSection = collectionObject.get(INFO);
-        Optional<String> collectionVersion = getCollectionVersionFromInfo(infoSection);
-        if (collectionVersion.isPresent()) {
-            return new PostmanCollectionV2(collectionObject);
-        }
-        throw new PostmanCollectionUnsupportedVersionException(UNSUPPORTED_VERSION_MESSAGE);
+        return Optional.of(getCollectionVersionFromInfo(infoSection))
+                .map(version -> new PostmanCollectionV2(collectionObject))
+                .orElseThrow(() -> new PostmanCollectionUnsupportedVersionException(UNSUPPORTED_VERSION_MESSAGE));
     }
 }

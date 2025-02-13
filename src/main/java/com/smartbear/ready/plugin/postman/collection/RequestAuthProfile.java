@@ -1,7 +1,7 @@
 package com.smartbear.ready.plugin.postman.collection;
 
 import com.eviware.soapui.support.StringUtils;
-import javafx.util.Pair;
+import org.apache.commons.math3.util.Pair;
 
 public class RequestAuthProfile {
 

@@ -12,9 +12,11 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
                             String refreshTokenUrl, String authUrl, String redirect_uri, String grant_type,
                             String client_authentication, String addTokenTo) implements PostmanAuthProfile {
 
+    private static final String AUTH_CODE_WITH_PKCE = "authorization_code_with_pkce";
+
     private static final Map<String, OAuth2FlowConfig.Enum> GRANT_TYPE_MAP = Map.of(
             "implicit", OAuth2FlowConfig.IMPLICIT_GRANT,
-            "authorization_code_with_pkce", OAuth2FlowConfig.AUTHORIZATION_CODE_GRANT,
+            AUTH_CODE_WITH_PKCE, OAuth2FlowConfig.AUTHORIZATION_CODE_GRANT,
             "authorization_code", OAuth2FlowConfig.AUTHORIZATION_CODE_GRANT,
             "password_credentials", OAuth2FlowConfig.RESOURCE_OWNER_PASSWORD_CREDENTIALS,
             "client_credentials", OAuth2FlowConfig.CLIENT_CREDENTIALS_GRANT);
@@ -36,7 +38,7 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
         setValueIfNotNull(state, oAuth20AuthEntry::setState);
         setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type), oAuth20AuthEntry::setOAuth2Flow);
         setValueIfNotNull(ADD_TOKEN_TO.get(addTokenTo), oAuth20AuthEntry::setAccessTokenPosition);
-        if ("authorization_code_with_pkce".equals(grant_type)) {
+        if (AUTH_CODE_WITH_PKCE.equals(grant_type)) {
             oAuth20AuthEntry.setEnablePKCE(true);
         }
         if ("header".equals(client_authentication)) {

@@ -93,9 +93,9 @@ public class PostmanCollectionV2 extends PostmanCollection {
                     extractRequestsFromItems(item.getJSONArray(ITEM), requestList,
                             new DirectoryInfo(
                                     item.getString(NAME),
-                                    item.get(DESCRIPTION) != null ? item.getString(DESCRIPTION) : "",
+                                    item.has(DESCRIPTION) ? item.getString(DESCRIPTION) : "",
                                     directoryInfo,
-                                    item.get(AUTH_PROFILE) != null ? item.getString(AUTH_PROFILE) : ""));
+                                    item.has(AUTH_PROFILE) ? item.getString(AUTH_PROFILE) : ""));
                 } else {
                     requestList.add(new RequestV2(item, directoryInfo));
                 }
