@@ -8,7 +8,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
+import com.smartbear.ready.plugin.postman.utils.PostmanCollectionUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -94,7 +94,7 @@ public class AuthorizationProfileImporter {
         if (NO_AUTH_TYPE.equals(authType)) {
             return "";
         }
-        if (collectionVersion.equals(PostmanCollectionFactory.VERSION_2_1)) {
+        if (collectionVersion.equals(PostmanCollectionUtils.VERSION_2_1)) {
             String authProfileContent = authProfileJson.getJSONArray(authType).toString();
             return mapKeyValueAuthProfileToObject(authProfileContent);
         }

@@ -1,5 +1,6 @@
 package com.smartbear.ready.plugin.postman.collection;
 
+import com.smartbear.ready.plugin.postman.utils.PostmanCollectionUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -33,7 +34,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     public PostmanCollectionV2(JSONObject postmanCollection) {
         super(postmanCollection);
         this.info = postmanCollection.getJSONObject(INFO);
-        this.version = PostmanCollectionFactory.getCollectionVersionFromInfo(info).orElse("");
+        this.version = PostmanCollectionUtils.getCollectionVersionFromInfo(info).orElse("");
     }
 
     @Override
