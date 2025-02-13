@@ -16,6 +16,7 @@
 
 package com.smartbear.ready.plugin.postman;
 
+import com.eviware.soapui.environmentspec.AuthProfileHolderContainer;
 import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.graphql.GraphQLRequest;
 import com.eviware.soapui.impl.rest.RestRequest;
@@ -74,6 +75,7 @@ public class PostmanImporter {
     private static String foldersAmount;
     private static String requestsAmount;
     private final TestCreator testCreator;
+    private AuthorizationProfileImporter authProfileFactory;
 
     public PostmanImporter(TestCreator testCreator) {
         this.testCreator = testCreator;
@@ -98,11 +100,8 @@ public class PostmanImporter {
                 }
                 project.setDescription(postmanCollection.getDescription());
 
-                AuthorizationProfileImporter authProfileFactory =
-                        new AuthorizationProfileImporter(project.getAuthRepository(), postmanCollection.getVersion());
-                if (StringUtils.hasContent(postmanCollection.getAuth())) {
-                    authProfileFactory.importAuthorizationProfile(postmanCollection.getAuth(), postmanCollection.getName(), project);
-                }
+                authProfileFactory = new AuthorizationProfileImporter(project.getAuthRepository(), postmanCollection.getVersion());
+                addAuthProfileIfPresent(postmanCollection.getAuth(), postmanCollection.getName(), project);
 
                 List<Request> requests = postmanCollection.getRequests();
                 for (Request request : requests) {
@@ -123,9 +122,8 @@ public class PostmanImporter {
                         SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
                         WsdlRequest wsdlRequest = soapServiceCreator.addSoapRequest(request);
 
-                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
-                            authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), wsdlRequest);
-                        }
+                        addAuthProfileIfPresent(authProfile.getAuthProfile(), authProfile.getProfileName(), wsdlRequest);
+
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(wsdlRequest, collectionName);
                             assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
@@ -139,9 +137,8 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
-                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
-                            authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), graphQLRequest);
-                        }
+                        addAuthProfileIfPresent(authProfile.getAuthProfile(), authProfile.getProfileName(), graphQLRequest);
+
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(graphQLRequest, collectionName);
                             assertable = getTestRequestStep(project, GraphQLTestRequestTestStepWithSchema.class);
@@ -153,9 +150,8 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
-                        if (StringUtils.hasContent(authProfile.getAuthProfile())) {
-                            authProfileFactory.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), restRequest);
-                        }
+                        addAuthProfileIfPresent(authProfile.getAuthProfile(), authProfile.getProfileName(), restRequest);
+
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(restRequest, collectionName);
                             assertable = getTestRequestStep(project, RestTestRequestStep.class);
@@ -183,6 +179,12 @@ public class PostmanImporter {
             }
         }
         return project;
+    }
+
+    private void addAuthProfileIfPresent(String authProfile, String profileName, AuthProfileHolderContainer authContainer) {
+        if (StringUtils.hasContent(authProfile)) {
+            authProfileFactory.importAuthorizationProfile(authProfile, profileName, authContainer);
+        }
     }
 
     private PostmanImporterWorker getPostmanImporterWorker(String filePath) {
