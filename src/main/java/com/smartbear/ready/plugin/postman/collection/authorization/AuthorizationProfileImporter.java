@@ -65,30 +65,18 @@ public class AuthorizationProfileImporter {
     }
 
     private PostmanAuthProfile getProfileByType(String authType, String authProfileString) throws JsonProcessingException {
-        switch (authType) {
-            case BASIC_AUTH_TYPE -> {
-                return OBJECT_MAPPER.readValue(authProfileString, BasicAuthProfile.class);
-            }
-            case AWS_SIGNATURE_AUTH_TYPE -> {
-                return OBJECT_MAPPER.readValue(authProfileString, AwsSignatureProfile.class);
-            }
-            case DIGEST_AUTH_TYPE -> {
-                return OBJECT_MAPPER.readValue(authProfileString, DigestProfile.class);
-            }
-            case NTLM_AUTH_TYPE -> {
-                return OBJECT_MAPPER.readValue(authProfileString, NtlmProfile.class);
-            }
-            case OAUTH1_AUTH_TYPE -> {
-                return OBJECT_MAPPER.readValue(authProfileString, OAuth1Profile.class);
-            }
-            case OAUTH2_AUTH_TYPE -> {
-                return OBJECT_MAPPER.readValue(authProfileString, OAuth2Profile.class);
-            }
+        return switch (authType) {
+            case BASIC_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, BasicAuthProfile.class);
+            case AWS_SIGNATURE_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, AwsSignatureProfile.class);
+            case DIGEST_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, DigestProfile.class);
+            case NTLM_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, NtlmProfile.class);
+            case OAUTH1_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, OAuth1Profile.class);
+            case OAUTH2_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, OAuth2Profile.class);
             default -> {
                 log.error("Unsupported authorization profile type: {}", authType);
-                return null;
+                yield null;
             }
-        }
+        };
     }
 
     private void createProfile(PostmanAuthProfile authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
