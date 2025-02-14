@@ -64,7 +64,7 @@ public class AuthorizationProfileImporter {
                 }
             }
         } catch (JSONException | JsonProcessingException e) {
-            log.error("Error happened while processing auth profile JSON [{}]", authProfile, e);
+            log.warn("Error happened while processing auth profile JSON [{}]", authProfile, e);
         }
     }
 
@@ -77,7 +77,7 @@ public class AuthorizationProfileImporter {
             case OAUTH1_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, OAuth1Profile.class);
             case OAUTH2_AUTH_TYPE -> OBJECT_MAPPER.readValue(authProfileString, OAuth2Profile.class);
             default -> {
-                log.error("Unsupported authorization profile type: {}", authType);
+                log.warn("Unsupported authorization profile type: {}", authType);
                 yield null;
             }
         };
