@@ -3,6 +3,7 @@ package com.smartbear.ready.plugin.postman.collection.authorization;
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.environmentspec.AuthProfileHolderContainer;
 import com.eviware.soapui.impl.AuthRepository.AuthRepository;
+import com.eviware.soapui.support.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -47,6 +48,9 @@ public class AuthorizationProfileImporter {
     }
 
     public void importAuthorizationProfile(String authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
+        if (StringUtils.hasContent(authProfile)) {
+            return;
+        }
         try {
             JSONObject authProfileJson = new JSONObject(authProfile);
             String authType = authProfileJson.getString(PROFILE_TYPE);
