@@ -16,7 +16,6 @@
 
 package com.smartbear.ready.plugin.postman;
 
-import com.eviware.soapui.environmentspec.AuthProfileHolderContainer;
 import com.eviware.soapui.impl.WorkspaceImpl;
 import com.eviware.soapui.impl.graphql.GraphQLRequest;
 import com.eviware.soapui.impl.rest.RestRequest;

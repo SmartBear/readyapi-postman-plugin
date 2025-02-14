@@ -48,7 +48,7 @@ public class AuthorizationProfileImporter {
     }
 
     public void importAuthorizationProfile(String authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
-        if (StringUtils.hasContent(authProfile)) {
+        if (StringUtils.isNullOrEmpty(authProfile)) {
             return;
         }
         try {

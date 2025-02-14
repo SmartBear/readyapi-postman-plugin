@@ -74,7 +74,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
 
     @Override
     public String getAuth() {
-        return postmanCollection.getJSONObject(AUTH_PROFILE).toString();
+        return postmanCollection.has(AUTH_PROFILE) ? postmanCollection.get(AUTH_PROFILE).toString() : "";
     }
 
     @Override
