@@ -9,9 +9,14 @@ public record OAuth1Profile(String consumerSecret, String consumerKey, String to
                             Boolean addParamsToHeader) implements PostmanAuthProfile {
 
     @Override
+    public AuthEntryTypeConfig.Enum getAuthEntryType() {
+        return AuthEntryTypeConfig.O_AUTH_1_0;
+    }
+
+    @Override
     public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.OAuth10AuthEntry oAuth10AuthEntry = (AuthEntries.OAuth10AuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.O_AUTH_1_0, profileName);
+                .createEntry(getAuthEntryType(), profileName);
         setValueIfNotNull(consumerKey, oAuth10AuthEntry::setConsumerKey);
         setValueIfNotNull(consumerSecret, oAuth10AuthEntry::setConsumerSecret);
         setValueIfNotNull(token, oAuth10AuthEntry::setAccessToken);

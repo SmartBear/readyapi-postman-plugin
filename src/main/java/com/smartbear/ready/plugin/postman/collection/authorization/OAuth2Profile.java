@@ -25,10 +25,16 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
             "queryParams", AccessTokenPositionConfig.QUERY,
             "header", AccessTokenPositionConfig.HEADER);
 
+
+    @Override
+    public AuthEntryTypeConfig.Enum getAuthEntryType() {
+        return AuthEntryTypeConfig.O_AUTH_2_0;
+    }
+
     @Override
     public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.OAuth20AuthEntry oAuth20AuthEntry = (AuthEntries.OAuth20AuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.O_AUTH_2_0, profileName);
+                .createEntry(getAuthEntryType(), profileName);
         setValueIfNotNull(clientId, oAuth20AuthEntry::setClientID);
         setValueIfNotNull(clientSecret, oAuth20AuthEntry::setClientSecret);
         setValueIfNotNull(accessTokenUrl, oAuth20AuthEntry::setAccessTokenURI);

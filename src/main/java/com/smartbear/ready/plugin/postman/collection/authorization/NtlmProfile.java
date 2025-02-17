@@ -7,9 +7,14 @@ import com.eviware.soapui.impl.AuthRepository.AuthRepository;
 public record NtlmProfile(String username, String password, String domain) implements PostmanAuthProfile {
 
     @Override
+    public AuthEntryTypeConfig.Enum getAuthEntryType() {
+        return AuthEntryTypeConfig.NTLM;
+    }
+
+    @Override
     public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.NTLMAuthEntry ntlmAuthEntry = (AuthEntries.NTLMAuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.NTLM, profileName);
+                .createEntry(getAuthEntryType(), profileName);
         setValueIfNotNull(username, ntlmAuthEntry::setUsername);
         setValueIfNotNull(password, ntlmAuthEntry::setPassword);
         setValueIfNotNull(domain, ntlmAuthEntry::setDomain);

@@ -7,9 +7,14 @@ import com.eviware.soapui.impl.AuthRepository.AuthRepository;
 public record BasicAuthProfile (String username, String password) implements PostmanAuthProfile {
 
     @Override
+    public AuthEntryTypeConfig.Enum getAuthEntryType() {
+        return AuthEntryTypeConfig.BASIC;
+    }
+
+    @Override
     public void createAuthEntry(String profileName, AuthRepository authRepository) {
         AuthEntries.BasicAuthEntry basicAuthEntry = (AuthEntries.BasicAuthEntry) authRepository
-                .createEntry(AuthEntryTypeConfig.BASIC, profileName);
+                .createEntry(getAuthEntryType(), profileName);
         setValueIfNotNull(password, basicAuthEntry::setPassword);
         setValueIfNotNull(username, basicAuthEntry::setUsername);
     }

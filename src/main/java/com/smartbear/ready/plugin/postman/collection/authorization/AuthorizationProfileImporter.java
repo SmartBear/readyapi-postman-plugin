@@ -84,6 +84,9 @@ public class AuthorizationProfileImporter {
     }
 
     private void createProfile(PostmanAuthProfile authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
+        if (profileName.equals(authProfile.getAuthEntryType().toString())) {
+            profileName += " auth";
+        }
         if (importedProfiles.containsValue(authProfile)) {
             profileName = importedProfiles.inverse().get(authProfile);
         } else {
