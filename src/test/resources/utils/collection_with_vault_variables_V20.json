@@ -1,0 +1,152 @@
+{
+	"info": {
+		"_postman_id": "bc4dd058-dc6f-40a5-be43-009a04715f12",
+		"name": "Collection with vault variables",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "folder2",
+			"item": [
+				{
+					"name": "folder 1",
+					"item": [
+						{
+							"name": "request in folder",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "body key",
+											"value": "{{vault:form-data-vault}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": "https://localhost:8080"
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "awsv4",
+				"awsv4": {
+					"sessionToken": "session-token",
+					"secretKey": "secret123",
+					"accessKey": "123-234-345",
+					"service": "s3",
+					"region": "us-east-1"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "basic request",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": {
+						"password": "{{vault:basic_user}}",
+						"username": "{{vault:basic_password}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://google.com?the key={{vault:the secret key}}",
+					"protocol": "https",
+					"host": [
+						"google",
+						"com"
+					],
+					"query": [
+						{
+							"key": "the key",
+							"value": "{{vault:the secret key}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:222"
+			},
+			"response": []
+		},
+		{
+			"name": "Ntlm sample",
+			"request": {
+				"auth": {
+					"type": "ntlm",
+					"ntlm": {
+						"workstation": "",
+						"domain": "",
+						"username": "{{vault:ntlm username}}",
+						"password": "{{vault:ntlm password}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:222"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
