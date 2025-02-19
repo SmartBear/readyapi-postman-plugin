@@ -5,6 +5,7 @@ import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.config.OAuth2FlowConfig;
 import com.eviware.soapui.impl.AuthRepository.AuthEntries;
 import com.eviware.soapui.impl.AuthRepository.AuthRepository;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -42,8 +43,12 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
         setValueIfNotNull(redirect_uri, oAuth20AuthEntry::setRedirectURI);
         setValueIfNotNull(scope, oAuth20AuthEntry::setScope);
         setValueIfNotNull(state, oAuth20AuthEntry::setState);
-        setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type), oAuth20AuthEntry::setOAuth2Flow);
-        setValueIfNotNull(ADD_TOKEN_TO.get(addTokenTo), oAuth20AuthEntry::setAccessTokenPosition);
+        if (grant_type != null) {
+            setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type), oAuth20AuthEntry::setOAuth2Flow);
+        }
+        if (addTokenTo != null) {
+            setValueIfNotNull(ADD_TOKEN_TO.get(addTokenTo), oAuth20AuthEntry::setAccessTokenPosition);
+        }
         if (AUTH_CODE_WITH_PKCE.equals(grant_type)) {
             oAuth20AuthEntry.setEnablePKCE(true);
         }
