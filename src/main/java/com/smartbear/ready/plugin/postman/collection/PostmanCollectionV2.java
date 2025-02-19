@@ -1,5 +1,6 @@
 package com.smartbear.ready.plugin.postman.collection;
 
+import com.smartbear.ready.plugin.postman.utils.PostmanCollectionUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -25,12 +26,15 @@ public class PostmanCollectionV2 extends PostmanCollection {
     public static final String VARIABLE_KEY = "key";
     public static final String VARIABLE_VALUE = "value";
     public static final String VARIABLE_TYPE = "type";
+    public static final String AUTH_PROFILE = "auth";
 
     private final JSONObject info;
+    private final String version;
 
     public PostmanCollectionV2(JSONObject postmanCollection) {
         super(postmanCollection);
-        info = postmanCollection.getJSONObject(INFO);
+        this.info = postmanCollection.getJSONObject(INFO);
+        this.version = PostmanCollectionUtils.getCollectionVersionFromInfo(info).orElse("");
     }
 
     @Override
@@ -68,16 +72,30 @@ public class PostmanCollectionV2 extends PostmanCollection {
         return variablesList;
     }
 
+    @Override
+    public String getAuth() {
+        return postmanCollection.has(AUTH_PROFILE) ? postmanCollection.get(AUTH_PROFILE).toString() : "";
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
+    }
+
     private boolean isFolder(JSONObject item) {
         return item.containsKey(ITEM);
     }
 
     private void extractRequestsFromItems(JSONArray items, List<Request> requestList, DirectoryInfo directoryInfo) {
         for (Object itemObject : items) {
-            if (itemObject instanceof JSONObject) {
-                JSONObject item = (JSONObject) itemObject;
+            if (itemObject instanceof JSONObject item) {
                 if (isFolder(item)) {
-                    extractRequestsFromItems(item.getJSONArray(ITEM), requestList, new DirectoryInfo(item.getString(NAME), item.get(DESCRIPTION) != null ? item.getString(DESCRIPTION) : "", directoryInfo));
+                    extractRequestsFromItems(item.getJSONArray(ITEM), requestList,
+                            new DirectoryInfo(
+                                    item.getString(NAME),
+                                    item.has(DESCRIPTION) ? item.getString(DESCRIPTION) : "",
+                                    directoryInfo,
+                                    item.has(AUTH_PROFILE) ? item.getString(AUTH_PROFILE) : ""));
                 } else {
                     requestList.add(new RequestV2(item, directoryInfo));
                 }
@@ -87,20 +105,16 @@ public class PostmanCollectionV2 extends PostmanCollection {
 
     private void extractFoldersFromItems(JSONArray items, List<JSONObject> foldersList) {
         for (Object itemObject : items) {
-            if (itemObject instanceof JSONObject) {
-                JSONObject item = (JSONObject) itemObject;
-                if (isFolder(item)) {
-                    foldersList.add(item);
-                    extractFoldersFromItems(item.getJSONArray(ITEM), foldersList);
-                }
+            if (itemObject instanceof JSONObject item && isFolder(item)) {
+                foldersList.add(item);
+                extractFoldersFromItems(item.getJSONArray(ITEM), foldersList);
             }
         }
     }
 
     private void extractVariablesFromItems(JSONArray items, List<Variable> variablesList) {
         for (Object itemObject : items) {
-            if (itemObject instanceof JSONObject) {
-                JSONObject item = (JSONObject) itemObject;
+            if (itemObject instanceof JSONObject item) {
                 variablesList.add(new VariableImpl(item));
             }
         }

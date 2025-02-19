@@ -1,0 +1,322 @@
+{
+	"info": {
+		"_postman_id": "54fde65a-ad46-40e9-a3da-d2eecf8fd6b6",
+		"name": "test-auth-profiles",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "folder 1 [Digest]",
+			"item": [
+				{
+					"name": "folder 2",
+					"item": [
+						{
+							"name": "request in folder",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "https://google.com"
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "digest",
+				"digest": {
+					"realm": "testrealm@example.com",
+					"password": "digest-password",
+					"username": "digest-user",
+					"algorithm": "MD5"
+				}
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "requests with the same name",
+			"item": [
+				{
+					"name": "different profile",
+					"item": [
+						{
+							"name": "same name",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": {
+										"password": "pass-2",
+										"username": "user-2"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "https://localhost:1234"
+							},
+							"response": []
+						},
+						{
+							"name": "same name",
+							"request": {
+								"auth": {
+									"type": "ntlm",
+									"ntlm": {
+										"password": "ntlm-1",
+										"username": "ntlm-1",
+										"workstation": "TEST_WORKSTATION",
+										"domain": "testdomain.com"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "https://localhost:1234"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "same profile",
+					"item": [
+						{
+							"name": "same profile",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": {
+										"password": "same-password",
+										"username": "same-username"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "https://google.pl"
+							},
+							"response": []
+						},
+						{
+							"name": "same profile",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": {
+										"password": "same-password",
+										"username": "same-username"
+									}
+								},
+								"method": "GET",
+								"header": [],
+								"url": "https://google.pl"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "unsupported profile",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": {
+						"payload": "{\"test\" : \"test\"}",
+						"secret": "test-test-test",
+						"isSecretBase64Encoded": false,
+						"algorithm": "HS256",
+						"addTokenTo": "header",
+						"headerPrefix": "Bearer",
+						"queryParamKey": "token",
+						"header": "{}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:8080"
+			},
+			"response": []
+		},
+		{
+			"name": "aws request",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": {
+						"sessionToken": "session-token",
+						"service": "s3",
+						"region": "us-east-1",
+						"secretKey": "secret-key",
+						"accessKey": "access-key"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:8080"
+			},
+			"response": []
+		},
+		{
+			"name": "oauth1",
+			"request": {
+				"auth": {
+					"type": "oauth1",
+					"oauth1": {
+						"addParamsToHeader": false,
+						"callback": "https://callback-url.com",
+						"timestamp": "timestamptest",
+						"includeBodyHash": true,
+						"addEmptyParamsToSign": true,
+						"realm": "sometest@realm.com",
+						"nonce": "NonceTest",
+						"verifier": "verifier-value",
+						"tokenSecret": "token-secret-value",
+						"token": "access-token",
+						"consumerSecret": "consumer-secret-value",
+						"consumerKey": "consumer-key-value",
+						"signatureMethod": "HMAC-SHA1",
+						"version": "1.0"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:8080"
+			},
+			"response": []
+		},
+		{
+			"name": "oauth2",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": {
+						"client_authentication": "header",
+						"code_verifier": "some-verifier",
+						"grant_type": "authorization_code_with_pkce",
+						"addTokenTo": "queryParams",
+						"refreshTokenUrl": "http://refreshurl.com",
+						"state": "test-state",
+						"scope": "scope:email",
+						"clientSecret": "some-client-secret",
+						"clientId": "some-client-id",
+						"accessTokenUrl": "http://accesstokenurl",
+						"authUrl": "http://authurl",
+						"useBrowser": false,
+						"redirect_uri": "http://test.test",
+						"tokenName": "some name",
+						"headerPrefix": "Bearer",
+						"refreshRequestParams": [
+							{
+								"key": "refresh_req_param",
+								"value": "refresh_req_val",
+								"enabled": true,
+								"send_as": "request_body"
+							}
+						],
+						"authRequestParams": [
+							{
+								"key": "auth_req_param",
+								"value": "auth_req_val",
+								"enabled": true,
+								"send_as": "request_url"
+							}
+						],
+						"tokenRequestParams": [
+							{
+								"key": "token_request_test_param",
+								"value": "token_req_val",
+								"enabled": true,
+								"send_as": "request_body"
+							}
+						]
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:8081"
+			},
+			"response": []
+		},
+		{
+			"name": "no auth",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:222"
+			},
+			"response": []
+		},
+		{
+			"name": "ntlm",
+			"request": {
+				"auth": {
+					"type": "ntlm",
+					"ntlm": {
+						"workstation": "sample-workstatiom",
+						"domain": "sampledomain.com",
+						"password": "ntlm-pass",
+						"username": "ntlm-user"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": "https://localhost:1234"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": {
+			"password": "collection-password",
+			"username": "collection-name"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

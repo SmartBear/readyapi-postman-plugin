@@ -39,6 +39,8 @@ import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.x.dialogs.Worker;
 import com.eviware.x.dialogs.XProgressDialog;
 import com.eviware.x.dialogs.XProgressMonitor;
+import com.smartbear.ready.plugin.postman.collection.RequestAuthProfile;
+import com.smartbear.ready.plugin.postman.collection.authorization.AuthorizationProfileImporter;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
@@ -95,13 +97,16 @@ public class PostmanImporter {
                     return null;
                 }
                 project.setDescription(postmanCollection.getDescription());
-                List<Request> requests = postmanCollection.getRequests();
 
+                AuthorizationProfileImporter authProfileImporter = new AuthorizationProfileImporter(project.getAuthRepository(), postmanCollection.getVersion());
+                authProfileImporter.importAuthorizationProfile(postmanCollection.getAuth(), postmanCollection.getName(), project);
+
+                List<Request> requests = postmanCollection.getRequests();
                 for (Request request : requests) {
                     String uri = request.getUrl();
-                    String requestName = request.getName();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
+                    RequestAuthProfile authProfile = request.getAuthProfileWithName();
 
                     if (StringUtils.hasContent(preRequestScript)) {
                         processPreRequestScript(preRequestScript, project);
@@ -114,6 +119,8 @@ public class PostmanImporter {
 
                         SoapServiceCreator soapServiceCreator = new SoapServiceCreator(project);
                         WsdlRequest wsdlRequest = soapServiceCreator.addSoapRequest(request);
+
+                        authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), wsdlRequest);
 
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(wsdlRequest, collectionName);
@@ -128,6 +135,7 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
+                        authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), graphQLRequest);
 
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(graphQLRequest, collectionName);
@@ -140,6 +148,7 @@ public class PostmanImporter {
                             logger.error("Could not import {} request with URI [ {} ]", request.getMethod(), uri);
                             continue;
                         }
+                        authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), restRequest);
 
                         if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(restRequest, collectionName);
