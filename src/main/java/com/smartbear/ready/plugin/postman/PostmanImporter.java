@@ -53,6 +53,7 @@ import com.smartbear.ready.plugin.postman.utils.GraphQLImporterUtils;
 import com.smartbear.ready.plugin.postman.utils.PostmanJsonUtil;
 import com.smartbear.ready.plugin.postman.utils.RestServiceCreator;
 import com.smartbear.ready.plugin.postman.utils.SoapServiceCreator;
+import com.smartbear.ready.plugin.postman.utils.VaultVariableResolver;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
@@ -84,8 +85,8 @@ public class PostmanImporter {
         String postmanJson = getPostmanImporterWorker(filePath).getPostmanJson();
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
-            if (json instanceof JSONObject) {
-                PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection((JSONObject) json);
+            if (json instanceof JSONObject jsonCollection) {
+                PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection(jsonCollection);
                 String collectionName = postmanCollection.getName();
                 foldersAmount = Integer.toString(postmanCollection.getFolders().size());
                 requestsAmount = Integer.toString(postmanCollection.getRequests().size());
@@ -162,6 +163,7 @@ public class PostmanImporter {
 
                     logger.info("Importing a request with URI [ {} ] - done", uri);
                 }
+                handleVaultVariables(jsonCollection, project);
 
                 List<PostmanCollection.Variable> variables = postmanCollection.getVariables();
                 if (variables != null) {
@@ -177,6 +179,17 @@ public class PostmanImporter {
             }
         }
         return project;
+    }
+
+    private void handleVaultVariables(JSONObject jsonCollection, WsdlProject project) {
+        VaultVariableResolver resolver = new VaultVariableResolver();
+        Map<String,String> vaultVariables = resolver.resolve(jsonCollection);
+        for (Map.Entry<String, String> vaultVariable : vaultVariables.entrySet()) {
+            if (!project.hasProperty(vaultVariable.getKey())) {
+                project.addProperty(vaultVariable.getKey());
+            }
+            project.setPropertyValue(vaultVariable.getKey(), vaultVariable.getValue());
+        }
     }
 
     private PostmanImporterWorker getPostmanImporterWorker(String filePath) {
