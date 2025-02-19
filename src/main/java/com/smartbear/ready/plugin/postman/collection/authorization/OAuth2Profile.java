@@ -5,7 +5,6 @@ import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.config.OAuth2FlowConfig;
 import com.eviware.soapui.impl.AuthRepository.AuthEntries;
 import com.eviware.soapui.impl.AuthRepository.AuthRepository;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
