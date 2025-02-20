@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class VaultVariableResolver {
 
@@ -52,11 +53,9 @@ public class VaultVariableResolver {
 
     private Map<String, String> getVaultVariablesFromCollection(JSONObject jsonCollection) {
         Set<String> vaultVariableNames = PostmanCollectionUtils.extractVaultVariables(jsonCollection);
-        Map<String, String> variablesToResolve = new HashMap<>();
-        for (String key : vaultVariableNames) {
-            variablesToResolve.put(key, "");
-        }
-        return variablesToResolve;
+        return vaultVariableNames
+                .stream()
+                .collect(Collectors.toMap(key -> key, value -> ""));
     }
 
     private void buildDialog() {
@@ -100,10 +99,8 @@ public class VaultVariableResolver {
     }
 
     private boolean allVariablesResolved() {
-        for (Map.Entry<String, String> vaultVariable : vaultVariablesTableModel.getVaultVariables().entrySet()) {
-            if (StringUtils.isNullOrEmpty(vaultVariable.getValue())) {
-                return UISupport.confirm(UNRESOLVED_DIALOG_QUESTION, UNRESOLVED_DIALOG_TITLE);
-            }
+        if (vaultVariablesTableModel.getVaultVariables().values().stream().anyMatch(StringUtils::isNullOrEmpty)) {
+            return UISupport.confirm(UNRESOLVED_DIALOG_QUESTION, UNRESOLVED_DIALOG_TITLE);
         }
         return true;
     }
