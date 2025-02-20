@@ -19,6 +19,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -107,10 +108,10 @@ public class VaultVariableResolver {
 
     private static class VaultVariablesTableModel extends AbstractTableModel {
 
-        private final Map<String, String> vaultVariables;
+        private final LinkedHashMap<String, String> vaultVariables = new LinkedHashMap<>();
 
         public VaultVariablesTableModel(Map<String, String> vaultVariables) {
-            this.vaultVariables = vaultVariables;
+            this.vaultVariables.putAll(vaultVariables);
         }
 
         public Map<String, String> getVaultVariables() {
@@ -141,7 +142,7 @@ public class VaultVariableResolver {
 
         @Override
         public Object getValueAt(int rowIndex, int columnIndex) {
-            String currentKey = new ArrayList<>(vaultVariables.keySet()).get(rowIndex);
+            String currentKey = getCurrentKeyForRow(rowIndex);
             return switch (columnIndex) {
                 case 0 -> currentKey;
                 case 1 -> vaultVariables.get(currentKey);
@@ -152,10 +153,14 @@ public class VaultVariableResolver {
         @Override
         public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
             if (columnIndex == 1) {
-                String currentKey = new ArrayList<>(vaultVariables.keySet()).get(rowIndex);
+                String currentKey = getCurrentKeyForRow(rowIndex);
                 vaultVariables.put(currentKey, aValue.toString());
                 fireTableCellUpdated(rowIndex, columnIndex);
             }
+        }
+
+        private String getCurrentKeyForRow(int rowIndex) {
+            return new ArrayList<>(vaultVariables.keySet()).get(rowIndex);
         }
     }
 }
