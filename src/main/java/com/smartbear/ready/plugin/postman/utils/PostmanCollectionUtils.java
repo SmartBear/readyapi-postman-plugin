@@ -1,6 +1,5 @@
 package com.smartbear.ready.plugin.postman.utils;
 
-import com.eviware.soapui.support.StringUtils;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
@@ -52,17 +51,11 @@ public class PostmanCollectionUtils {
             } else if (currentNode instanceof String string) {
                 Matcher matcher = VAULT_VARIABLE_REGEX.matcher(string);
                 while (matcher.find()) {
-                    vaultVariables.add(removeDoubleBraces(matcher.group(0).trim()));
+                    vaultVariables.add("vault:" + matcher.group(1).trim());
                 }
             }
         }
         return vaultVariables;
     }
 
-    private static String removeDoubleBraces(String input) {
-        if (StringUtils.hasContent(input) && input.startsWith("{{") && input.endsWith("}}")) {
-            return input.substring(2, input.length() - 2);
-        }
-        return input;
-    }
 }
