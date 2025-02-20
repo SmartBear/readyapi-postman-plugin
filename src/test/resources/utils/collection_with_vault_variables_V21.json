@@ -1,0 +1,217 @@
+{
+	"info": {
+		"_postman_id": "d2741fd1-f474-41b6-8d0a-59777ae09452",
+		"name": "Collection with vault variables",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "folder2",
+			"item": [
+				{
+					"name": "folder 1",
+					"item": [
+						{
+							"name": "request in folder",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "body key",
+											"value": "{{vault:form-data-vault}}",
+											"type": "text"
+										}
+									]
+								},
+								"url": {
+									"raw": "https://localhost:8080",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "8080"
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "awsv4",
+				"awsv4": [
+					{
+						"key": "sessionToken",
+						"value": "session-token",
+						"type": "string"
+					},
+					{
+						"key": "secretKey",
+						"value": "secret123",
+						"type": "string"
+					},
+					{
+						"key": "accessKey",
+						"value": "123-234-345",
+						"type": "string"
+					},
+					{
+						"key": "service",
+						"value": "s3",
+						"type": "string"
+					},
+					{
+						"key": "region",
+						"value": "us-east-1",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "basic request",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "{{vault:basic_user}}",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{vault:basic_password}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://google.com?the key={{vault:the secret key}}",
+					"protocol": "https",
+					"host": [
+						"google",
+						"com"
+					],
+					"query": [
+						{
+							"key": "the key",
+							"value": "{{vault:the secret key}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:222",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "222"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Ntlm sample",
+			"request": {
+				"auth": {
+					"type": "ntlm",
+					"ntlm": [
+						{
+							"key": "workstation",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "domain",
+							"value": "",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "{{vault:ntlm username}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{vault:ntlm password}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:222",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "222"
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
