@@ -2,7 +2,7 @@ package com.smartbear.ready.plugin.postman.collection.authorization;
 
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.impl.AuthRepository.AuthEntries;
-import com.eviware.soapui.impl.AuthRepository.AuthRepository;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 
 public record DigestProfile(String username, String password) implements PostmanAuthProfile {
 
@@ -12,11 +12,11 @@ public record DigestProfile(String username, String password) implements Postman
     }
 
     @Override
-    public void createAuthEntry(String profileName, AuthRepository authRepository) {
-        AuthEntries.DigestAuthEntry digestAuthEntry = (AuthEntries.DigestAuthEntry) authRepository
+    public void createAuthEntry(String profileName, WsdlProject project) {
+        AuthEntries.DigestAuthEntry digestAuthEntry = (AuthEntries.DigestAuthEntry) project.getAuthRepository()
                 .createEntry(getAuthEntryType(), profileName);
-        setValueIfNotNull(username, digestAuthEntry::setUsername);
-        setValueIfNotNull(password, digestAuthEntry::setPassword);
+        setValueIfNotNull(username, digestAuthEntry::setUsername, project);
+        setValueIfNotNull(password, digestAuthEntry::setPassword, project);
     }
 }
 

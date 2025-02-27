@@ -11,13 +11,18 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.smartbear.ready.plugin.postman.DummyTestCreator;
 import com.smartbear.ready.plugin.postman.PostmanImporter;
 import com.smartbear.ready.plugin.postman.exceptions.PostmanCollectionUnsupportedVersionException;
+import com.smartbear.ready.plugin.postman.utils.VaultVariableResolver;
+import net.sf.json.JSONObject;
 import org.apache.xmlbeans.XmlException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -26,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 class AuthorizationProfileImporterTest {
 
@@ -44,11 +50,18 @@ class AuthorizationProfileImporterTest {
     private static WsdlProject collectionV20;
     private static WsdlProject collectionV21;
 
+    @Mock
+    private static VaultVariableResolver resolver;
+
     @BeforeAll
     static void setUp() throws XmlException, IOException, ExecutionException, InterruptedException, PostmanCollectionUnsupportedVersionException {
         workspaceFile = new File(TEST_WORKSPACE_FILE_PATH);
         workspace = new WorkspaceImpl(workspaceFile.getAbsolutePath(), null);
-        importer = new PostmanImporter(new DummyTestCreator());
+
+        resolver = Mockito.mock(VaultVariableResolver.class);
+        when(resolver.resolve(Mockito.any(JSONObject.class))).thenReturn(new HashMap<>());
+        importer = new PostmanImporter(new DummyTestCreator(), resolver);
+
         collectionV20 = importer.importPostmanCollection(workspace,
                 AuthorizationProfileImporterTest.class.getResource(AUTH_COLLECTION_V20).getPath());
         collectionV21 = importer.importPostmanCollection(workspace,
@@ -125,6 +138,12 @@ class AuthorizationProfileImporterTest {
     void importNoAuthAuthProfileV20_V21() {
         verifyIfNoAuthProfileIsSet(collectionV20);
         verifyIfNoAuthProfileIsSet(collectionV21);
+    }
+
+    @Test
+    void checkPropertyExpansionsCreatedV20_V21() {
+        verifyPropertyExpansionsCreatedForBasicAuth(collectionV20);
+        verifyPropertyExpansionsCreatedForBasicAuth(collectionV21);
     }
 
     @AfterAll
@@ -238,4 +257,19 @@ class AuthorizationProfileImporterTest {
         assertEquals(AuthEntryTypeConfig.NO_AUTHORIZATION.toString(), request.getAuthProfile());
     }
 
+    private void verifyPropertyExpansionsCreatedForBasicAuth(WsdlProject project) {
+        assertNotNull(project.getProperty("vault:vault var"));
+        assertNotNull(project.getProperty("vault:basicAuthUsername"));
+
+        AuthEntries.BaseAuthEntry vaultEntry = project.getAuthRepository().getEntry("basic with vault");
+        assertEquals("${#Project#vault:basicAuthUsername}", ((AuthEntries.BasicAuthEntry) vaultEntry).getUsername());
+        assertEquals("${#Project#vault:vault var}", ((AuthEntries.BasicAuthEntry) vaultEntry).getPassword());
+
+        assertNotNull(project.getProperty("global_username"));
+        assertNotNull(project.getProperty("global_password"));
+
+        AuthEntries.BaseAuthEntry globalsEntry = project.getAuthRepository().getEntry("basic with globals");
+        assertEquals("${#Project#global_username}", ((AuthEntries.BasicAuthEntry) globalsEntry).getUsername());
+        assertEquals("${#Project#global_password}", ((AuthEntries.BasicAuthEntry) globalsEntry).getPassword());
+    }
 }
