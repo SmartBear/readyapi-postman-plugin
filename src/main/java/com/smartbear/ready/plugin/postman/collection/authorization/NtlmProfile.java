@@ -2,7 +2,7 @@ package com.smartbear.ready.plugin.postman.collection.authorization;
 
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.impl.AuthRepository.AuthEntries;
-import com.eviware.soapui.impl.AuthRepository.AuthRepository;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 
 public record NtlmProfile(String username, String password, String domain) implements PostmanAuthProfile {
 
@@ -12,11 +12,11 @@ public record NtlmProfile(String username, String password, String domain) imple
     }
 
     @Override
-    public void createAuthEntry(String profileName, AuthRepository authRepository) {
-        AuthEntries.NTLMAuthEntry ntlmAuthEntry = (AuthEntries.NTLMAuthEntry) authRepository
+    public void createAuthEntry(String profileName, WsdlProject project) {
+        AuthEntries.NTLMAuthEntry ntlmAuthEntry = (AuthEntries.NTLMAuthEntry) project.getAuthRepository()
                 .createEntry(getAuthEntryType(), profileName);
-        setValueIfNotNull(username, ntlmAuthEntry::setUsername);
-        setValueIfNotNull(password, ntlmAuthEntry::setPassword);
-        setValueIfNotNull(domain, ntlmAuthEntry::setDomain);
+        setValueIfNotNull(username, ntlmAuthEntry::setUsername, project);
+        setValueIfNotNull(password, ntlmAuthEntry::setPassword, project);
+        setValueIfNotNull(domain, ntlmAuthEntry::setDomain, project);
     }
 }

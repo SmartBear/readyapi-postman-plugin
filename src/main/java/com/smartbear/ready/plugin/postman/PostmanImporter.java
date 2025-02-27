@@ -75,9 +75,16 @@ public class PostmanImporter {
     private static String foldersAmount;
     private static String requestsAmount;
     private final TestCreator testCreator;
+    private final VaultVariableResolver resolver;
 
     public PostmanImporter(TestCreator testCreator) {
         this.testCreator = testCreator;
+        this.resolver = new VaultVariableResolver();
+    }
+
+    public PostmanImporter(TestCreator testCreator, VaultVariableResolver resolver) {
+        this.testCreator = testCreator;
+        this.resolver = resolver;
     }
 
     public WsdlProject importPostmanCollection(WorkspaceImpl workspace, String filePath) throws PostmanCollectionUnsupportedVersionException {
@@ -99,7 +106,7 @@ public class PostmanImporter {
                 }
                 project.setDescription(postmanCollection.getDescription());
 
-                AuthorizationProfileImporter authProfileImporter = new AuthorizationProfileImporter(project.getAuthRepository(), postmanCollection.getVersion());
+                AuthorizationProfileImporter authProfileImporter = new AuthorizationProfileImporter(postmanCollection.getVersion(), project);
                 authProfileImporter.importAuthorizationProfile(postmanCollection.getAuth(), postmanCollection.getName(), project);
 
                 List<Request> requests = postmanCollection.getRequests();
@@ -182,7 +189,6 @@ public class PostmanImporter {
     }
 
     private void handleVaultVariables(JSONObject jsonCollection, WsdlProject project) {
-        VaultVariableResolver resolver = new VaultVariableResolver();
         Map<String,String> vaultVariables = resolver.resolve(jsonCollection);
         for (Map.Entry<String, String> vaultVariable : vaultVariables.entrySet()) {
             if (!project.hasProperty(vaultVariable.getKey())) {

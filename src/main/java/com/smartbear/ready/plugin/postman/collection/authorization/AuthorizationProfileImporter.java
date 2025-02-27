@@ -2,7 +2,7 @@ package com.smartbear.ready.plugin.postman.collection.authorization;
 
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.environmentspec.AuthProfileHolderContainer;
-import com.eviware.soapui.impl.AuthRepository.AuthRepository;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -37,14 +37,14 @@ public class AuthorizationProfileImporter {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private static final Logger log = LoggerFactory.getLogger(AuthorizationProfileImporter.class);
 
-    private final AuthRepository authRepository;
+    private final WsdlProject project;
     private final String collectionVersion;
     private final BiMap<String, PostmanAuthProfile> importedProfiles = HashBiMap.create();
     private final Map<String, Integer> profileNamesCounter = new HashMap<>();
 
-    public AuthorizationProfileImporter(AuthRepository authRepository, String collectionVersion) {
-        this.authRepository = authRepository;
+    public AuthorizationProfileImporter(String collectionVersion, WsdlProject project) {
         this.collectionVersion = collectionVersion;
+        this.project = project;
     }
 
     public void importAuthorizationProfile(String authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
@@ -83,7 +83,7 @@ public class AuthorizationProfileImporter {
         };
     }
 
-    private void createProfile(PostmanAuthProfile authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) throws JsonProcessingException {
+    private void createProfile(PostmanAuthProfile authProfile, String profileName, AuthProfileHolderContainer objectToAttachAuth) {
         if (profileName.equals(authProfile.getAuthEntryType().toString())) {
             profileName += " auth";
         }
@@ -91,7 +91,7 @@ public class AuthorizationProfileImporter {
             profileName = importedProfiles.inverse().get(authProfile);
         } else {
             profileName = incrementProfileNameIfExists(profileName);
-            authProfile.createAuthEntry(profileName, authRepository);
+            authProfile.createAuthEntry(profileName, project);
             importedProfiles.put(profileName, authProfile);
         }
         objectToAttachAuth.setAuthProfile(profileName);
