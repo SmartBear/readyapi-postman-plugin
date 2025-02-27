@@ -229,6 +229,69 @@
 			]
 		},
 		{
+			"name": "property expansions",
+			"item": [
+				{
+					"name": "basic with vault",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{vault:vault var}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{vault:basicAuthUsername}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/basic",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"basic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "basic with globals",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{global_password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{global_username}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/basicglobals"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "unsupported profile",
 			"request": {
 				"auth": {

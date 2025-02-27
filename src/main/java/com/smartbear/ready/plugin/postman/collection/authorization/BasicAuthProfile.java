@@ -2,7 +2,7 @@ package com.smartbear.ready.plugin.postman.collection.authorization;
 
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.impl.AuthRepository.AuthEntries;
-import com.eviware.soapui.impl.AuthRepository.AuthRepository;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 
 public record BasicAuthProfile (String username, String password) implements PostmanAuthProfile {
 
@@ -12,10 +12,10 @@ public record BasicAuthProfile (String username, String password) implements Pos
     }
 
     @Override
-    public void createAuthEntry(String profileName, AuthRepository authRepository) {
-        AuthEntries.BasicAuthEntry basicAuthEntry = (AuthEntries.BasicAuthEntry) authRepository
+    public void createAuthEntry(String profileName, WsdlProject project) {
+        AuthEntries.BasicAuthEntry basicAuthEntry = (AuthEntries.BasicAuthEntry) project.getAuthRepository()
                 .createEntry(getAuthEntryType(), profileName);
-        setValueIfNotNull(password, basicAuthEntry::setPassword);
-        setValueIfNotNull(username, basicAuthEntry::setUsername);
+        setValueIfNotNull(password, basicAuthEntry::setPassword, project);
+        setValueIfNotNull(username, basicAuthEntry::setUsername, project);
     }
 }
