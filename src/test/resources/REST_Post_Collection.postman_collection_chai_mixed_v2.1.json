@@ -12,22 +12,33 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-                            "tests[ \"Status code is 200 - old\"] = responseCode.code === 200;",
+                            "tests[ \"Status code is 200 - old\"] = responseCode.code === 200",
                             "",
-                            "pm.test(\"Status code is 200 - new\", () => { ",
-                            "    pm.expect(pm.response.code).to.eql(200);",
-                            "});",
+                            "pm.test(\"Status code is 200 - new\", () => ",
+                            "    pm.expect(pm. response.code).to.eql(200)",
+                            ")",
                             "",
-                            "tests[\"Body matches string - old\"] = responseBody.has(\"model\");",
+                            " tests [\"Body matches string - old\"] = responseBody.has(\"model\")",
                             "",
                             "pm.test(\"Body matches string - new\", () => { ",
-                            "  const jsonData = pm.response.json;",
-                            "  pm.expect(jsonData.model).to.eql(\"SUBSCRIPTION\");",
-                            "});",
+                            "  const jsonData = pm.response.json",
+                            "  pm.expect(jsonData.model).to.eql(\"SUBSCRIPTION\")",
+                            "})"
                         ],
 						"type": "text/javascript"
 					}
-				}
+				},
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm .globals. set (\"new_key\" , \"new_value\");",
+                      "postman.setGlobalVariable(\"old_key\", \"old_value\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {}
+                  }
+                }
 			],
 			"request": {
                 "method": "POST",

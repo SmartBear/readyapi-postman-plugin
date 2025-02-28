@@ -9,6 +9,8 @@ import net.sf.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class PostmanCollection {
     public static final String NAME = "name";
@@ -20,6 +22,12 @@ public abstract class PostmanCollection {
     public static final String SCRIPT = "script";
     public static final String EXEC = "exec";
     public static final char SCRIPT_LINE_DELIMITER = ';';
+    private static final String ONLY_COMMENT = "^ *(//|/\\*).*";
+    private static final String SINGLE_LINE_COMMENT_REGEX = "(.*?)( *\\/\\/.*)";
+    private static final String MULTI_LINE_COMMENT_REGEX = "(.*?)( */\\*.*)";
+    private static final List<String> commentRegexList = List.of(SINGLE_LINE_COMMENT_REGEX, MULTI_LINE_COMMENT_REGEX);
+    private static final String CONTINUATION_IN_CURRENT_LINE_REGEX = "^ *[!-/:-@\\[-`{-~].*";
+    private static final String CONTINUATION_IN_NEXT_LINE_REGEX = ".*[!-(*-/:-@\\[-`{-~] *$";
 
     protected final JSONObject postmanCollection;
 
@@ -35,11 +43,10 @@ public abstract class PostmanCollection {
     public abstract String getAuth();
     public abstract String getVersion();
 
-    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName, boolean isPostmanCollectionV2) {
+    protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
         for (Object eventObject : events) {
-            if (eventObject instanceof JSONObject) {
-                JSONObject event = (JSONObject) eventObject;
+            if (eventObject instanceof JSONObject event) {
                 String listen = getValue(event, LISTEN);
                 if (!StringUtils.sameString(listen, scriptType.getListenType())) {
                     continue;
@@ -49,18 +56,54 @@ public abstract class PostmanCollection {
                     StringBuffer scriptBuffer = new StringBuffer();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
                     for (Object scriptLine : scriptLines) {
-                        if (!scriptBuffer.isEmpty() && !isPostmanCollectionV2) {
-                            scriptBuffer.append(SCRIPT_LINE_DELIMITER);
-                        }
-                        scriptBuffer.append(scriptLine);
+                        removeSemicolonFromPreviousLineIfNeeded(scriptLine.toString(), scriptBuffer);
+                        appendNewLineAndComment(scriptLine.toString(), scriptBuffer);
                     }
-                    if (scriptBuffer.length() > 0) {
+                    if (!scriptBuffer.isEmpty()) {
                         return scriptBuffer.toString();
                     }
                 }
             }
         }
         return null;
+    }
+
+    private static void appendNewLineAndComment(String currentLine, StringBuffer scriptBuffer) {
+        String comment = "";
+
+        for (String commentRegex : commentRegexList) {
+            Pattern commentPattern = Pattern.compile(commentRegex);
+            Matcher commentMatcher = commentPattern.matcher(currentLine);
+
+            if (commentMatcher.find()) {
+                currentLine = commentMatcher.group(1);
+                comment = commentMatcher.group(2);
+                break;
+            }
+        }
+
+        scriptBuffer.append(currentLine);
+        if (StringUtils.hasContent(currentLine)) {
+            addSemicolonIfNeeded(currentLine, scriptBuffer);
+        }
+        scriptBuffer.append(comment);
+        scriptBuffer.append('\n');
+    }
+
+    private static void removeSemicolonFromPreviousLineIfNeeded(String currentLine, StringBuffer scriptBuffer) {
+        if (currentLine.matches(CONTINUATION_IN_CURRENT_LINE_REGEX) &&
+                !currentLine.matches(ONLY_COMMENT) &&
+                scriptBuffer.length() > 1 &&
+                scriptBuffer.charAt(scriptBuffer.length() - 2) == SCRIPT_LINE_DELIMITER) {
+            scriptBuffer.deleteCharAt(scriptBuffer.length() - 2);
+        }
+    }
+
+    private static void addSemicolonIfNeeded(String currentLine, StringBuffer scriptBuffer) {
+        if (!scriptBuffer.isEmpty() && !currentLine.isEmpty() &&
+                !currentLine.matches(CONTINUATION_IN_NEXT_LINE_REGEX)) {
+            scriptBuffer.append(SCRIPT_LINE_DELIMITER);
+        }
     }
 
     protected static String getValue(JSONObject jsonObject, String name) {
