@@ -16,9 +16,9 @@ public interface Request {
 
     String getDescription();
 
-    String getPreRequestScript(boolean isPostmanCollectionV2);
+    String getPreRequestScript();
 
-    String getTests(boolean isPostmanCollectionV2);
+    String getTests();
 
     List<PostmanCollection.Header> getHeaders();
 
