@@ -45,7 +45,7 @@ import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
 import com.smartbear.ready.plugin.postman.exceptions.PostmanCollectionUnsupportedVersionException;
-import com.smartbear.ready.plugin.postman.script.PostmanScriptParser;
+import com.smartbear.ready.plugin.postman.script.PostmanScriptParserV1;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptParserV2;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer.Token;
@@ -75,9 +75,6 @@ public class PostmanImporter {
     private static String foldersAmount;
     private static String requestsAmount;
     private final TestCreator testCreator;
-    private final String INFO = "info";
-    private final String SCHEMA = "schema";
-    private final String V2 = "v2";
 
     public PostmanImporter(TestCreator testCreator) {
         this.testCreator = testCreator;
@@ -89,7 +86,6 @@ public class PostmanImporter {
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject jsonObject) {
-                boolean isPostmanCollectionV2 = isPostmanCollectionV2(jsonObject);
                 PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection(jsonObject);
                 String collectionName = postmanCollection.getName();
                 foldersAmount = Integer.toString(postmanCollection.getFolders().size());
@@ -111,10 +107,8 @@ public class PostmanImporter {
                     String uri = request.getUrl();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
-                    RequestAuthProfile authProfile = request.getAuthProfileWithName();
                     String requestName = request.getName();
-                    String preRequestScript = request.getPreRequestScript(isPostmanCollectionV2);
-                    String testsV1 = request.getTests(false);
+                    RequestAuthProfile authProfile = request.getAuthProfileWithName();
 
                     if (StringUtils.hasContent(preRequestScript)) {
                         processPreRequestScript(preRequestScript, project);
@@ -131,7 +125,6 @@ public class PostmanImporter {
                         authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), wsdlRequest);
 
                         if (StringUtils.hasContent(tests)) {
-                        if (StringUtils.hasContent(testsV1)) {
                             testCreator.createTest(wsdlRequest, collectionName);
                             assertable = getTestRequestStep(project, WsdlTestRequestStep.class);
                         }
@@ -146,7 +139,7 @@ public class PostmanImporter {
                         }
                         authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), graphQLRequest);
 
-                        if (StringUtils.hasContent(testsV1)) {
+                        if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(graphQLRequest, collectionName);
                             assertable = getTestRequestStep(project, GraphQLTestRequestTestStepWithSchema.class);
                         }
@@ -159,18 +152,14 @@ public class PostmanImporter {
                         }
                         authProfileImporter.importAuthorizationProfile(authProfile.getAuthProfile(), authProfile.getProfileName(), restRequest);
 
-                        if (StringUtils.hasContent(testsV1)) {
+                        if (StringUtils.hasContent(tests)) {
                             testCreator.createTest(restRequest, collectionName);
                             assertable = getTestRequestStep(project, RestTestRequestStep.class);
                         }
                     }
 
                     if (assertable != null) {
-                        if (isPostmanCollectionV2){
-                            String testsV2 = request.getTests(true);
-                            addAssertionsV2(testsV2, project, assertable);
-                        }
-                        addAssertions(testsV1, project, assertable);
+                        addAssertionsV2(tests, project, assertable, requestName);
                     }
 
                     logger.info("Importing a request with URI [ {} ] - done", uri);
@@ -230,35 +219,43 @@ public class PostmanImporter {
     }
 
 
-    void addAssertions(String tests, WsdlProject project, Assertable assertable) {
+    private void addAssertionsV1(String tests, WsdlProject project, Assertable assertable) {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        PostmanScriptParser parser = new PostmanScriptParser();
+        PostmanScriptParserV1 parser = new PostmanScriptParserV1();
         try {
             LinkedList<Token> tokens = tokenizer.tokenize(tests);
 
             ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
             parser.parse(tokens, context);
         } catch (SoapUIException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
         }
     }
 
-    void addAssertionsV2(String tests, WsdlProject project, Assertable assertable) {
-        PostmanScriptParserV2 parser = new PostmanScriptParserV2();
+    private void addAssertionsV2(String tests, WsdlProject project, Assertable assertable, String requestName) {
         ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
-        parser.parse(tests, context);
+        PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
+        parserV2.parse(tests, requestName);
+
+        if (StringUtils.hasContent(parserV2.getTestsV1())) {
+            addAssertionsV1(parserV2.getTestsV1(), project, assertable);
+        }
     }
 
     private void processPreRequestScript(String preRequestScript, WsdlProject project) {
-        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        PostmanScriptParser parser = new PostmanScriptParser();
-        try {
-            LinkedList<Token> tokens = tokenizer.tokenize(preRequestScript);
+        ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
+        PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
+        parserV2.findAndAddSettingGlobalVariables(preRequestScript);
 
-            ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
-            parser.parse(tokens, context);
-        } catch (SoapUIException e) {
-            e.printStackTrace();
+        if (StringUtils.hasContent(parserV2.getPrescriptV1())) {
+            PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+            PostmanScriptParserV1 parser = new PostmanScriptParserV1();
+            try {
+                LinkedList<Token> tokens = tokenizer.tokenize(parserV2.getPrescriptV1());
+                parser.parse(tokens, context);
+            } catch (SoapUIException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 
@@ -276,13 +273,6 @@ public class PostmanImporter {
             }
         }
         return null;
-    }
-
-    private boolean isPostmanCollectionV2(JSON json){
-        if(json == null){
-            return false;
-        }
-        return ((JSONObject) json).getJSONObject(INFO).get(SCHEMA).toString().contains(V2);
     }
 
     /**

@@ -36,11 +36,6 @@ public class AddEqualsAssertionCommand implements AddAssertionCommand {
     }
 
     @Override
-    public void addCondition(String condition) {
-
-    }
-
-    @Override
     public String getName() {
         return null;
     }

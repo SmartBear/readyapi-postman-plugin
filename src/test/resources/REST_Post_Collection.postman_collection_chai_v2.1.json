@@ -1,0 +1,135 @@
+{
+	"info": {
+		"_postman_id": "b4c6d94a-7e25-4584-a832-5263b39d4946",
+		"name": "REST Service 1 collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+            "name": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+                          " pm . test( \"The response has all properties\" ,( )=>{",
+                          "    const jsonData = pm",
+                          "        .response.json()",
+                          "    /* comment */",
+                          "    pm.expect(jsonData.type).to.eql('vip') /* comment */",
+                          "    pm.expect(jsonData.name).to.be.a('string') //comment",
+                          "    pm.expect(jsonData.id).to.have.lengthOf(1);",
+                          "} ) ",
+                          "",
+                          "pm.test(\"Body contains string\",() => pm.expect(pm.response.text()).to.include(\"customer_id\"));",
+                          "",
+                          "pm.test(\"Successful POST request\", () => {",
+                          "   //comment",
+                          "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                          "});",
+                          "",
+                          "",
+                          "pm.test(\"Content-Type header is application/json\", () => {",
+                          "  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
+                          "});",
+                          "",
+                          "pm.test(\"Response time is less than 200ms\", () => {",
+                          "  pm.expect(pm.response.responseTime).to.be.below(200);",
+                          "});",
+                          "",
+                          "pm.test(\"Response property matches environment variable\", function ( ) {",
+                          "  pm.expect(pm.response.json().name).to.eql(pm.environment.get(\"name\"));",
+                          "});",
+                          "",
+                          "const jsonData = pm.response.json();",
+                          "pm.test(\"Test data type of the response\", () => {",
+                          "  pm.expect(jsonData).to.be.an(\"object\");",
+                          "  // comment",
+                          "  pm.expect(jsonData.name).to.be.a(\"string\");",
+                          "  pm.expect(jsonData.age).to.be.a(\"number\");",
+                          "  pm.expect(jsonData.hobbies).to.be.an(\"array\");",
+                          "  pm.expect(jsonData.website).to.be.undefined;",
+                          "  pm.expect(jsonData.email).to.be.null;  }",
+                          "   )",
+                          "",
+                          "pm.test(\"Test array properties\", () => {",
+                          "  pm.expect(jsonData.errors).to.be.empty;",
+                          "  pm.expect(jsonData.areas).to.include(\"goods\");",
+                          "  const notificationSettings = jsonData.settings.find",
+                          "      (m => m.type === \"notification\");",
+                          "  pm.expect(notificationSettings)",
+                          "    .to.be.an(\"object\", \"Could not find the setting\");",
+                          "  pm.expect(notificationSettings.detail).to.include(\"sms\");",
+                          "  pm.expect(notificationSettings.detail).",
+                          "    to.have.members([\"email\", \"sms\"]);",
+                          "});",
+                          "",
+                          "pm.test(\"Test object\", () => {",
+                          "  pm.expect({a: 1, b: 2}).to.have.all.keys('a', 'b');",
+                          "  pm.expect({a: 1, b: 2}).to.have.any.keys('a', 'b');",
+                          "  pm.expect({a: 1, b: 2}).to.not.have.any.keys('c', 'd');",
+                          "  pm.expect({a: 1}).to.have.property('a');",
+                          "  pm.expect({a: 1, b: 2}).to.be.a('object')",
+                          "    .that.has.all.keys('a', 'b');",
+                          "});",
+                          "",
+                          "pm.test(\"Value is in valid list\", function() {",
+                          "  pm.expect(pm.response.json().type)",
+                          "    .to.be.oneOf([\"Subscriber\", \"Customer\", \"User\"]",
+                          ");",
+                          "});",
+                          "",
+                          "pm.test(\"Object is contained\", ( ) => {",
+                          "   const expectedObject = {",
+                          "     \"created\": true,",
+                          "     \"errors\": []",
+                          "   };",
+                          "   pm.expect(pm.response.json()).to.deep.include(expectedObject);",
+                          "});",
+                          "",
+                          "pm.test('Response is valid', function() {",
+                          "  pm.response.to.have.jsonSchema(schema);",
+                          "});",
+                          "",
+                          "// Delimiter checks",
+                          "const val =",
+                          "5",
+                          "/",
+                          "5",
+                          "",
+                          "const tab = [",
+                          "  a,",
+                          "  b,",
+                          "  c",
+                          "]",
+                          "",
+                          "A = 5",
+                          "B = 10"
+                        ],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "Basic Og=="
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"assd\":\"qwe\"}"
+                },
+                "url": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
+                "description": "Request 2"
+            },
+            "response": []
+		}
+	]
+}

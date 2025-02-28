@@ -291,7 +291,7 @@ public class PostmanScriptParserTest {
 
     private void parseScript(String script, ScriptContext context) throws SoapUIException {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        PostmanScriptParser parser = new PostmanScriptParser();
+        PostmanScriptParserV1 parser = new PostmanScriptParserV1();
         LinkedList<PostmanScriptTokenizer.Token> tokens = tokenizer.tokenize(script);
         parser.parse(tokens, context);
     }

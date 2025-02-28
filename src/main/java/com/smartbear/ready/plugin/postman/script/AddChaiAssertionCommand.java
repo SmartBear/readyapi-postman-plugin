@@ -8,6 +8,7 @@ public class AddChaiAssertionCommand implements AddAssertionCommand {
     public static final String NAME = "chaiAssertion";
     private final Assertable assertable;
     private String script;
+    private String assertionName;
 
     public AddChaiAssertionCommand(Assertable assertable) {
         this.assertable = assertable;
@@ -28,6 +29,10 @@ public class AddChaiAssertionCommand implements AddAssertionCommand {
         script = argument;
     }
 
+    public void addAssertionName(String name) {
+        this.assertionName = name;
+    }
+
     @Override
     public boolean validate() {
         return StringUtils.hasContent(script);
@@ -37,11 +42,9 @@ public class AddChaiAssertionCommand implements AddAssertionCommand {
     public Object execute() {
         ChaiAssertion assertion = (ChaiAssertion) assertable.addAssertion(ChaiAssertion.LABEL);
         assertion.setScriptText(script);
+        if (!StringUtils.isNullOrEmpty(assertionName)) {
+            assertion.getConfig().setName(assertionName);
+        }
         return null;
-    }
-
-    @Override
-    public void addCondition(String condition) {
-
     }
 }
