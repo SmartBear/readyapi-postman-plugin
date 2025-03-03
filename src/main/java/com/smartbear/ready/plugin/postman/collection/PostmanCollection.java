@@ -25,7 +25,6 @@ public abstract class PostmanCollection {
     private static final String ONLY_COMMENT = "^ *(//|/\\*).*";
     private static final String SINGLE_LINE_COMMENT_REGEX = "(.*?)( *\\/\\/.*)";
     private static final String MULTI_LINE_COMMENT_REGEX = "(.*?)( */\\*.*)";
-    private static final List<String> commentRegexList = List.of(SINGLE_LINE_COMMENT_REGEX, MULTI_LINE_COMMENT_REGEX);
     private static final String CONTINUATION_IN_CURRENT_LINE_REGEX = "^ *[!-/:-@\\[-`{-~].*";
     private static final String CONTINUATION_IN_NEXT_LINE_REGEX = ".*[!-(*-/:-@\\[-`{-~] *$";
 
@@ -45,6 +44,8 @@ public abstract class PostmanCollection {
 
     protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
+        List<Pattern> commentRegexPatterns = List.of(Pattern.compile(SINGLE_LINE_COMMENT_REGEX), Pattern.compile(MULTI_LINE_COMMENT_REGEX));
+
         for (Object eventObject : events) {
             if (eventObject instanceof JSONObject event) {
                 String listen = getValue(event, LISTEN);
@@ -53,14 +54,14 @@ public abstract class PostmanCollection {
                 }
                 JSONObject script = event.getJSONObject(SCRIPT);
                 if (script != null) {
-                    StringBuffer scriptBuffer = new StringBuffer();
+                    StringBuilder scriptBuilder = new StringBuilder();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
                     for (Object scriptLine : scriptLines) {
-                        removeSemicolonFromPreviousLineIfNeeded(scriptLine.toString(), scriptBuffer);
-                        appendNewLineAndComment(scriptLine.toString(), scriptBuffer);
+                        removeSemicolonFromPreviousLineIfNeeded(scriptLine.toString(), scriptBuilder);
+                        appendNewLineAndComment(scriptLine.toString(), scriptBuilder, commentRegexPatterns);
                     }
-                    if (!scriptBuffer.isEmpty()) {
-                        return scriptBuffer.toString();
+                    if (!scriptBuilder.isEmpty()) {
+                        return scriptBuilder.toString();
                     }
                 }
             }
@@ -68,12 +69,11 @@ public abstract class PostmanCollection {
         return null;
     }
 
-    private static void appendNewLineAndComment(String currentLine, StringBuffer scriptBuffer) {
+    private static void appendNewLineAndComment(String currentLine, StringBuilder scriptBuffer, List<Pattern> commentRegexPatterns) {
         String comment = "";
 
-        for (String commentRegex : commentRegexList) {
-            Pattern commentPattern = Pattern.compile(commentRegex);
-            Matcher commentMatcher = commentPattern.matcher(currentLine);
+        for (Pattern commentRegex : commentRegexPatterns) {
+            Matcher commentMatcher = commentRegex.matcher(currentLine);
 
             if (commentMatcher.find()) {
                 currentLine = commentMatcher.group(1);
@@ -90,16 +90,16 @@ public abstract class PostmanCollection {
         scriptBuffer.append('\n');
     }
 
-    private static void removeSemicolonFromPreviousLineIfNeeded(String currentLine, StringBuffer scriptBuffer) {
-        if (currentLine.matches(CONTINUATION_IN_CURRENT_LINE_REGEX) &&
-                !currentLine.matches(ONLY_COMMENT) &&
-                scriptBuffer.length() > 1 &&
-                scriptBuffer.charAt(scriptBuffer.length() - 2) == SCRIPT_LINE_DELIMITER) {
+    private static void removeSemicolonFromPreviousLineIfNeeded(String currentLine, StringBuilder scriptBuffer) {
+        if (scriptBuffer.length() > 1 &&
+                scriptBuffer.charAt(scriptBuffer.length() - 2) == SCRIPT_LINE_DELIMITER &&
+                currentLine.matches(CONTINUATION_IN_CURRENT_LINE_REGEX) &&
+                !currentLine.matches(ONLY_COMMENT)) {
             scriptBuffer.deleteCharAt(scriptBuffer.length() - 2);
         }
     }
 
-    private static void addSemicolonIfNeeded(String currentLine, StringBuffer scriptBuffer) {
+    private static void addSemicolonIfNeeded(String currentLine, StringBuilder scriptBuffer) {
         if (!scriptBuffer.isEmpty() && !currentLine.isEmpty() &&
                 !currentLine.matches(CONTINUATION_IN_NEXT_LINE_REGEX)) {
             scriptBuffer.append(SCRIPT_LINE_DELIMITER);

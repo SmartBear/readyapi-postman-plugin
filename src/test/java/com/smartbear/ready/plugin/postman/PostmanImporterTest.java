@@ -290,7 +290,7 @@ public class PostmanImporterTest {
 
     @Test
     public void testImportRestPostRequestFromCollectionOldAndNewAssertions() throws Exception {
-        testImportRestRequestWithOldAdnNewAssertions(REST_POST_COLLECTION_CHAI_MIXED_2_1_PATH);
+        testImportRestRequestWithOldAndNewAssertions(REST_POST_COLLECTION_CHAI_MIXED_2_1_PATH);
     }
 
     @Test
@@ -350,7 +350,7 @@ public class PostmanImporterTest {
         assertEquals(REST_POST_BODY_VALUE, request.getRequestContent(), "Request should have test body");
     }
 
-    public void testImportRestRequestWithOldAdnNewAssertions(String collectionPath) throws Exception {
+    public void testImportRestRequestWithOldAndNewAssertions(String collectionPath) throws Exception {
         PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
         WsdlProject postmanProject = importer.importPostmanCollection(
             workspace,
