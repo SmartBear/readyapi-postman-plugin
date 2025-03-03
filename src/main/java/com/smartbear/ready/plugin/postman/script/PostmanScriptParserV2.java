@@ -2,10 +2,10 @@ package com.smartbear.ready.plugin.postman.script;
 
 import com.eviware.soapui.support.StringUtils;
 import org.mozilla.javascript.CompilerEnvirons;
-import org.mozilla.javascript.Node;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
+import org.mozilla.javascript.ast.NodeVisitor;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -25,7 +25,7 @@ public class PostmanScriptParserV2 {
 
     private static final String POSTMAN_IMPORTED_COLLECTION_NAME = "Postman imported chai assertions - ";
     private static final String OLD_TEST_SYNTAX = "tests[";
-    private static final String SET_GLOBAL_VARIABLE_REGEX = "pm *. *globals. *set *\\(\"(.*?)\" *, *\"(.*?)\"\\);";
+    private static final String SET_GLOBAL_VARIABLE_REGEX = "pm.globals.set\\(\"(.*?)\", \"(.*?)\"\\);";
     private static final Map<String, String> tokenMap = new LinkedHashMap<>();
 
     static {
@@ -45,6 +45,10 @@ public class PostmanScriptParserV2 {
         this.context = context;
     }
 
+    public void parse(String script) {
+        parse(script, null);
+    }
+
     public void parse(String script, String requestName) {
         this.requestName = requestName;
 
@@ -53,19 +57,17 @@ public class PostmanScriptParserV2 {
         env.setAllowSharpComments(true);
         env.setRecordingComments(true);
         Parser parser = new Parser(env);
-
         AstRoot astRoot = parser.parse(script, null, 1);
-        for (Node node : astRoot) {
-            AstNode astNode = (AstNode) node;
-            if (astNode.toSource().startsWith(OLD_TEST_SYNTAX)){
-                testsV1.append(astNode.toSource());
-            } else {
-                testsV2.append(astNode.toSource());
-                testsV2.append('\n');
-            }
+
+        if (requestName == null) {
+            astRoot.visit(new LookForGlobalsNodeVisitor());
+        } else {
+            astRoot.visit(new SplitTestsNodeVisitor());
         }
-        if (StringUtils.hasContent(testsV2.toString())) {
-            addChaiAssertion(testsV2.toString());
+
+        String chaiTests = testsV2.toString();
+        if (StringUtils.hasContent(chaiTests)) {
+            addChaiAssertion(chaiTests);
         }
     }
 
@@ -93,17 +95,6 @@ public class PostmanScriptParserV2 {
         }
     }
 
-    public void findAndAddSettingGlobalVariables(String script) {
-        prescriptV1 = script;
-        Pattern pattern = Pattern.compile(SET_GLOBAL_VARIABLE_REGEX);
-        Matcher matcher;
-        matcher = pattern.matcher(script);
-        while (matcher.find()) {
-            addGlobalVariable(matcher.group(1), matcher.group(2));
-            prescriptV1 = script.replace(matcher.group(0), "");
-        }
-    }
-
     public String getPrescriptV1() {
         return prescriptV1;
     }
@@ -114,6 +105,39 @@ public class PostmanScriptParserV2 {
                 (SetGlobalVariableCommand) context.getObject(POSTMAN_OBJECT).getCommand(SetGlobalVariableCommand.NAME);
             setGlobalVariableCommand.addVariable(key, value);
             setGlobalVariableCommand.execute();
+        }
+    }
+
+    private class SplitTestsNodeVisitor implements NodeVisitor {
+        @Override
+        public boolean visit(AstNode astNode) {
+            if (astNode.depth() == 1){
+                if (astNode.toSource().startsWith(OLD_TEST_SYNTAX)){
+                    testsV1.append(astNode.toSource());
+                } else {
+                    testsV2.append(astNode.toSource());
+                    testsV2.append('\n');
+                }
+            }
+            return astNode.depth() <= 1;
+        }
+    }
+
+    private class LookForGlobalsNodeVisitor implements NodeVisitor {
+        @Override
+        public boolean visit(AstNode astNode) {
+            if (astNode.depth() == 0) {
+                prescriptV1 = astNode.toSource();
+            } else {
+                Pattern pattern = Pattern.compile(SET_GLOBAL_VARIABLE_REGEX);
+                Matcher matcher;
+                matcher = pattern.matcher(astNode.toSource());
+                while (matcher.find()) {
+                    addGlobalVariable(matcher.group(1), matcher.group(2));
+                    prescriptV1 = prescriptV1.replace(matcher.group(0), "");
+                }
+            }
+            return astNode.depth() <= 1;
         }
     }
 }

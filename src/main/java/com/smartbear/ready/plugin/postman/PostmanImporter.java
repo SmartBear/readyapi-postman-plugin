@@ -264,7 +264,7 @@ public class PostmanImporter {
     private void processPreRequestScript(String preRequestScript, WsdlProject project) {
         ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
         PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
-        parserV2.findAndAddSettingGlobalVariables(preRequestScript);
+        parserV2.parse(preRequestScript);
 
         if (StringUtils.hasContent(parserV2.getPrescriptV1())) {
             PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
