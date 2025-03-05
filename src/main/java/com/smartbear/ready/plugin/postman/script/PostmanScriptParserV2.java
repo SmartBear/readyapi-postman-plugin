@@ -25,20 +25,20 @@ public class PostmanScriptParserV2 {
 
     private static final String POSTMAN_IMPORTED_COLLECTION_NAME = "Postman imported chai assertions - ";
     private static final String OLD_TEST_SYNTAX = "tests[";
-    private static final String SET_GLOBAL_VARIABLE_REGEX = "pm.globals.set\\(\"(.*?)\", \"(.*?)\"\\);";
-    private static final Map<String, String> tokenMap = new LinkedHashMap<>();
+    private static final Pattern SET_GLOBAL_VARIABLE_REGEX_PATTERN = Pattern.compile("pm.globals.set\\(\"(.*?)\", \"(.*?)\"\\);");
+    private static final Map<Pattern, String> tokenMap = new LinkedHashMap<>();
 
     static {
-        tokenMap.put("pm.response.json\\(\\)", "JSON.parse(messageExchange.response.contentAsString)");
-        tokenMap.put("pm.response.json", "JSON.parse(messageExchange.response.contentAsString)");
-        tokenMap.put("pm.response.code", "messageExchange.response.getStatusCode()");
-        tokenMap.put("pm.response.text\\(\\)", "String(messageExchange.response.contentAsString)");
-        tokenMap.put("pm.response.to.have.status", "chai.expect(messageExchange.response.getStatusCode()).to.eql");
-        tokenMap.put("pm.response.to.have.header *\\((.*?)\\)", "chai.expect(messageExchange.responseHeaders.hasValues($1)).to.be.true");
-        tokenMap.put("pm.response.headers.get\\((.*?)\\)", "String(messageExchange.responseHeaders.get($1))");
-        tokenMap.put("pm.response.responseTime", "messageExchange.response.timeTaken");
-        tokenMap.put("pm.test", "ready.test");
-        tokenMap.put("pm", "chai");
+        tokenMap.put(Pattern.compile("pm.response.json\\(\\)"), "JSON.parse(messageExchange.response.contentAsString)");
+        tokenMap.put(Pattern.compile("pm.response.json"), "JSON.parse(messageExchange.response.contentAsString)");
+        tokenMap.put(Pattern.compile("pm.response.code"), "messageExchange.response.getStatusCode()");
+        tokenMap.put(Pattern.compile("pm.response.text\\(\\)"), "String(messageExchange.response.contentAsString)");
+        tokenMap.put(Pattern.compile("pm.response.to.have.status"), "chai.expect(messageExchange.response.getStatusCode()).to.eql");
+        tokenMap.put(Pattern.compile("pm.response.to.have.header *\\((.*?)\\)"), "chai.expect(messageExchange.responseHeaders.hasValues($1)).to.be.true");
+        tokenMap.put(Pattern.compile("pm.response.headers.get\\((.*?)\\)"), "String(messageExchange.responseHeaders.get($1))");
+        tokenMap.put(Pattern.compile("pm.response.responseTime"), "messageExchange.response.timeTaken");
+        tokenMap.put(Pattern.compile("pm.test"), "ready.test");
+        tokenMap.put(Pattern.compile("pm"), "chai");
     }
 
     public PostmanScriptParserV2(ScriptContext context) {
@@ -76,9 +76,8 @@ public class PostmanScriptParserV2 {
     }
 
     private String mapSyntax(String assertionBody) {
-        for(Map.Entry<String,String> entry : tokenMap.entrySet()){
-            Pattern pattern = Pattern.compile(entry.getKey());
-            Matcher matcher = pattern.matcher(assertionBody);
+        for(Map.Entry<Pattern, String> entry : tokenMap.entrySet()){
+            Matcher matcher = entry.getKey().matcher(assertionBody);
             if (matcher.find()) {
                 assertionBody = matcher.replaceAll(entry.getValue());
             }
@@ -97,15 +96,6 @@ public class PostmanScriptParserV2 {
 
     public String getPrescriptV1() {
         return prescriptV1;
-    }
-
-    private void addGlobalVariable(String key, String value) {
-        if (context.getObject(POSTMAN_OBJECT) != null) {
-            SetGlobalVariableCommand setGlobalVariableCommand =
-                (SetGlobalVariableCommand) context.getObject(POSTMAN_OBJECT).getCommand(SetGlobalVariableCommand.NAME);
-            setGlobalVariableCommand.addVariable(key, value);
-            setGlobalVariableCommand.execute();
-        }
     }
 
     private class SplitTestsNodeVisitor implements NodeVisitor {
@@ -129,15 +119,22 @@ public class PostmanScriptParserV2 {
             if (astNode.depth() == 0) {
                 prescriptV1 = astNode.toSource();
             } else {
-                Pattern pattern = Pattern.compile(SET_GLOBAL_VARIABLE_REGEX);
-                Matcher matcher;
-                matcher = pattern.matcher(astNode.toSource());
+                Matcher matcher = SET_GLOBAL_VARIABLE_REGEX_PATTERN.matcher(astNode.toSource());
                 while (matcher.find()) {
                     addGlobalVariable(matcher.group(1), matcher.group(2));
                     prescriptV1 = prescriptV1.replace(matcher.group(0), "");
                 }
             }
             return astNode.depth() <= 1;
+        }
+
+        private void addGlobalVariable(String key, String value) {
+            if (context.getObject(POSTMAN_OBJECT) != null) {
+                SetGlobalVariableCommand setGlobalVariableCommand =
+                        (SetGlobalVariableCommand) context.getObject(POSTMAN_OBJECT).getCommand(SetGlobalVariableCommand.NAME);
+                setGlobalVariableCommand.addVariable(key, value);
+                setGlobalVariableCommand.execute();
+            }
         }
     }
 }

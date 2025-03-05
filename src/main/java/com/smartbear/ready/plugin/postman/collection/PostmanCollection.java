@@ -27,6 +27,9 @@ public abstract class PostmanCollection {
     private static final String MULTI_LINE_COMMENT_REGEX = "(.*?)( */\\*.*)";
     private static final String CONTINUATION_IN_CURRENT_LINE_REGEX = "^ *[!-/:-@\\[-`{-~].*";
     private static final String CONTINUATION_IN_NEXT_LINE_REGEX = ".*[!-(*-/:-@\\[-`{-~] *$";
+    private static Pattern onlyCommentPattern;
+    private static Pattern continuationInCurrentLinePattern;
+    private static Pattern continuationInNextLinePattern;
 
     protected final JSONObject postmanCollection;
 
@@ -45,6 +48,9 @@ public abstract class PostmanCollection {
     protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
         List<Pattern> commentRegexPatterns = List.of(Pattern.compile(SINGLE_LINE_COMMENT_REGEX), Pattern.compile(MULTI_LINE_COMMENT_REGEX));
+        onlyCommentPattern = Pattern.compile(ONLY_COMMENT);
+        continuationInCurrentLinePattern = Pattern.compile(CONTINUATION_IN_CURRENT_LINE_REGEX);
+        continuationInNextLinePattern = Pattern.compile(CONTINUATION_IN_NEXT_LINE_REGEX);
 
         for (Object eventObject : events) {
             if (eventObject instanceof JSONObject event) {
@@ -57,8 +63,9 @@ public abstract class PostmanCollection {
                     StringBuilder scriptBuilder = new StringBuilder();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
                     for (Object scriptLine : scriptLines) {
-                        removeSemicolonFromPreviousLineIfNeeded(scriptLine.toString(), scriptBuilder);
-                        appendNewLineAndComment(scriptLine.toString(), scriptBuilder, commentRegexPatterns);
+                        String line = scriptLine.toString();
+                        removeSemicolonFromPreviousLineIfNeeded(line, scriptBuilder);
+                        appendNewLineAndComment(line, scriptBuilder, commentRegexPatterns);
                     }
                     if (!scriptBuilder.isEmpty()) {
                         return scriptBuilder.toString();
@@ -93,15 +100,15 @@ public abstract class PostmanCollection {
     private static void removeSemicolonFromPreviousLineIfNeeded(String currentLine, StringBuilder scriptBuffer) {
         if (scriptBuffer.length() > 1 &&
                 scriptBuffer.charAt(scriptBuffer.length() - 2) == SCRIPT_LINE_DELIMITER &&
-                currentLine.matches(CONTINUATION_IN_CURRENT_LINE_REGEX) &&
-                !currentLine.matches(ONLY_COMMENT)) {
+                continuationInCurrentLinePattern.matcher(currentLine).find() &&
+                !onlyCommentPattern.matcher(currentLine).find()) {
             scriptBuffer.deleteCharAt(scriptBuffer.length() - 2);
         }
     }
 
     private static void addSemicolonIfNeeded(String currentLine, StringBuilder scriptBuffer) {
         if (!scriptBuffer.isEmpty() && !currentLine.isEmpty() &&
-                !currentLine.matches(CONTINUATION_IN_NEXT_LINE_REGEX)) {
+                !continuationInNextLinePattern.matcher(currentLine).find()) {
             scriptBuffer.append(SCRIPT_LINE_DELIMITER);
         }
     }
