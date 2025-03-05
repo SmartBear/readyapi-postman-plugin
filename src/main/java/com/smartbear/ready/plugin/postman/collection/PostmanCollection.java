@@ -22,14 +22,6 @@ public abstract class PostmanCollection {
     public static final String SCRIPT = "script";
     public static final String EXEC = "exec";
     public static final char SCRIPT_LINE_DELIMITER = ';';
-    private static final String ONLY_COMMENT = "^ *(//|/\\*).*";
-    private static final String SINGLE_LINE_COMMENT_REGEX = "(.*?)( *\\/\\/.*)";
-    private static final String MULTI_LINE_COMMENT_REGEX = "(.*?)( */\\*.*)";
-    private static final String CONTINUATION_IN_CURRENT_LINE_REGEX = "^ *[!-/:-@\\[-`{-~].*";
-    private static final String CONTINUATION_IN_NEXT_LINE_REGEX = ".*[!-(*-/:-@\\[-`{-~] *$";
-    private static Pattern onlyCommentPattern;
-    private static Pattern continuationInCurrentLinePattern;
-    private static Pattern continuationInNextLinePattern;
 
     protected final JSONObject postmanCollection;
 
@@ -47,10 +39,10 @@ public abstract class PostmanCollection {
 
     protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
-        List<Pattern> commentRegexPatterns = List.of(Pattern.compile(SINGLE_LINE_COMMENT_REGEX), Pattern.compile(MULTI_LINE_COMMENT_REGEX));
-        onlyCommentPattern = Pattern.compile(ONLY_COMMENT);
-        continuationInCurrentLinePattern = Pattern.compile(CONTINUATION_IN_CURRENT_LINE_REGEX);
-        continuationInNextLinePattern = Pattern.compile(CONTINUATION_IN_NEXT_LINE_REGEX);
+        List<Pattern> commentRegexPatterns = List.of(Pattern.compile("(.*?)(//.*)"), Pattern.compile("(.*?)(/\\*.*)"));
+        Pattern onlyCommentPattern = Pattern.compile("^ *(//|/\\*).*");
+        Pattern continuationInCurrentLinePattern = Pattern.compile("^ *[!-/:-@\\[-`{-~].*");
+        Pattern continuationInNextLinePattern = Pattern.compile(".*[!-(*-/:-@\\[-`{-~] *$");
 
         for (Object eventObject : events) {
             if (eventObject instanceof JSONObject event) {
@@ -64,8 +56,18 @@ public abstract class PostmanCollection {
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
                     for (Object scriptLine : scriptLines) {
                         String line = scriptLine.toString();
-                        removeSemicolonFromPreviousLineIfNeeded(line, scriptBuilder);
-                        appendNewLineAndComment(line, scriptBuilder, commentRegexPatterns);
+                        removeSemicolonFromPreviousLineIfNeeded(
+                            line,
+                            scriptBuilder,
+                            continuationInCurrentLinePattern,
+                            onlyCommentPattern
+                        );
+                        appendNewLineAndComment(
+                            line,
+                            scriptBuilder,
+                            commentRegexPatterns,
+                            continuationInNextLinePattern
+                        );
                     }
                     if (!scriptBuilder.isEmpty()) {
                         return scriptBuilder.toString();
@@ -76,7 +78,12 @@ public abstract class PostmanCollection {
         return null;
     }
 
-    private static void appendNewLineAndComment(String currentLine, StringBuilder scriptBuffer, List<Pattern> commentRegexPatterns) {
+    private static void appendNewLineAndComment(
+        String currentLine,
+        StringBuilder scriptBuilder,
+        List<Pattern> commentRegexPatterns,
+        Pattern continuationInNextLinePattern) {
+
         String comment = "";
 
         for (Pattern commentRegex : commentRegexPatterns) {
@@ -89,24 +96,33 @@ public abstract class PostmanCollection {
             }
         }
 
-        scriptBuffer.append(currentLine);
+        scriptBuilder.append(currentLine);
         if (StringUtils.hasContent(currentLine)) {
-            addSemicolonIfNeeded(currentLine, scriptBuffer);
+            addSemicolonIfNeeded(currentLine, scriptBuilder, continuationInNextLinePattern);
         }
-        scriptBuffer.append(comment);
-        scriptBuffer.append('\n');
+        scriptBuilder.append(comment);
+        scriptBuilder.append('\n');
     }
 
-    private static void removeSemicolonFromPreviousLineIfNeeded(String currentLine, StringBuilder scriptBuffer) {
-        if (scriptBuffer.length() > 1 &&
-                scriptBuffer.charAt(scriptBuffer.length() - 2) == SCRIPT_LINE_DELIMITER &&
+    private static void removeSemicolonFromPreviousLineIfNeeded(
+        String currentLine,
+        StringBuilder scriptBuilder,
+        Pattern continuationInCurrentLinePattern,
+        Pattern onlyCommentPattern) {
+
+        if (scriptBuilder.length() > 1 &&
+                scriptBuilder.charAt(scriptBuilder.length() - 2) == SCRIPT_LINE_DELIMITER &&
                 continuationInCurrentLinePattern.matcher(currentLine).find() &&
                 !onlyCommentPattern.matcher(currentLine).find()) {
-            scriptBuffer.deleteCharAt(scriptBuffer.length() - 2);
+            scriptBuilder.deleteCharAt(scriptBuilder.length() - 2);
         }
     }
 
-    private static void addSemicolonIfNeeded(String currentLine, StringBuilder scriptBuffer) {
+    private static void addSemicolonIfNeeded(
+        String currentLine,
+        StringBuilder scriptBuffer,
+        Pattern continuationInNextLinePattern) {
+
         if (!scriptBuffer.isEmpty() && !currentLine.isEmpty() &&
                 !continuationInNextLinePattern.matcher(currentLine).find()) {
             scriptBuffer.append(SCRIPT_LINE_DELIMITER);
