@@ -22,7 +22,7 @@
     </repositories>
 
     <properties>
-        <ready-api-version>3.59.0-SNAPSHOT</ready-api-version>
+        <ready-api-version>3.59.0-POSTMAN-SNAPSHOT</ready-api-version>
         <java.version>17</java.version>
     </properties>
 
@@ -82,6 +82,11 @@
             <groupId>ezmorph</groupId>
             <artifactId>ezmorph</artifactId>
             <version>1.0.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
+            <version>1.7.15</version>
         </dependency>
     </dependencies>
     <build>

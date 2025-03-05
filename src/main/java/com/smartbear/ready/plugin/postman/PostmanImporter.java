@@ -45,7 +45,8 @@ import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
 import com.smartbear.ready.plugin.postman.exceptions.PostmanCollectionUnsupportedVersionException;
-import com.smartbear.ready.plugin.postman.script.PostmanScriptParser;
+import com.smartbear.ready.plugin.postman.script.PostmanScriptParserV1;
+import com.smartbear.ready.plugin.postman.script.PostmanScriptParserV2;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.ready.plugin.postman.script.ScriptContext;
@@ -84,8 +85,8 @@ public class PostmanImporter {
         String postmanJson = getPostmanImporterWorker(filePath).getPostmanJson();
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
             JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
-            if (json instanceof JSONObject) {
-                PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection((JSONObject) json);
+            if (json instanceof JSONObject jsonObject) {
+                PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection(jsonObject);
                 String collectionName = postmanCollection.getName();
                 foldersAmount = Integer.toString(postmanCollection.getFolders().size());
                 requestsAmount = Integer.toString(postmanCollection.getRequests().size());
@@ -106,6 +107,7 @@ public class PostmanImporter {
                     String uri = request.getUrl();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
+                    String requestName = request.getName();
                     RequestAuthProfile authProfile = request.getAuthProfileWithName();
 
                     if (StringUtils.hasContent(preRequestScript)) {
@@ -157,7 +159,7 @@ public class PostmanImporter {
                     }
 
                     if (assertable != null) {
-                        addAssertions(tests, project, assertable);
+                        addAssertionsV2(tests, project, assertable, requestName);
                     }
 
                     logger.info("Importing a request with URI [ {} ] - done", uri);
@@ -217,29 +219,43 @@ public class PostmanImporter {
     }
 
 
-    void addAssertions(String tests, WsdlProject project, Assertable assertable) {
+    private void addAssertionsV1(String tests, WsdlProject project, Assertable assertable) {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        PostmanScriptParser parser = new PostmanScriptParser();
+        PostmanScriptParserV1 parser = new PostmanScriptParserV1();
         try {
             LinkedList<Token> tokens = tokenizer.tokenize(tests);
 
             ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
             parser.parse(tokens, context);
         } catch (SoapUIException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private void addAssertionsV2(String tests, WsdlProject project, Assertable assertable, String requestName) {
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
+        parserV2.parse(tests, requestName);
+
+        if (StringUtils.hasContent(parserV2.getTestsV1())) {
+            addAssertionsV1(parserV2.getTestsV1(), project, assertable);
         }
     }
 
     private void processPreRequestScript(String preRequestScript, WsdlProject project) {
-        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        PostmanScriptParser parser = new PostmanScriptParser();
-        try {
-            LinkedList<Token> tokens = tokenizer.tokenize(preRequestScript);
+        ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
+        PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
+        parserV2.parse(preRequestScript);
 
-            ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
-            parser.parse(tokens, context);
-        } catch (SoapUIException e) {
-            e.printStackTrace();
+        if (StringUtils.hasContent(parserV2.getPrescriptV1())) {
+            PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+            PostmanScriptParserV1 parser = new PostmanScriptParserV1();
+            try {
+                LinkedList<Token> tokens = tokenizer.tokenize(parserV2.getPrescriptV1());
+                parser.parse(tokens, context);
+            } catch (SoapUIException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 

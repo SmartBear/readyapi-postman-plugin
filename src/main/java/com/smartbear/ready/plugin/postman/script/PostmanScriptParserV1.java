@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedList;
 import java.util.Stack;
 
-public class PostmanScriptParser {
-    public static Logger log = LoggerFactory.getLogger(PostmanScriptParser.class);
+public class PostmanScriptParserV1 {
+    public static Logger log = LoggerFactory.getLogger(PostmanScriptParserV1.class);
 
     public static final String TEST_LIST = "tests";
 
