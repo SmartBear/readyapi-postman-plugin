@@ -28,6 +28,7 @@ public class VariableUtils {
     private static final String VARIABLE_NAME_REG_GROUP = "name";
     private static final Pattern VARIABLE_REG = Pattern.compile("\\{\\{(?<" + VARIABLE_NAME_REG_GROUP + ">.*?)\\}\\}");
     private static final String ESCAPING_PREFIX = "\\";
+    private static final String VAULT_PREFIX = "vault:";
 
     public static String convertVariables(String postmanString, WsdlProject projectToAddProperties) {
         if (StringUtils.isNullOrEmpty(postmanString)) {
@@ -38,13 +39,14 @@ public class VariableUtils {
         Matcher matcher = VARIABLE_REG.matcher(postmanString);
         while (matcher.find()) {
             String propertyName = matcher.group(VARIABLE_NAME_REG_GROUP);
+            propertyName = removeVaultPrefixIfPresent(propertyName);
             if (projectToAddProperties != null && !projectToAddProperties.hasProperty(propertyName)) {
                 projectToAddProperties.addProperty(propertyName);
             }
             matcher.appendReplacement(readyApiStringBuffer,
                     ESCAPING_PREFIX + READYAPI_VARIABLE_BEGIN + propertyName + READYAPI_VARIABLE_END);
         }
-        if (readyApiStringBuffer.length() > 0) {
+        if (!readyApiStringBuffer.isEmpty()) {
             matcher.appendTail(readyApiStringBuffer);
             return readyApiStringBuffer.toString();
         } else {
@@ -53,8 +55,16 @@ public class VariableUtils {
     }
 
     public static String createProjectVariableExpansionString(String variableName) {
+        variableName = removeVaultPrefixIfPresent(variableName);
         StringBuffer buffer = new StringBuffer();
         buffer.append(READYAPI_VARIABLE_BEGIN).append(variableName).append(READYAPI_VARIABLE_END);
         return buffer.toString();
+    }
+
+    private static String removeVaultPrefixIfPresent(String propertyName) {
+        if (propertyName.startsWith(VAULT_PREFIX)) {
+            propertyName = propertyName.substring(VAULT_PREFIX.length());
+        }
+        return propertyName;
     }
 }
