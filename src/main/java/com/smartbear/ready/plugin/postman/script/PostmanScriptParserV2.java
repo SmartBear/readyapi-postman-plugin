@@ -102,10 +102,11 @@ public class PostmanScriptParserV2 {
         @Override
         public boolean visit(AstNode astNode) {
             if (astNode.depth() == 1){
-                if (astNode.toSource().startsWith(OLD_TEST_SYNTAX)){
-                    testsV1.append(astNode.toSource());
+                String jsNodeCode = astNode.toSource();
+                if (jsNodeCode.startsWith(OLD_TEST_SYNTAX)){
+                    testsV1.append(jsNodeCode);
                 } else {
-                    testsV2.append(astNode.toSource());
+                    testsV2.append(jsNodeCode);
                     testsV2.append('\n');
                 }
             }
@@ -116,10 +117,11 @@ public class PostmanScriptParserV2 {
     private class LookForGlobalsNodeVisitor implements NodeVisitor {
         @Override
         public boolean visit(AstNode astNode) {
+            String jsNodeCode = astNode.toSource();
             if (astNode.depth() == 0) {
-                prescriptV1 = astNode.toSource();
+                prescriptV1 = jsNodeCode;
             } else {
-                Matcher matcher = SET_GLOBAL_VARIABLE_REGEX_PATTERN.matcher(astNode.toSource());
+                Matcher matcher = SET_GLOBAL_VARIABLE_REGEX_PATTERN.matcher(jsNodeCode);
                 while (matcher.find()) {
                     addGlobalVariable(matcher.group(1), matcher.group(2));
                     prescriptV1 = prescriptV1.replace(matcher.group(0), "");
