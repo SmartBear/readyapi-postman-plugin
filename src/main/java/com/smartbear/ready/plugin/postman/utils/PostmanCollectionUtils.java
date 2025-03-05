@@ -51,7 +51,7 @@ public class PostmanCollectionUtils {
             } else if (currentNode instanceof String string) {
                 Matcher matcher = VAULT_VARIABLE_REGEX.matcher(string);
                 while (matcher.find()) {
-                    vaultVariables.add("vault:" + matcher.group(1).trim());
+                    vaultVariables.add(matcher.group(1).trim());
                 }
             }
         }
