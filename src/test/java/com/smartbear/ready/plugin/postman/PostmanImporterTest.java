@@ -28,16 +28,29 @@ import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
+import com.github.tomakehurst.wiremock.WireMockServer;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,6 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class PostmanImporterTest {
     private static final String OUTPUT_FOLDER_PATH = PostmanImporterTest.class.getResource("/").getPath();
     private static final String TEST_WORKSPACE_FILE_PATH = OUTPUT_FOLDER_PATH + "test-workspace.xml";
+    private static final WireMockServer WIREMOCK = new WireMockServer(wireMockConfig().port(28089));
 
     public static final String REST_GET_COLLECTION_2_1_EVENTS_PATH = "/REST_Get_Collection_events.postman_collection_v2.1";
     public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get_Collection.postman_collection_v2.0";
@@ -66,7 +80,7 @@ public class PostmanImporterTest {
     public static final String COLLECTION_NAME = "REST Service 1 collection";
     public static final String GRAPHQL_COLLECTION_NAME = "Postman Collection (from GraphQL)";
     public static final String REST_ENDPOINT = "http://rapis02.aqa.com.ru";
-    public static final String SOAP_ENDPOINT = "http://rapis02.aqa.com.ru/SOAP/Service1.asmx";
+    public static final String SOAP_ENDPOINT = "http://localhost:28089/SOAP/Service1.asmx";
     public static final String GET_PATH = "/WCFREST/Service.svc/ConStroka";
     public static final String POST_PATH = "/WCFREST/Service.svc/testComplexClass";
     public static final String PARAMETER1_NAME = "x";
@@ -95,9 +109,32 @@ public class PostmanImporterTest {
     public static final String QUERY_PARAMETER_NAME = "qparam";
     public static final String QUERY_PARAMETER_VALUE = "${#Project#queryParam}";
     public static final String[] GRAPHQL_REQUESTS = {"addCustomer", "editCustomer", "customer", "customers"};
+    private static final String SOAP_PUBLIC_SOAP_APIS_SERVICE_1_ASMX = "soap/public_soap_apis/Service1.asmx";
 
     private File workspaceFile;
     private WorkspaceImpl workspace;
+
+    @BeforeAll
+    public static void wireMockInit() throws URISyntaxException, IOException {
+        URL resource = PostmanImporterTest.class.getClassLoader().getResource(SOAP_PUBLIC_SOAP_APIS_SERVICE_1_ASMX);
+        Path wsdlPath = Paths.get(resource.toURI());
+        String wsdlContent = Files.readString(wsdlPath);
+        WIREMOCK.stubFor(get(urlEqualTo("/SOAP/Service1.asmx?WSDL"))
+                .willReturn(
+                        aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type",
+                                        "Multipart/Related; boundary=\"----=_Part_112_400566523.1602581633780\"; type=\"application/xop+xml\"; start-info=\"application/soap+xml\"")
+                                .withBody(wsdlContent)
+                )
+        );
+        WIREMOCK.start();
+    }
+
+    @AfterAll
+    public static void shutdownWiremock() {
+        WIREMOCK.stop();
+    }
 
     @BeforeEach
     public void setUp() throws Exception {
@@ -345,25 +382,21 @@ public class PostmanImporterTest {
     }
 
     @Test
-    @Disabled("rapis02.aqa.com.ru not available")
     public void testImportWsdlRequestFromTestsNode() throws Exception {
         testImportWsdlRequest(WSDL_COLLECTION_2_1_PATH);
     }
 
     @Test
-    @Disabled("rapis02.aqa.com.ru not available")
     public void testImportWsdlRequestFromEventsNode() throws Exception {
         testImportWsdlRequest(WSDL_COLLECTION_2_1_EVENTS_PATH);
     }
 
     @Test
-    @Disabled("rapis02.aqa.com.ru not available")
     public void testImportWsdlRequestFromCollection20() throws Exception {
         testImportWsdlRequest(WSDL_COLLECTION_2_0_PATH);
     }
 
     @Test
-    @Disabled("rapis02.aqa.com.ru not available")
     public void testImportWsdlRequestFromCollection21() throws Exception {
         testImportWsdlRequest(WSDL_COLLECTION_2_1_PATH);
     }

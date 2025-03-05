@@ -13,7 +13,7 @@
 		{
 			"id": "1b469b9f-28b4-f3a8-3f47-b8b1d723ea97",
 			"headers": "Accept-Encoding: gzip,deflate\nContent-Type: text/xml\nSOAPAction: \"http://localhost/test_service/Service1.asmx/Date\"\nContent-Length: 228\nHost: rapis02.aqa.com.ru\nConnection: Keep-Alive\nUser-Agent: Apache-HttpClient/4.5.2 (Java/1.8.0_77)\ntest-header: test\n",
-			"url": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL",
+			"url": "http://localhost:28089/SOAP/Service1.asmx?WSDL",
 			"preRequestScript": null,
 			"pathVariables": {},
 			"method": "POST",
@@ -33,7 +33,7 @@
 		{
 			"id": "b0447c16-44e2-6896-cfb7-0a738af6adf5",
 			"headers": "Accept-Encoding: gzip,deflate\nContent-Type: text/xml\nSOAPAction: \"http://localhost/test_service/Service1.asmx/Date\"\nContent-Length: 228\nHost: rapis02.aqa.com.ru\nConnection: Keep-Alive\nUser-Agent: Apache-HttpClient/4.5.2 (Java/1.8.0_77)\n",
-			"url": "http://rapis02.aqa.com.ru/SOAP/Service1.asmx?WSDL",
+			"url": "http://localhost:28089/SOAP/Service1.asmx?WSDL",
 			"preRequestScript": "postman.setGlobalVariable(\"soap_key1\", \"soap_value1\");",
 			"pathVariables": {},
 			"method": "POST",
