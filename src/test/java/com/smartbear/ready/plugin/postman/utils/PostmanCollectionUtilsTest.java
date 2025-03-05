@@ -21,8 +21,7 @@ class PostmanCollectionUtilsTest {
     private static final String COLLECTION_WITH_UNSUPPORTED_VERSION = "/utils/collection_with_unsupported_version.json";
 
     private static final Set<String> EXPECTED_VAULT_VARIABLES = Set.of(
-            "vault:form-data-vault", "vault:basic_user", "vault:basic_password", "vault:the secret key",
-            "vault:ntlm username", "vault:ntlm password"
+            "form-data-vault", "basic_user", "basic_password", "the secret key", "ntlm username", "ntlm password"
     );
 
     @Test
