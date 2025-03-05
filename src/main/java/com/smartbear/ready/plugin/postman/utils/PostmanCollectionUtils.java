@@ -41,7 +41,7 @@ public class PostmanCollectionUtils {
         while (!collectionNodesQueue.isEmpty()) {
             Object currentNode = collectionNodesQueue.poll();
 
-            if (currentNode instanceof JSONObject jsonObject) {
+            if (currentNode instanceof JSONObject jsonObject && !jsonObject.isNullObject()) {
                 Iterator<String> keys = jsonObject.keys();
                 while (keys.hasNext()) {
                     collectionNodesQueue.add(jsonObject.get(keys.next()));
