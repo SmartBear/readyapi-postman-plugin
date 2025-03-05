@@ -115,7 +115,6 @@ public class PostmanImporter {
                     String uri = request.getUrl();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
-                    String requestName = request.getName();
                     RequestAuthProfile authProfile = request.getAuthProfileWithName();
 
                     if (StringUtils.hasContent(preRequestScript)) {
@@ -167,7 +166,7 @@ public class PostmanImporter {
                     }
 
                     if (assertable != null) {
-                        addAssertionsV2(tests, project, assertable, requestName);
+                        addAssertionsV2(tests, project, assertable, request.getName());
                     }
 
                     logger.info("Importing a request with URI [ {} ] - done", uri);
@@ -256,8 +255,9 @@ public class PostmanImporter {
         PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
         parserV2.parse(tests, requestName);
 
-        if (StringUtils.hasContent(parserV2.getTestsV1())) {
-            addAssertionsV1(parserV2.getTestsV1(), project, assertable);
+        String testsV1 = parserV2.getTestsV1();
+        if (StringUtils.hasContent(testsV1)) {
+            addAssertionsV1(testsV1, project, assertable);
         }
     }
 
@@ -266,11 +266,12 @@ public class PostmanImporter {
         PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
         parserV2.parse(preRequestScript);
 
-        if (StringUtils.hasContent(parserV2.getPrescriptV1())) {
+        String prescriptV1 = parserV2.getPrescriptV1();
+        if (StringUtils.hasContent(prescriptV1)) {
             PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
             PostmanScriptParserV1 parser = new PostmanScriptParserV1();
             try {
-                LinkedList<Token> tokens = tokenizer.tokenize(parserV2.getPrescriptV1());
+                LinkedList<Token> tokens = tokenizer.tokenize(prescriptV1);
                 parser.parse(tokens, context);
             } catch (SoapUIException e) {
                 logger.error(e.getMessage(), e);
