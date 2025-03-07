@@ -26,6 +26,7 @@ public class ScriptContext {
     public static final String RESPONSE_CODE = "responseCode";
     public static final String RESPONSE_TIME = "responseTime";
     public static final String RESPONSE_BODY = "responseBody";
+    public static final String CHAI_SCRIPTS = "chaiScripts";
     public static final String GLOBALS = "globals";
 
     private HashMap<String, PostmanObject> objects = new HashMap<>();
@@ -69,6 +70,10 @@ public class ScriptContext {
 
         PostmanObject postmanObject = context.getObject(POSTMAN_OBJECT);
         postmanObject.addCommand(new AddHeaderExistsAssertionCommand(assertable));
+
+        PostmanObject chaiScriptsObject = new PostmanObject();
+        chaiScriptsObject.addCommand(new AddChaiAssertionCommand(assertable));
+        context.addObject(CHAI_SCRIPTS, chaiScriptsObject);
 
         return context;
     }
