@@ -1,0 +1,7 @@
+ready.test("Cookie isLoggedIn is present", () => {
+  chai.expect(ready.getCookies(messageExchange.responseHeaders)['isLoggedIn'] != null).to.be.true;
+});
+
+ready.test("Cookie isLoggedIn has value 1", () => {
+  chai.expect(ready.getCookies(messageExchange.responseHeaders)["isLoggedIn"]).to.eql('1');
+});
