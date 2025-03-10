@@ -9,6 +9,8 @@ import net.sf.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class PostmanCollection {
     public static final String NAME = "name";
@@ -37,30 +39,94 @@ public abstract class PostmanCollection {
 
     protected static String getEventScript(JSONObject request, ScriptType scriptType, String nodeName) {
         JSONArray events = PostmanJsonUtil.getJsonArraySafely(request, nodeName);
+        List<Pattern> commentRegexPatterns = List.of(Pattern.compile("(.*?)(//.*)"), Pattern.compile("(.*?)(/\\*.*)"));
+        Pattern onlyCommentPattern = Pattern.compile("^ *(//|/\\*).*");
+        Pattern continuationInCurrentLinePattern = Pattern.compile("^ *[!-/:-@\\[-`{-~].*");
+        Pattern continuationInNextLinePattern = Pattern.compile(".*[!-(*-/:-@\\[-`{-~] *$");
+
         for (Object eventObject : events) {
-            if (eventObject instanceof JSONObject) {
-                JSONObject event = (JSONObject) eventObject;
+            if (eventObject instanceof JSONObject event) {
                 String listen = getValue(event, LISTEN);
                 if (!StringUtils.sameString(listen, scriptType.getListenType())) {
                     continue;
                 }
                 JSONObject script = event.getJSONObject(SCRIPT);
                 if (script != null) {
-                    StringBuffer scriptBuffer = new StringBuffer();
+                    StringBuilder scriptBuilder = new StringBuilder();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
                     for (Object scriptLine : scriptLines) {
-                        if (scriptBuffer.length() > 0) {
-                            scriptBuffer.append(SCRIPT_LINE_DELIMITER);
-                        }
-                        scriptBuffer.append(scriptLine);
+                        String line = scriptLine.toString();
+                        removeSemicolonFromPreviousLineIfNeeded(
+                            line,
+                            scriptBuilder,
+                            continuationInCurrentLinePattern,
+                            onlyCommentPattern
+                        );
+                        appendNewLineAndComment(
+                            line,
+                            scriptBuilder,
+                            commentRegexPatterns,
+                            continuationInNextLinePattern
+                        );
                     }
-                    if (scriptBuffer.length() > 0) {
-                        return scriptBuffer.toString();
+                    if (!scriptBuilder.isEmpty()) {
+                        return scriptBuilder.toString();
                     }
                 }
             }
         }
         return null;
+    }
+
+    private static void appendNewLineAndComment(
+        String currentLine,
+        StringBuilder scriptBuilder,
+        List<Pattern> commentRegexPatterns,
+        Pattern continuationInNextLinePattern) {
+
+        String comment = "";
+
+        for (Pattern commentRegex : commentRegexPatterns) {
+            Matcher commentMatcher = commentRegex.matcher(currentLine);
+
+            if (commentMatcher.find()) {
+                currentLine = commentMatcher.group(1);
+                comment = commentMatcher.group(2);
+                break;
+            }
+        }
+
+        scriptBuilder.append(currentLine);
+        if (StringUtils.hasContent(currentLine)) {
+            addSemicolonIfNeeded(currentLine, scriptBuilder, continuationInNextLinePattern);
+        }
+        scriptBuilder.append(comment);
+        scriptBuilder.append('\n');
+    }
+
+    private static void removeSemicolonFromPreviousLineIfNeeded(
+        String currentLine,
+        StringBuilder scriptBuilder,
+        Pattern continuationInCurrentLinePattern,
+        Pattern onlyCommentPattern) {
+
+        if (scriptBuilder.length() > 1 &&
+                scriptBuilder.charAt(scriptBuilder.length() - 2) == SCRIPT_LINE_DELIMITER &&
+                continuationInCurrentLinePattern.matcher(currentLine).find() &&
+                !onlyCommentPattern.matcher(currentLine).find()) {
+            scriptBuilder.deleteCharAt(scriptBuilder.length() - 2);
+        }
+    }
+
+    private static void addSemicolonIfNeeded(
+        String currentLine,
+        StringBuilder scriptBuffer,
+        Pattern continuationInNextLinePattern) {
+
+        if (!scriptBuffer.isEmpty() && !currentLine.isEmpty() &&
+                !continuationInNextLinePattern.matcher(currentLine).find()) {
+            scriptBuffer.append(SCRIPT_LINE_DELIMITER);
+        }
     }
 
     protected static String getValue(JSONObject jsonObject, String name) {
