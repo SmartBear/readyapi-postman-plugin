@@ -2,6 +2,7 @@ package com.smartbear.ready.plugin.postman.script;
 
 import com.eviware.soapui.support.StringUtils;
 import org.mozilla.javascript.CompilerEnvirons;
+import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Parser;
 import org.mozilla.javascript.ast.AstNode;
 import org.mozilla.javascript.ast.AstRoot;
@@ -56,6 +57,7 @@ public class PostmanScriptParserV2 {
         env.setRecordingLocalJsDocComments(true);
         env.setAllowSharpComments(true);
         env.setRecordingComments(true);
+        env.setLanguageVersion(Context.VERSION_ES6);
         Parser parser = new Parser(env);
         AstRoot astRoot = parser.parse(script, null, 1);
 
