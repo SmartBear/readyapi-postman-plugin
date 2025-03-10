@@ -27,19 +27,32 @@ public class PostmanScriptParserV2 {
     private static final String POSTMAN_IMPORTED_COLLECTION_NAME = "Postman imported chai assertions - ";
     private static final String OLD_TEST_SYNTAX = "tests[";
     private static final Pattern SET_GLOBAL_VARIABLE_REGEX_PATTERN = Pattern.compile("pm.globals.set\\(\"(.*?)\", \"(.*?)\"\\);");
-    private static final Map<Pattern, String> tokenMap = new LinkedHashMap<>();
+    private static final Map<Pattern, String> SYNTAX_TRANSLATION_MAP = new LinkedHashMap<>();
 
     static {
-        tokenMap.put(Pattern.compile("pm.response.json\\(\\)"), "JSON.parse(messageExchange.response.contentAsString)");
-        tokenMap.put(Pattern.compile("pm.response.json"), "JSON.parse(messageExchange.response.contentAsString)");
-        tokenMap.put(Pattern.compile("pm.response.code"), "messageExchange.response.getStatusCode()");
-        tokenMap.put(Pattern.compile("pm.response.text\\(\\)"), "String(messageExchange.response.contentAsString)");
-        tokenMap.put(Pattern.compile("pm.response.to.have.status"), "chai.expect(messageExchange.response.getStatusCode()).to.eql");
-        tokenMap.put(Pattern.compile("pm.response.to.have.header *\\((.*?)\\)"), "chai.expect(messageExchange.responseHeaders.hasValues($1)).to.be.true");
-        tokenMap.put(Pattern.compile("pm.response.headers.get\\((.*?)\\)"), "String(messageExchange.responseHeaders.get($1))");
-        tokenMap.put(Pattern.compile("pm.response.responseTime"), "messageExchange.response.timeTaken");
-        tokenMap.put(Pattern.compile("pm.test"), "ready.test");
-        tokenMap.put(Pattern.compile("pm"), "chai");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.code"), "messageExchange.response.getStatusCode()");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.text\\(\\)"), "messageExchange.response.contentAsString");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.to.have.jsonSchema\\((.*?)\\)"), "chai.expect(ajv.validate($1, JSON.parse(messageExchange.response.contentAsString))).to.be.true");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("tv4.validate\\((.*?), (.*?)\\)"), "ajv.validate($2, $1)");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.to.have.status\\((.*?)\\)"), "chai.expect(String(messageExchange.responseHeaders.get(\"#status#\"))).to.include($1)");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.to.have.body\\((.*?)\\)"), "chai.expect(messageExchange.response.contentAsString).to.eql($1)");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.to.have.header\\((.*?)\\)"), "chai.expect(messageExchange.responseHeaders.hasValues($1)).to.be.true");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.headers.get\\((.*?)\\)"), "String(messageExchange.responseHeaders.get($1))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.body"), "messageExchange.response.contentAsString");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.headers"), "messageExchange.response.responseHeaders");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.responseTime"), "messageExchange.response.timeTaken");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.(environment|globals).get\\(['\"](.*?)['\"]\\)"), "String(context.expand(\"\\${#Project#$2}\"))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.(environment|globals).get\\((.*?)\\)"), "String(context.expand(\"\\${#Project#\" + `\\${$2}` + \"}\"))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("require\\(['\"]xml2js['\"]\\)"), "xml2js");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("([^|\n].*?)xml2Json\\((.*?)\\)"), "var xml2jsResult;\nxml2js.parseString($2, function (err, result) {\n xml2jsResult = result;\n});\n$1xml2jsResult");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("messageExchange.response.contentAsString"), "String(messageExchange.response.contentAsString)");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.json(\\(\\))*"), "JSON.parse(messageExchange.response.contentAsString)");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("console.(error|debug)\\((.*?)\\)"), "log.$1(String($2))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("console.(log|info)\\((.*?)\\)"), "log.info(String($2))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.cookies.has\\((.*?)\\)"), "messageExchange.cookies.get($1) != null");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.cookies.get\\((.*?)\\)"), "String(messageExchange.cookies.get($1))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.test"), "ready.test");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.expect"), "chai.expect");
     }
 
     public PostmanScriptParserV2(ScriptContext context) {
@@ -78,7 +91,7 @@ public class PostmanScriptParserV2 {
     }
 
     private String mapSyntax(String assertionBody) {
-        for(Map.Entry<Pattern, String> entry : tokenMap.entrySet()){
+        for(Map.Entry<Pattern, String> entry : SYNTAX_TRANSLATION_MAP.entrySet()){
             Matcher matcher = entry.getKey().matcher(assertionBody);
             if (matcher.find()) {
                 assertionBody = matcher.replaceAll(entry.getValue());
