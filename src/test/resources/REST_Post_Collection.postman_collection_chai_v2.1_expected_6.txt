@@ -1,0 +1,22 @@
+const schema = {
+  properties: {
+  name: {
+  type: "string"}, 
+  age: {
+  type: "integer"}, 
+  hobbies: {
+  type: "array"}, 
+  email: {
+  type: ["string", "null"]}}};
+
+ready.test('Schema is valid - tv4 - 1', function() {
+  chai.expect(ajv.validate(schema, JSON.parse(messageExchange.response.contentAsString))).to.be.true;
+});
+
+ready.test('Schema is valid - tv4 - 2', function() {
+  chai.expect(ajv.validate(schema, JSON.parse(messageExchange.response.contentAsString))).to.be.true;
+});
+
+ready.test('Response is valid', function() {
+  chai.expect(ajv.validate(schema, JSON.parse(String(messageExchange.response.contentAsString)))).to.be.true;
+});

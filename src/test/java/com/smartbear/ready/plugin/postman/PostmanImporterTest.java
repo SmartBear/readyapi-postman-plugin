@@ -73,7 +73,12 @@ public class PostmanImporterTest {
     public static final String REST_POST_COLLECTION_2_0_PATH = "/REST_Post_Collection.postman_collection_v2.0";
     public static final String REST_POST_COLLECTION_CHAI_MIXED_2_1_PATH = "/REST_Post_Collection.postman_collection_chai_mixed_v2.1.json";
     public static final String REST_POST_COLLECTION_CHAI_2_1_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1.json";
-    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_1_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_1.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_2_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_2.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_3_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_3.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_4_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_4.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_5_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_5.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_6_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_6.txt";
     public static final String REST_POST_COLLECTION_2_1_PATH = "/REST_Post_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_2_1_EVENTS_PATH = "/REST_Post_Collection_events.postman_collection_v2.1";
     public static final String PARAMETERIZED_COLLECTION_2_1_PATH = "/Parameterized_Endpoint_Collection.postman_collection_v2.1";
@@ -415,15 +420,26 @@ public class PostmanImporterTest {
             workspace,
             PostmanImporterTest.class.getResource(collectionPath).getPath()
         );
-        String expectedChaiTests = FileUtils.readFileToString(
-            new File(getClass().getResource(REST_POST_COLLECTION_CHAI_2_1_EXPECTED_PATH).getPath()),
-                StandardCharsets.UTF_8
-            ).trim();
+        List<String> expectedResults = List.of(
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_1_PATH,
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_2_PATH,
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_3_PATH,
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_4_PATH,
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_5_PATH,
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_6_PATH
+        );
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
         WsdlTestCase testCase = testSuite.getTestCaseAt(0);
-        RestTestRequestStep testStep = (RestTestRequestStep) testCase.getTestStepAt(0);
-        assertEquals(expectedChaiTests, ((GroovyScriptAssertion) testStep.getAssertionAt(0)).getScriptText());
+
+        int requestCounter = 0;
+        for (TestStep testStep: testCase.getTestStepList()) {
+            String expectedChaiTests = FileUtils.readFileToString(
+                new File(getClass().getResource(expectedResults.get(requestCounter++)).getPath()),
+                StandardCharsets.UTF_8).trim();
+
+            assertEquals(expectedChaiTests, ((ChaiAssertion) ((RestTestRequestStep) testStep).getAssertionAt(0)).getScriptText());
+        }
     }
 
     @Test

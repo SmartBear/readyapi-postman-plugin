@@ -1,0 +1,15 @@
+const jsonData = JSON.parse(messageExchange.response.contentAsString);
+
+ready.test("Test array properties", () => {
+  //errors array is empty
+  chai.expect(jsonData.errors).to.be.empty;
+  //areas array includes "goods"
+  chai.expect(jsonData.areas).to.include("goods");
+  //get the notification settings object
+  const notificationSettings = jsonData.settings.find(m => m.type === "notification");
+  chai.expect(notificationSettings).to.be.an("object", "Could not find the setting");
+  //detail array must include "sms"
+  chai.expect(notificationSettings.detail).to.include("sms");
+  //detail array must include all listed
+  chai.expect(notificationSettings.detail).to.have.members(["email", "sms"]);
+});
