@@ -1,0 +1,48 @@
+var xml2jsResult;
+xml2js.parseString(String(messageExchange.response.contentAsString), function (err, result) {
+ xml2jsResult = result;
+});
+const responseJson1 = xml2jsResult;
+
+log.info(String(responseJson1));
+
+log.info(String(responseJson1.query));
+
+var xml2jsResult;
+xml2js.parseString(String(messageExchange.response.contentAsString), function (err, result) {
+ xml2jsResult = result;
+});
+log.info(String(xml2jsResult.query));
+
+ready.test("XML1 - old syntax", () => {
+var xml2jsResult;
+xml2js.parseString(String(messageExchange.response.contentAsString), function (err, result) {
+ xml2jsResult = result;
+});
+  chai.expect(Number(xml2jsResult.query.incomes)).to.be.eql(1000);
+  chai.expect(Number(responseJson1["query"]["incomes"])).to.be.eql(1000);
+});
+
+var parse = xml2js;
+
+let responseJson2;
+
+parse.parseString(String(messageExchange.response.contentAsString), function(err, result) {
+  responseJson2 = result;
+});
+
+ready.test("XML2 - external library", () => {
+  chai.expect(Number(responseJson2.query.incomes)).to.be.eql(1000);
+  chai.expect(Number(responseJson2["query"]["incomes"])).to.be.eql(1000);
+});
+
+let responseJson3;
+
+xml2js.parseString(String(messageExchange.response.contentAsString), function(err, result) {
+  responseJson3 = result;
+});
+
+ready.test("XML3 - external library", () => {
+  chai.expect(Number(responseJson3.query.incomes)).to.be.eql(1000);
+  chai.expect(Number(responseJson3["query"]["incomes"])).to.be.eql(1000);
+});
