@@ -21,7 +21,6 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.model.iface.Operation;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.support.StringUtils;
-import com.smartbear.ready.plugin.postman.VariableUtils;
 import com.smartbear.ready.plugin.postman.collection.FormDataParameter;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.Request;

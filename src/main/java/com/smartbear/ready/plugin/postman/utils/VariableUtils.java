@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.smartbear.ready.plugin.postman;
+package com.smartbear.ready.plugin.postman.utils;
 
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
+import com.eviware.soapui.support.UISupport;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,26 +30,35 @@ public class VariableUtils {
     private static final Pattern VARIABLE_REG = Pattern.compile("\\{\\{(?<" + VARIABLE_NAME_REG_GROUP + ">.*?)\\}\\}");
     private static final String ESCAPING_PREFIX = "\\";
     private static final String VAULT_PREFIX = "vault:";
+    private static final String DYNAMIC_VARIABLE_PREFIX = "$";
+    private static final String DYNAMIC_VARIABLE_NAME_PREFIX = "dynamic-variable-";
+    private static boolean isDynamicVariablePresent;
+
+    private VariableUtils() {}
 
     public static String convertVariables(String postmanString, WsdlProject projectToAddProperties) {
         if (StringUtils.isNullOrEmpty(postmanString)) {
             return postmanString;
         }
 
-        StringBuffer readyApiStringBuffer = new StringBuffer();
+        StringBuilder readyApiStringBuilder = new StringBuilder();
         Matcher matcher = VARIABLE_REG.matcher(postmanString);
         while (matcher.find()) {
             String propertyName = matcher.group(VARIABLE_NAME_REG_GROUP);
             propertyName = removeVaultPrefixIfPresent(propertyName);
+            if (propertyName.startsWith(DYNAMIC_VARIABLE_PREFIX)) {
+                propertyName = DYNAMIC_VARIABLE_NAME_PREFIX + propertyName.substring(1);
+                isDynamicVariablePresent = true;
+            }
             if (projectToAddProperties != null && !projectToAddProperties.hasProperty(propertyName)) {
                 projectToAddProperties.addProperty(propertyName);
             }
-            matcher.appendReplacement(readyApiStringBuffer,
+            matcher.appendReplacement(readyApiStringBuilder,
                     ESCAPING_PREFIX + READYAPI_VARIABLE_BEGIN + propertyName + READYAPI_VARIABLE_END);
         }
-        if (!readyApiStringBuffer.isEmpty()) {
-            matcher.appendTail(readyApiStringBuffer);
-            return readyApiStringBuffer.toString();
+        if (!readyApiStringBuilder.isEmpty()) {
+            matcher.appendTail(readyApiStringBuilder);
+            return readyApiStringBuilder.toString();
         } else {
             return postmanString;
         }
@@ -56,9 +66,15 @@ public class VariableUtils {
 
     public static String createProjectVariableExpansionString(String variableName) {
         variableName = removeVaultPrefixIfPresent(variableName);
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(READYAPI_VARIABLE_BEGIN).append(variableName).append(READYAPI_VARIABLE_END);
-        return buffer.toString();
+        return READYAPI_VARIABLE_BEGIN + variableName + READYAPI_VARIABLE_END;
+    }
+
+    public static void showDynamicVariablesInfoIfPresent() {
+        if (isDynamicVariablePresent) {
+            isDynamicVariablePresent = false;
+            UISupport.showInfoMessage("Dynamic variables were converted to ReadyAPI property expansions. " +
+                    "Their values can be set in custom project properties.");
+        }
     }
 
     private static String removeVaultPrefixIfPresent(String propertyName) {

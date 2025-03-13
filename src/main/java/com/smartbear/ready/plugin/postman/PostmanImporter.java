@@ -54,6 +54,7 @@ import com.smartbear.ready.plugin.postman.utils.PostmanJsonUtil;
 import com.smartbear.ready.plugin.postman.utils.RestServiceCreator;
 import com.smartbear.ready.plugin.postman.utils.SoapServiceCreator;
 import com.smartbear.ready.plugin.postman.utils.VaultVariableResolver;
+import com.smartbear.ready.plugin.postman.utils.VariableUtils;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
@@ -176,6 +177,7 @@ public class PostmanImporter {
                         project.setPropertyValue(propertyName, variable.getValue());
                     }
                 }
+                VariableUtils.showDynamicVariablesInfoIfPresent();
             }
         }
         return project;
