@@ -60,6 +60,33 @@
 				"url": "https://postman-echo.com/post"
 			},
 			"response": []
+		},
+		{
+			"name": "Request with query parameters",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:1234/test/sample?x=space test&y=10&z=+",
+					"protocol": "http",
+					"query": [
+						{
+							"key": "x",
+							"value": "space test"
+						},
+						{
+							"key": "y",
+							"value": "10"
+						},
+						{
+							"key": "z",
+							"value": "+"
+						}
+					]
+				},
+				"description": "request with query parameters that should be encoded"
+			},
+			"response": []
 		}
 	]
 }
