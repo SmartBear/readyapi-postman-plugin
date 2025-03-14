@@ -33,7 +33,11 @@ import jakarta.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RestServiceCreator extends RestServiceBuilder {
     private static final Logger logger = LoggerFactory.getLogger(RestServiceCreator.class);
@@ -140,10 +144,20 @@ public class RestServiceCreator extends RestServiceBuilder {
         RestUtils.extractTemplateParamsFromResourcePath(paramsHolder, path);
 
         if (StringUtils.hasContent(queryString)) {
+            queryString = encodeQueryString(queryString);
             RestUtils.extractParamsFromQueryString(paramsHolder, queryString);
         }
 
         return paramsHolder;
+    }
+
+    private String encodeQueryString(String queryString) {
+        return Arrays.stream(queryString.split("&"))
+                .map(pair -> pair.split("=", 2))
+                .map(keyValue -> (URLEncoder.encode(keyValue[0], StandardCharsets.UTF_8) + "="
+                                + URLEncoder.encode(keyValue[1], StandardCharsets.UTF_8))
+                )
+                .collect(Collectors.joining("&"));
     }
 
     private void addRestHeaders(List<PostmanCollection.Header> headers) {
