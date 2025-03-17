@@ -177,7 +177,7 @@ public class PostmanImporter {
                         project.setPropertyValue(propertyName, variable.getValue());
                     }
                 }
-                VariableUtils.showDynamicVariablesInfoIfPresent();
+                VariableUtils.showDynamicVariablesInfoIfPresent(project);
             }
         }
         return project;

@@ -20,6 +20,7 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +33,6 @@ public class VariableUtils {
     private static final String VAULT_PREFIX = "vault:";
     private static final String DYNAMIC_VARIABLE_PREFIX = "$";
     private static final String DYNAMIC_VARIABLE_NAME_PREFIX = "dynamic-variable-";
-    private static boolean isDynamicVariablePresent;
 
     private VariableUtils() {}
 
@@ -48,7 +48,6 @@ public class VariableUtils {
             propertyName = removeVaultPrefixIfPresent(propertyName);
             if (propertyName.startsWith(DYNAMIC_VARIABLE_PREFIX)) {
                 propertyName = DYNAMIC_VARIABLE_NAME_PREFIX + propertyName.substring(1);
-                isDynamicVariablePresent = true;
             }
             if (projectToAddProperties != null && !projectToAddProperties.hasProperty(propertyName)) {
                 projectToAddProperties.addProperty(propertyName);
@@ -69,9 +68,8 @@ public class VariableUtils {
         return READYAPI_VARIABLE_BEGIN + variableName + READYAPI_VARIABLE_END;
     }
 
-    public static void showDynamicVariablesInfoIfPresent() {
-        if (isDynamicVariablePresent) {
-            isDynamicVariablePresent = false;
+    public static void showDynamicVariablesInfoIfPresent(WsdlProject project) {
+        if (Arrays.stream(project.getPropertyNames()).anyMatch(name -> name.startsWith(DYNAMIC_VARIABLE_NAME_PREFIX))) {
             UISupport.showInfoMessage("Dynamic variables were converted to ReadyAPI property expansions. " +
                     "Their values can be set in custom project properties.");
         }
