@@ -10,7 +10,7 @@ import java.util.Map;
 
 public record OAuth2Profile(String clientId, String clientSecret, String scope, String state, String accessTokenUrl,
                             String refreshTokenUrl, String authUrl, String redirect_uri, String grant_type,
-                            String client_authentication, String addTokenTo) implements PostmanAuthProfile {
+                            String client_authentication, String addTokenTo, String username, String password) implements PostmanAuthProfile {
 
     private static final String AUTH_CODE_WITH_PKCE = "authorization_code_with_pkce";
 
@@ -42,6 +42,8 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
         setValueIfNotNull(redirect_uri, oAuth20AuthEntry::setRedirectURI, project);
         setValueIfNotNull(scope, oAuth20AuthEntry::setScope, project);
         setValueIfNotNull(state, oAuth20AuthEntry::setState, project);
+        setValueIfNotNull(username, oAuth20AuthEntry::setResourceOwnerName, project);
+        setValueIfNotNull(password, oAuth20AuthEntry::setResourceOwnerPassword, project);
         if (grant_type != null) {
             setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type), oAuth20AuthEntry::setOAuth2Flow);
         }
