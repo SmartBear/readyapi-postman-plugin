@@ -258,12 +258,12 @@ class AuthorizationProfileImporterTest {
     }
 
     private void verifyPropertyExpansionsCreatedForBasicAuth(WsdlProject project) {
-        assertNotNull(project.getProperty("vault:vault var"));
-        assertNotNull(project.getProperty("vault:basicAuthUsername"));
+        assertNotNull(project.getProperty("vault var"));
+        assertNotNull(project.getProperty("basicAuthUsername"));
 
         AuthEntries.BaseAuthEntry vaultEntry = project.getAuthRepository().getEntry("basic with vault");
-        assertEquals("${#Project#vault:basicAuthUsername}", ((AuthEntries.BasicAuthEntry) vaultEntry).getUsername());
-        assertEquals("${#Project#vault:vault var}", ((AuthEntries.BasicAuthEntry) vaultEntry).getPassword());
+        assertEquals("${#Project#basicAuthUsername}", ((AuthEntries.BasicAuthEntry) vaultEntry).getUsername());
+        assertEquals("${#Project#vault var}", ((AuthEntries.BasicAuthEntry) vaultEntry).getPassword());
 
         assertNotNull(project.getProperty("global_username"));
         assertNotNull(project.getProperty("global_password"));
