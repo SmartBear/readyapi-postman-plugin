@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+<wsdl:definitions xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+    xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://localhost:28089/" xmlns:s="http://www.w3.org/2001/XMLSchema"
+    xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="http://localhost:28089/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
     <wsdl:types>
-        <s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+        <s:schema elementFormDefault="qualified" targetNamespace="http://localhost:28089/">
             <s:element name="Add">
                 <s:complexType>
                     <s:sequence>
@@ -110,7 +113,7 @@
     <wsdl:binding name="CalculatorSoap" type="tns:CalculatorSoap">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
         <wsdl:operation name="Add">
-            <soap:operation soapAction="http://tempuri.org/Add" style="document" />
+            <soap:operation soapAction="http://localhost:28089/Add" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -119,7 +122,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="Subtract">
-            <soap:operation soapAction="http://tempuri.org/Subtract" style="document" />
+            <soap:operation soapAction="http://localhost:28089/Subtract" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -128,7 +131,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="Multiply">
-            <soap:operation soapAction="http://tempuri.org/Multiply" style="document" />
+            <soap:operation soapAction="http://localhost:28089/Multiply" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -137,7 +140,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="Divide">
-            <soap:operation soapAction="http://tempuri.org/Divide" style="document" />
+            <soap:operation soapAction="http://localhost:28089/Divide" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -149,7 +152,7 @@
     <wsdl:binding name="CalculatorSoap12" type="tns:CalculatorSoap">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
         <wsdl:operation name="Add">
-            <soap12:operation soapAction="http://tempuri.org/Add" style="document" />
+            <soap12:operation soapAction="http://localhost:28089/Add" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -158,7 +161,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="Subtract">
-            <soap12:operation soapAction="http://tempuri.org/Subtract" style="document" />
+            <soap12:operation soapAction="http://localhost:28089/Subtract" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -167,7 +170,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="Multiply">
-            <soap12:operation soapAction="http://tempuri.org/Multiply" style="document" />
+            <soap12:operation soapAction="http://localhost:28089/Multiply" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -176,7 +179,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="Divide">
-            <soap12:operation soapAction="http://tempuri.org/Divide" style="document" />
+            <soap12:operation soapAction="http://localhost:28089/Divide" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -187,10 +190,10 @@
     </wsdl:binding>
     <wsdl:service name="Calculator">
         <wsdl:port name="CalculatorSoap" binding="tns:CalculatorSoap">
-            <soap:address location="http://www.dneonline.com/calculator.asmx" />
+            <soap:address location="http://localhost:28089/calculator.asmx" />
         </wsdl:port>
         <wsdl:port name="CalculatorSoap12" binding="tns:CalculatorSoap12">
-            <soap12:address location="http://www.dneonline.com/calculator.asmx" />
+            <soap12:address location="http://localhost:28089/calculator.asmx" />
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

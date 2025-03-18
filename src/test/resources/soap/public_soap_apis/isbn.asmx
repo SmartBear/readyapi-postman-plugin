@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://webservices.daehosting.com/ISBN" name="ISBNService" targetNamespace="http://webservices.daehosting.com/ISBN">
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://localhost:28089/ISBN" name="ISBNService"
+    targetNamespace="http://localhost:28089/ISBN">
     <types>
-        <xs:schema elementFormDefault="qualified" targetNamespace="http://webservices.daehosting.com/ISBN">
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://localhost:28089/ISBN">
             <xs:element name="IsValidISBN13">
                 <xs:complexType>
                     <xs:sequence>
@@ -101,10 +103,10 @@
     <service name="ISBNService">
         <documentation>DataFlex Web Service to validate ISBN numbers.</documentation>
         <port name="ISBNServiceSoap" binding="tns:ISBNServiceSoapBinding">
-            <soap:address location="https://webservices.daehosting.com/services/isbnservice.wso"/>
+            <soap:address location="http://localhost:28089/services/isbnservice.asmx"/>
         </port>
         <port name="ISBNServiceSoap12" binding="tns:ISBNServiceSoapBinding12">
-            <soap12:address location="https://webservices.daehosting.com/services/isbnservice.wso"/>
+            <soap12:address location="http://localhost:28089/services/isbnservice.asmx"/>
         </port>
     </service>
 </definitions>

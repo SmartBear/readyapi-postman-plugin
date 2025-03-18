@@ -37,14 +37,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <NumberToWords xmlns=\"http://www.dataaccess.com/webservicesserver/\">\n      <ubiNum>500</ubiNum>\n    </NumberToWords>\n  </soap:Body>\n</soap:Envelope>",
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <NumberToWords xmlns=\"http://localhost:28089/webservicesserver/\">\n      <ubiNum>500</ubiNum>\n    </NumberToWords>\n  </soap:Body>\n</soap:Envelope>",
               "options": {
                 "raw": {
                   "language": "xml"
                 }
               }
             },
-            "url": "/soap/public_soap_apis/number_conversion.wsdl",
+            "url": "http://localhost:28089/webservicesserver/NumberConversion.asmx?WSDL",
             "description": "Returns the word corresponding to the positive number passed as parameter. Limited to quadrillions."
           },
           "response": []
@@ -62,9 +62,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <NumberToDollars xmlns=\"http://www.dataaccess.com/webservicesserver/\">\n      <dNum>500</dNum>\n    </NumberToDollars>\n  </soap:Body>\n</soap:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <NumberToDollars xmlns=\"http://localhost:28089/webservicesserver/\">\n      <dNum>500</dNum>\n    </NumberToDollars>\n  </soap:Body>\n</soap:Envelope>"
             },
-            "url": "/soap/public_soap_apis/number_conversion.wsdl",
+            "url": "http://localhost:28089/webservicesserver/NumberConversion.asmx?WSDL",
             "description": "Returns the non-zero dollar amount of the passed number."
           },
           "response": []
@@ -88,9 +88,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tem=\"http://tempuri.org/\">\n   <soapenv:Header/>\n   <soapenv:Body>\n      <tem:Add>\n         <tem:intA>3</tem:intA>\n         <tem:intB>3</tem:intB>\n      </tem:Add>\n   </soapenv:Body>\n</soapenv:Envelope>"
+              "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:tem=\"http://localhost:28089/\">\n   <soapenv:Header/>\n   <soapenv:Body>\n      <tem:Add>\n         <tem:intA>3</tem:intA>\n         <tem:intB>3</tem:intB>\n      </tem:Add>\n   </soapenv:Body>\n</soapenv:Envelope>"
             },
-            "url": "/soap/public_soap_apis/calculator.wsdl",
+            "url": "http://localhost:28089/calculator.asmx?WSDL",
             "description": "Adds two integers."
           },
           "response": []
@@ -107,15 +107,15 @@
               },
               {
                 "key": "SOAPAction",
-                "value": "http://tempuri.org/Divide",
+                "value": "http://localhost:28089/Divide",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <Divide xmlns=\"http://tempuri.org/\">\n      <intA>5</intA>\n      <intB>5</intB>\n    </Divide>\n  </soap:Body>\n</soap:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <Divide xmlns=\"http://localhost:28089/\">\n      <intA>5</intA>\n      <intB>5</intB>\n    </Divide>\n  </soap:Body>\n</soap:Envelope>"
             },
-            "url": "/soap/public_soap_apis/calculator.wsdl",
+            "url": "http://localhost:28089/calculator.asmx?WSDL",
             "description": "Divides two integers."
           },
           "response": []
@@ -132,15 +132,15 @@
               },
               {
                 "key": "SOAPAction",
-                "value": "http://tempuri.org/Multiply",
+                "value": "http://localhost:28089/Multiply",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <Multiply xmlns=\"http://tempuri.org/\">\n      <intA>5</intA>\n      <intB>5</intB>\n    </Multiply>\n  </soap:Body>\n</soap:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <Multiply xmlns=\"http://localhost:28089/\">\n      <intA>5</intA>\n      <intB>5</intB>\n    </Multiply>\n  </soap:Body>\n</soap:Envelope>"
             },
-            "url": "/soap/public_soap_apis/calculator.wsdl",
+            "url": "http://localhost:28089/calculator.asmx?WSDL",
             "description": "Multiplies two integers."
           },
           "response": []
@@ -157,15 +157,15 @@
               },
               {
                 "key": "SOAPAction",
-                "value": "http://tempuri.org/Subtract",
+                "value": "http://localhost:28089/Subtract",
                 "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <Subtract xmlns=\"http://tempuri.org/\">\n      <intA>5</intA>\n      <intB>5</intB>\n    </Subtract>\n  </soap:Body>\n</soap:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <Subtract xmlns=\"http://localhost:28089/\">\n      <intA>5</intA>\n      <intB>5</intB>\n    </Subtract>\n  </soap:Body>\n</soap:Envelope>"
             },
-            "url": "/soap/public_soap_apis/calculator.wsdl",
+            "url": "http://localhost:28089/calculator.asmx?WSDL",
             "description": "Subtracts two integers."
           },
           "response": []
@@ -209,9 +209,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <ListOfContinentsByName xmlns=\"http://www.oorsprong.org/websamples.countryinfo\">\n    </ListOfContinentsByName>\n  </soap12:Body>\n</soap12:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <ListOfContinentsByName xmlns=\"http://localhost:28089/websamples.countryinfo\">\n    </ListOfContinentsByName>\n  </soap12:Body>\n</soap12:Envelope>"
             },
-            "url": "/soap/public_soap_apis/continents.wsdl",
+            "url": "http://localhost:28089/websamples.countryinfo/CountryInfoService.asxm?WSDL",
             "description": "Returns a list of continents ordered by name."
           },
           "response": []
@@ -255,9 +255,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <ListOfCurrenciesByName xmlns=\"http://www.oorsprong.org/websamples.countryinfo\">\n    </ListOfCurrenciesByName>\n  </soap12:Body>\n</soap12:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <ListOfCurrenciesByName xmlns=\"http://localhost:28089/websamples.countryinfo\">\n    </ListOfCurrenciesByName>\n  </soap12:Body>\n</soap12:Envelope>"
             },
-            "url": "/soap/public_soap_apis/continents.wsdl",
+            "url": "http://localhost:28089/websamples.countryinfo/CountryInfoService.asxm?WSDL",
             "description": "Returns a list of currencies ordered by name."
           },
           "response": []
@@ -301,9 +301,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ListOfLanguagesByName xmlns=\"http://www.oorsprong.org/websamples.countryinfo\">\n    </ListOfLanguagesByName>\n  </soap:Body>\n</soap:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <ListOfLanguagesByName xmlns=\"http://localhost:28089/websamples.countryinfo\">\n    </ListOfLanguagesByName>\n  </soap:Body>\n</soap:Envelope>"
             },
-            "url": "/soap/public_soap_apis/continents.wsdl",
+            "url": "http://localhost:28089/websamples.countryinfo/CountryInfoService.asxm?WSDL",
             "description": "Returns an array of languages ordered by name."
           },
           "response": []
@@ -347,9 +347,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <IsValidISBN13 xmlns=\"http://webservices.daehosting.com/ISBN\">\n      <sISBN>978-1-4612-9090-2</sISBN>\n    </IsValidISBN13>\n  </soap:Body>\n</soap:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <IsValidISBN13 xmlns=\"http://localhost:28089/ISBN\">\n      <sISBN>978-1-4612-9090-2</sISBN>\n    </IsValidISBN13>\n  </soap:Body>\n</soap:Envelope>"
             },
-            "url": "/soap/public_soap_apis/isbn.wsdl",
+            "url": "http://localhost:28089/services/isbnservice.asmx?WSDL",
             "description": "The test is done by calculation on the first 12 digits and compare the result with the checksum number at the end. You have to pass a 13 digits number."
           },
           "response": []
@@ -367,9 +367,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <IsValidISBN10 xmlns=\"http://webservices.daehosting.com/ISBN\">\n      <sISBN>0-19-852663-6</sISBN>\n    </IsValidISBN10>\n  </soap:Body>\n</soap:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n  <soap:Body>\n    <IsValidISBN10 xmlns=\"http://localhost:28089/ISBN\">\n      <sISBN>0-19-852663-6</sISBN>\n    </IsValidISBN10>\n  </soap:Body>\n</soap:Envelope>"
             },
-            "url": "/soap/public_soap_apis/isbn.wsdl",
+            "url": "http://localhost:28089/services/isbnservice.asmx?WSDL",
             "description": "The test is done by calculation on the first 9 digits and compare the result with the checksum number at the end. You have to pass a 10 digits number or 8 digits and an X."
           },
           "response": []
@@ -413,9 +413,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <CelsiusToFahrenheit xmlns=\"https://www.w3schools.com/xml/\">\n      <Celsius>20</Celsius>\n    </CelsiusToFahrenheit>\n  </soap12:Body>\n</soap12:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <CelsiusToFahrenheit xmlns=\"https://localhost:28089/xml/\">\n      <Celsius>20</Celsius>\n    </CelsiusToFahrenheit>\n  </soap12:Body>\n</soap12:Envelope>"
             },
-            "url": "/soap/public_soap_apis/tempconvert.wsdl",
+            "url": "http://localhost:28089/xml/tempconvert.asmx?WSDL",
             "description": "Converts celsius temperature to farenheit."
           },
           "response": []
@@ -433,9 +433,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <FahrenheitToCelsius xmlns=\"https://www.w3schools.com/xml/\">\n      <Fahrenheit>75</Fahrenheit>\n    </FahrenheitToCelsius>\n  </soap12:Body>\n</soap12:Envelope>"
+              "raw": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n  <soap12:Body>\n    <FahrenheitToCelsius xmlns=\"https://localhost:28089/xml/\">\n      <Fahrenheit>75</Fahrenheit>\n    </FahrenheitToCelsius>\n  </soap12:Body>\n</soap12:Envelope>"
             },
-            "url": "/soap/public_soap_apis/tempconvert.wsdl",
+            "url": "http://localhost:28089/xml/tempconvert.asmx?WSDL",
             "description": "Converts farenheit temperature to celsius."
           },
           "response": []
