@@ -52,6 +52,7 @@ public class SoapServiceCreator {
     private String getRequestWsdlUrl(String url) {
         return shouldAppendWsdl(url) ? url + WSDL_SUFFIX : url;
     }
+
     private boolean shouldAppendWsdl(String url) {
         return StringUtils.hasContent(url) && !url.toUpperCase().endsWith(WSDL_SUFFIX);
     }
@@ -109,7 +110,7 @@ public class SoapServiceCreator {
             wsdlRequest = operation.addNewRequest(request.getName());
             wsdlRequest.setRequestContent(request.getBody());
 
-            wsdlRequest.setDescription("Imported from Postman collection, original directory: [" + request.getDirectoryPath()+"]");
+            wsdlRequest.setDescription("Imported from Postman collection, original directory: [" + request.getDirectoryPath() + "]");
             addHttpHeaders(wsdlRequest, request.getHeaders(), project);
         }
         return wsdlRequest;

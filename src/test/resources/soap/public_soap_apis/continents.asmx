@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://www.oorsprong.org/websamples.countryinfo" name="CountryInfoService" targetNamespace="http://www.oorsprong.org/websamples.countryinfo">
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://localhost:28089/websamples.countryinfo" name="CountryInfoService"
+    targetNamespace="http://localhost:28089/websamples.countryinfo">
     <types>
-        <xs:schema elementFormDefault="qualified" targetNamespace="http://www.oorsprong.org/websamples.countryinfo">
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://localhost:28089/websamples.countryinfo">
             <xs:complexType name="tContinent">
                 <xs:sequence>
                     <xs:element name="sCode" type="xs:string"/>
@@ -970,10 +972,10 @@
     <service name="CountryInfoService">
         <documentation>This DataFlex Web Service opens up country information. 2 letter ISO codes are used for Country code. There are functions to retrieve the used Currency, Language, Capital City, Continent and Telephone code.</documentation>
         <port name="CountryInfoServiceSoap" binding="tns:CountryInfoServiceSoapBinding">
-            <soap:address location="http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso"/>
+            <soap:address location="http://localhost:28089/websamples.countryinfo/CountryInfoService.asxm"/>
         </port>
         <port name="CountryInfoServiceSoap12" binding="tns:CountryInfoServiceSoapBinding12">
-            <soap12:address location="http://webservices.oorsprong.org/websamples.countryinfo/CountryInfoService.wso"/>
+            <soap12:address location="http://localhost:28089/websamples.countryinfo/CountryInfoService.asxm"/>
         </port>
     </service>
 </definitions>

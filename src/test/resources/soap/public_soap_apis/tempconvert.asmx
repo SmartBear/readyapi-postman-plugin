@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="https://www.w3schools.com/xml/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="https://www.w3schools.com/xml/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+    xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://localhost:28089/xml/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://localhost:28089/xml/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
     <wsdl:types>
-        <s:schema elementFormDefault="qualified" targetNamespace="https://www.w3schools.com/xml/">
+        <s:schema elementFormDefault="qualified" targetNamespace="localhost:28089/xml/">
             <s:element name="FahrenheitToCelsius">
                 <s:complexType>
                     <s:sequence>
@@ -80,7 +83,7 @@
     <wsdl:binding name="TempConvertSoap" type="tns:TempConvertSoap">
         <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
         <wsdl:operation name="FahrenheitToCelsius">
-            <soap:operation soapAction="https://www.w3schools.com/xml/FahrenheitToCelsius" style="document" />
+            <soap:operation soapAction="http://localhost:28089/xml/FahrenheitToCelsius" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -89,7 +92,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="CelsiusToFahrenheit">
-            <soap:operation soapAction="https://www.w3schools.com/xml/CelsiusToFahrenheit" style="document" />
+            <soap:operation soapAction="http://localhost:28089/xml/CelsiusToFahrenheit" style="document" />
             <wsdl:input>
                 <soap:body use="literal" />
             </wsdl:input>
@@ -101,7 +104,7 @@
     <wsdl:binding name="TempConvertSoap12" type="tns:TempConvertSoap">
         <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
         <wsdl:operation name="FahrenheitToCelsius">
-            <soap12:operation soapAction="https://www.w3schools.com/xml/FahrenheitToCelsius" style="document" />
+            <soap12:operation soapAction="http://localhost:28089/xml/FahrenheitToCelsius" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -110,7 +113,7 @@
             </wsdl:output>
         </wsdl:operation>
         <wsdl:operation name="CelsiusToFahrenheit">
-            <soap12:operation soapAction="https://www.w3schools.com/xml/CelsiusToFahrenheit" style="document" />
+            <soap12:operation soapAction="http://localhost:28089/xml/CelsiusToFahrenheit" style="document" />
             <wsdl:input>
                 <soap12:body use="literal" />
             </wsdl:input>
@@ -142,13 +145,13 @@
     </wsdl:binding>
     <wsdl:service name="TempConvert">
         <wsdl:port name="TempConvertSoap" binding="tns:TempConvertSoap">
-            <soap:address location="http://www.w3schools.com/xml/tempconvert.asmx" />
+            <soap:address location="http://localhost:28089/xml/tempconvert.asmx" />
         </wsdl:port>
         <wsdl:port name="TempConvertSoap12" binding="tns:TempConvertSoap12">
-            <soap12:address location="http://www.w3schools.com/xml/tempconvert.asmx" />
+            <soap12:address location="http://localhost:28089/xml/tempconvert.asmx" />
         </wsdl:port>
         <wsdl:port name="TempConvertHttpPost" binding="tns:TempConvertHttpPost">
-            <http:address location="http://www.w3schools.com/xml/tempconvert.asmx" />
+            <http:address location="http://localhost:28089/xml/tempconvert.asmx" />
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

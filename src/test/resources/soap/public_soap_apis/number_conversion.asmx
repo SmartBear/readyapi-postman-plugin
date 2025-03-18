@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://www.dataaccess.com/webservicesserver/" name="NumberConversion" targetNamespace="http://www.dataaccess.com/webservicesserver/">
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:tns="http://localhost:28089/webservicesserver/" name="NumberConversion" targetNamespace="http://localhost:28089/webservicesserver/">
     <types>
-        <xs:schema elementFormDefault="qualified" targetNamespace="http://www.dataaccess.com/webservicesserver/">
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://localhost:28089/webservicesserver/">
             <xs:element name="NumberToWords">
                 <xs:complexType>
                     <xs:sequence>
@@ -101,10 +101,10 @@
     <service name="NumberConversion">
         <documentation>The Number Conversion Web Service, implemented with Visual DataFlex, provides functions that convert numbers into words or dollar amounts.</documentation>
         <port name="NumberConversionSoap" binding="tns:NumberConversionSoapBinding">
-            <soap:address location="https://www.dataaccess.com/webservicesserver/NumberConversion.wso"/>
+            <soap:address location="http://localhost:28089/webservicesserver/NumberConversion.asmx"/>
         </port>
         <port name="NumberConversionSoap12" binding="tns:NumberConversionSoapBinding12">
-            <soap12:address location="https://www.dataaccess.com/webservicesserver/NumberConversion.wso"/>
+            <soap12:address location="http://localhost:28089/webservicesserver/NumberConversion.asmx"/>
         </port>
     </service>
 </definitions>
