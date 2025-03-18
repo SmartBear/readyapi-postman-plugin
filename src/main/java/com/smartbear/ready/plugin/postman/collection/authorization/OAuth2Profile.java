@@ -4,13 +4,13 @@ import com.eviware.soapui.config.AccessTokenPositionConfig;
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.config.OAuth2FlowConfig;
 import com.eviware.soapui.impl.AuthRepository.AuthEntries;
-import com.eviware.soapui.impl.AuthRepository.AuthRepository;
+import com.eviware.soapui.impl.wsdl.WsdlProject;
 
 import java.util.Map;
 
 public record OAuth2Profile(String clientId, String clientSecret, String scope, String state, String accessTokenUrl,
                             String refreshTokenUrl, String authUrl, String redirect_uri, String grant_type,
-                            String client_authentication, String addTokenTo) implements PostmanAuthProfile {
+                            String client_authentication, String addTokenTo, String username, String password) implements PostmanAuthProfile {
 
     private static final String AUTH_CODE_WITH_PKCE = "authorization_code_with_pkce";
 
@@ -32,16 +32,18 @@ public record OAuth2Profile(String clientId, String clientSecret, String scope, 
     }
 
     @Override
-    public void createAuthEntry(String profileName, AuthRepository authRepository) {
-        AuthEntries.OAuth20AuthEntry oAuth20AuthEntry = (AuthEntries.OAuth20AuthEntry) authRepository
+    public void createAuthEntry(String profileName, WsdlProject project) {
+        AuthEntries.OAuth20AuthEntry oAuth20AuthEntry = (AuthEntries.OAuth20AuthEntry) project.getAuthRepository()
                 .createEntry(getAuthEntryType(), profileName);
-        setValueIfNotNull(clientId, oAuth20AuthEntry::setClientID);
-        setValueIfNotNull(clientSecret, oAuth20AuthEntry::setClientSecret);
-        setValueIfNotNull(accessTokenUrl, oAuth20AuthEntry::setAccessTokenURI);
-        setValueIfNotNull(authUrl, oAuth20AuthEntry::setAuthorizationURI);
-        setValueIfNotNull(redirect_uri, oAuth20AuthEntry::setRedirectURI);
-        setValueIfNotNull(scope, oAuth20AuthEntry::setScope);
-        setValueIfNotNull(state, oAuth20AuthEntry::setState);
+        setValueIfNotNull(clientId, oAuth20AuthEntry::setClientID, project);
+        setValueIfNotNull(clientSecret, oAuth20AuthEntry::setClientSecret, project);
+        setValueIfNotNull(accessTokenUrl, oAuth20AuthEntry::setAccessTokenURI, project);
+        setValueIfNotNull(authUrl, oAuth20AuthEntry::setAuthorizationURI, project);
+        setValueIfNotNull(redirect_uri, oAuth20AuthEntry::setRedirectURI, project);
+        setValueIfNotNull(scope, oAuth20AuthEntry::setScope, project);
+        setValueIfNotNull(state, oAuth20AuthEntry::setState, project);
+        setValueIfNotNull(username, oAuth20AuthEntry::setResourceOwnerName, project);
+        setValueIfNotNull(password, oAuth20AuthEntry::setResourceOwnerPassword, project);
         if (grant_type != null) {
             setValueIfNotNull(GRANT_TYPE_MAP.get(grant_type), oAuth20AuthEntry::setOAuth2Flow);
         }

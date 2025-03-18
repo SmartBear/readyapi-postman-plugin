@@ -22,7 +22,7 @@
     </repositories>
 
     <properties>
-        <ready-api-version>3.59.0-SNAPSHOT</ready-api-version>
+        <ready-api-version>3.60.0-SNAPSHOT</ready-api-version>
         <java.version>17</java.version>
     </properties>
 
@@ -142,6 +142,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
+                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/java.awt=ALL-UNNAMED</argLine>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>

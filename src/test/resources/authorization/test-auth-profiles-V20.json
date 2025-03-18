@@ -138,6 +138,43 @@
 			]
 		},
 		{
+			"name": "property expansions",
+			"item": [
+				{
+					"name": "basic with vault",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "{{vault:vault var}}",
+								"username": "{{vault:basicAuthUsername}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/basic"
+					},
+					"response": []
+				},
+				{
+					"name": "basic with globals",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": {
+								"password": "{{global_password}}",
+								"username": "{{global_username}}"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/basicglobals"
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "unsupported profile",
 			"request": {
 				"auth": {
