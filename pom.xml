@@ -41,6 +41,12 @@
         </dependency>
         <dependency>
             <groupId>com.smartbear</groupId>
+            <artifactId>ready-api-soapui</artifactId>
+            <version>${ready-api-version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.smartbear</groupId>
             <artifactId>ready-api-soapui-pro</artifactId>
             <version>${ready-api-version}</version>
             <scope>provided</scope>

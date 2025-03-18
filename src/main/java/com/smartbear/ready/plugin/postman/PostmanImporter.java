@@ -45,7 +45,8 @@ import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
 import com.smartbear.ready.plugin.postman.exceptions.PostmanCollectionUnsupportedVersionException;
-import com.smartbear.ready.plugin.postman.script.PostmanScriptParser;
+import com.smartbear.ready.plugin.postman.script.PostmanScriptParserV1;
+import com.smartbear.ready.plugin.postman.script.PostmanScriptParserV2;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer;
 import com.smartbear.ready.plugin.postman.script.PostmanScriptTokenizer.Token;
 import com.smartbear.ready.plugin.postman.script.ScriptContext;
@@ -165,7 +166,7 @@ public class PostmanImporter {
                     }
 
                     if (assertable != null) {
-                        addAssertions(tests, project, assertable);
+                        addAssertionsV2(tests, project, assertable, request.getName());
                     }
 
                     logger.info("Importing a request with URI [ {} ] - done", uri);
@@ -236,29 +237,45 @@ public class PostmanImporter {
     }
 
 
-    void addAssertions(String tests, WsdlProject project, Assertable assertable) {
+    private void addAssertionsV1(String tests, WsdlProject project, Assertable assertable) {
         PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        PostmanScriptParser parser = new PostmanScriptParser();
+        PostmanScriptParserV1 parser = new PostmanScriptParserV1();
         try {
             LinkedList<Token> tokens = tokenizer.tokenize(tests);
 
             ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
             parser.parse(tokens, context);
         } catch (SoapUIException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
+        }
+    }
+
+    private void addAssertionsV2(String tests, WsdlProject project, Assertable assertable, String requestName) {
+        ScriptContext context = ScriptContext.prepareTestScriptContext(project, assertable);
+        PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
+        parserV2.parse(tests, requestName);
+
+        String testsV1 = parserV2.getTestsV1();
+        if (StringUtils.hasContent(testsV1)) {
+            addAssertionsV1(testsV1, project, assertable);
         }
     }
 
     private void processPreRequestScript(String preRequestScript, WsdlProject project) {
-        PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
-        PostmanScriptParser parser = new PostmanScriptParser();
-        try {
-            LinkedList<Token> tokens = tokenizer.tokenize(preRequestScript);
+        ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
+        PostmanScriptParserV2 parserV2 = new PostmanScriptParserV2(context);
+        parserV2.parse(preRequestScript);
 
-            ScriptContext context = ScriptContext.preparePreRequestScriptContext(project);
-            parser.parse(tokens, context);
-        } catch (SoapUIException e) {
-            e.printStackTrace();
+        String prescriptV1 = parserV2.getPrescriptV1();
+        if (StringUtils.hasContent(prescriptV1)) {
+            PostmanScriptTokenizer tokenizer = new PostmanScriptTokenizer();
+            PostmanScriptParserV1 parser = new PostmanScriptParserV1();
+            try {
+                LinkedList<Token> tokens = tokenizer.tokenize(prescriptV1);
+                parser.parse(tokens, context);
+            } catch (SoapUIException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 

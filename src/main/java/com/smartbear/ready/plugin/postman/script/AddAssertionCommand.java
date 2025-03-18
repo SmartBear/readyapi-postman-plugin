@@ -17,5 +17,5 @@
 package com.smartbear.ready.plugin.postman.script;
 
 public interface AddAssertionCommand extends ScriptCommand {
-    void addCondition(String condition);
+    default void addCondition(String condition) {}
 }

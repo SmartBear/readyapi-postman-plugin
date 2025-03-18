@@ -21,6 +21,8 @@ import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestRequestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.WsdlTestStep;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.EqualsAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.TestAssertionRegistry;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.ChaiAssertion;
+import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.GroovyScriptAssertion;
 import com.eviware.soapui.impl.wsdl.teststeps.assertions.basic.SimpleContainsAssertion;
 import com.eviware.soapui.model.iface.Interface;
 import com.eviware.soapui.model.propertyexpansion.PropertyExpander;
@@ -28,6 +30,7 @@ import com.eviware.soapui.model.testsuite.TestAssertion;
 import com.eviware.soapui.model.testsuite.TestProperty;
 import com.eviware.soapui.model.testsuite.TestStep;
 import com.eviware.soapui.security.assertion.ValidHttpStatusCodesAssertion;
+import org.apache.commons.io.FileUtils;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -43,6 +46,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +71,9 @@ public class PostmanImporterTest {
     public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get_Collection.postman_collection_v2.0";
     public static final String REST_GET_COLLECTION_2_1_PATH = "/REST_Get_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_2_0_PATH = "/REST_Post_Collection.postman_collection_v2.0";
+    public static final String REST_POST_COLLECTION_CHAI_MIXED_2_1_PATH = "/REST_Post_Collection.postman_collection_chai_mixed_v2.1.json";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1.json";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected.txt";
     public static final String REST_POST_COLLECTION_2_1_PATH = "/REST_Post_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_2_1_EVENTS_PATH = "/REST_Post_Collection_events.postman_collection_v2.1";
     public static final String PARAMETERIZED_COLLECTION_2_1_PATH = "/Parameterized_Endpoint_Collection.postman_collection_v2.1";
@@ -110,6 +117,19 @@ public class PostmanImporterTest {
     public static final String QUERY_PARAMETER_VALUE = "${#Project#queryParam}";
     public static final String[] GRAPHQL_REQUESTS = {"addCustomer", "editCustomer", "customer", "customers"};
     private static final String SOAP_PUBLIC_SOAP_APIS_SERVICE_1_ASMX = "soap/public_soap_apis/Service1.asmx";
+    public static final Map<String, String> GLOBAL_VARIABLES = Map.of(
+      "new_key", "new_value",
+      "old_key", "old_value"
+    );
+
+    private static final String EXPECTED_SCRIPT_TEXT_WHEN_OLD_AND_NEW_ASSERTIONS =
+        """
+        ready.test("Status code is 200 - new", () => chai.expect(messageExchange.response.getStatusCode()).to.eql(200));
+        
+        ready.test("Body matches string - new", () => {
+          const jsonData = JSON.parse(messageExchange.response.contentAsString);
+          chai.expect(jsonData.model).to.eql("SUBSCRIPTION");
+        });""";
 
     private File workspaceFile;
     private WorkspaceImpl workspace;
@@ -306,6 +326,16 @@ public class PostmanImporterTest {
     }
 
     @Test
+    public void testImportRestPostRequestFromCollectionOldAndNewAssertions() throws Exception {
+        testImportRestRequestWithOldAndNewAssertions(REST_POST_COLLECTION_CHAI_MIXED_2_1_PATH);
+    }
+
+    @Test
+    public void testImportRestPostRequestFromCollectionChai() throws Exception {
+        testImportRestChaiRequestWithChaiAssertions(REST_POST_COLLECTION_CHAI_2_1_PATH);
+    }
+
+    @Test
     public void testImportRestPostRequestFromCollection20() throws Exception {
         testImportRestPostRequest(REST_POST_COLLECTION_2_0_PATH);
     }
@@ -355,6 +385,45 @@ public class PostmanImporterTest {
         List<RestParamProperty> requestParams = getParamsOfStyle(testRequest.getParams(), ParameterStyle.QUERY);
         assertEquals(0, requestParams != null ? requestParams.size() : 0, "Request should have 0 query params");
         assertEquals(REST_POST_BODY_VALUE, request.getRequestContent(), "Request should have test body");
+    }
+
+    public void testImportRestRequestWithOldAndNewAssertions(String collectionPath) throws Exception {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(
+            workspace,
+            PostmanImporterTest.class.getResource(collectionPath).getPath()
+        );
+
+        WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
+        WsdlTestCase testCase = testSuite.getTestCaseAt(0);
+        RestTestRequestStep testStep = (RestTestRequestStep) testCase.getTestStepAt(0);
+
+        assertThat(testStep.getAssertionAt(0), instanceOf(ChaiAssertion.class));
+        assertEquals(EXPECTED_SCRIPT_TEXT_WHEN_OLD_AND_NEW_ASSERTIONS, ((GroovyScriptAssertion)testStep.getAssertionAt(0)).getScriptText());
+        assertThat(testStep.getAssertionAt(1), instanceOf(ValidHttpStatusCodesAssertion.class));
+        assertThat(testStep.getAssertionAt(2), instanceOf(SimpleContainsAssertion.class));
+
+        GLOBAL_VARIABLES.forEach(
+            (key, value) ->
+                assertEquals(value, postmanProject.getProperty(key).getValue())
+        );
+    }
+
+    public void testImportRestChaiRequestWithChaiAssertions(String collectionPath) throws Exception {
+        PostmanImporter importer = new PostmanImporter(new DummyTestCreator());
+        WsdlProject postmanProject = importer.importPostmanCollection(
+            workspace,
+            PostmanImporterTest.class.getResource(collectionPath).getPath()
+        );
+        String expectedChaiTests = FileUtils.readFileToString(
+            new File(getClass().getResource(REST_POST_COLLECTION_CHAI_2_1_EXPECTED_PATH).getPath()),
+                StandardCharsets.UTF_8
+            ).trim();
+
+        WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);
+        WsdlTestCase testCase = testSuite.getTestCaseAt(0);
+        RestTestRequestStep testStep = (RestTestRequestStep) testCase.getTestStepAt(0);
+        assertEquals(expectedChaiTests, ((GroovyScriptAssertion) testStep.getAssertionAt(0)).getScriptText());
     }
 
     @Test
@@ -507,5 +576,4 @@ public class PostmanImporterTest {
             workspaceFile.delete();
         }
     }
-
 }

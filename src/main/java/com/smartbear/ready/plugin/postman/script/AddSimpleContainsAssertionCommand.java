@@ -31,11 +31,6 @@ public class AddSimpleContainsAssertionCommand implements AddAssertionCommand {
     }
 
     @Override
-    public void addCondition(String condition) {
-
-    }
-
-    @Override
     public String getName() {
         return NAME;
     }

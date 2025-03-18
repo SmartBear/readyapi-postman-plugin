@@ -20,7 +20,7 @@ import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
 
 public class SetGlobalVariableCommand implements ScriptCommand {
-    private static final String NAME = "setGlobalVariable";
+    public static final String NAME = "setGlobalVariable";
 
     private final WsdlProject project;
     private int argumentCount;
@@ -54,6 +54,11 @@ public class SetGlobalVariableCommand implements ScriptCommand {
                 variableValue = argument;
                 argumentCount++;
         }
+    }
+
+    public void addVariable(String variableName, String variableValue) {
+        this.variableName = variableName;
+        this.variableValue = variableValue;
     }
 
     @Override
