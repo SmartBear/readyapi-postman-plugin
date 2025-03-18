@@ -4,20 +4,17 @@ import com.eviware.soapui.impl.rest.RestRequest;
 import com.eviware.soapui.impl.rest.RestService;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.impl.wsdl.WsdlProjectFactory;
-import com.eviware.soapui.support.SoapUIException;
 import com.google.common.collect.ImmutableMap;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.IOUtils;
-import org.apache.xmlbeans.XmlException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import jakarta.ws.rs.core.MediaType;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -25,25 +22,26 @@ import java.util.Map;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-public class RestServiceCreatorTest {
-    WsdlProject project;
-    RestServiceCreator creator;
+class RestServiceCreatorTest {
+
+    private WsdlProject project;
+    private RestServiceCreator creator;
+    private PostmanCollection collection;
 
     @BeforeEach
-    public void setUp() throws XmlException, IOException, SoapUIException {
+    public void setUp() throws Exception {
         project = new WsdlProjectFactory().createNew();
         creator = spy(new RestServiceCreator(project));
+        collection = getCollectionFromFile(RestServiceCreatorTest.class.getResource("/rest/multipart_collection.json"));
     }
 
     @Test
-    public void importFormData() throws Exception {
+    void importFormData() {
         // given
-        PostmanCollection collection = getCollectionFromFile(RestServiceCreatorTest.class.getResource("/rest/multipart_collection.json"));
-
         URL attachmentUri = RestServiceCreatorTest.class.getResource("/rest/attachment.txt");
         doReturn(new File(attachmentUri.getPath())).when(creator).getAttachmentFile(any());
 
@@ -72,6 +70,22 @@ public class RestServiceCreatorTest {
 
         assertThat(request.getMediaType(), equalTo(MediaType.MULTIPART_FORM_DATA));
         assertThat(request.isPostQueryString(), is(true));
+    }
+
+    @Test
+    void queryParametersAreExtractedCorrectly() {
+        //given
+        Map<String, String> params = ImmutableMap.of("x", "space test","y", "10","z", "+");
+
+        // when
+        collection.getRequests().forEach(creator::addRestRequest);
+
+        // then
+        RestService service = (RestService) project.getInterfaceByName("http://localhost:1234");
+        RestRequest request = service.getResourceList().get(0).getRestMethodAt(0).getRequestAt(0);
+
+        assertThat(request.getPropertyCount(), is(params.size()));
+        params.forEach((name, value) -> assertThat(request.getPropertyValue(name), equalTo(value)));
     }
 
     private PostmanCollection getCollectionFromFile(URL collectionUrl) throws Exception {
