@@ -4,7 +4,7 @@
     xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://localhost:28089/xml/"
     xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
     <wsdl:types>
-        <s:schema elementFormDefault="qualified" targetNamespace="localhost:28089/xml/">
+        <s:schema elementFormDefault="qualified" targetNamespace="http://localhost:28089/xml/">
             <s:element name="FahrenheitToCelsius">
                 <s:complexType>
                     <s:sequence>
