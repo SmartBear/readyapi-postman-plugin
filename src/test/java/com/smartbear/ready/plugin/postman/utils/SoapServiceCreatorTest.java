@@ -9,7 +9,6 @@ import com.eviware.soapui.impl.wsdl.WsdlRequest;
 import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
 import com.eviware.soapui.support.SoapUIException;
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.smartbear.ready.plugin.postman.PostmanImporterTest;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
@@ -196,7 +195,7 @@ class SoapServiceCreatorTest {
     }
 
     private static void initServiceMock(String resourceUrl, String stubUrl) throws URISyntaxException, IOException {
-        URL resource = PostmanImporterTest.class.getClassLoader().getResource(resourceUrl);
+        URL resource = SoapServiceCreatorTest.class.getClassLoader().getResource(resourceUrl);
         Path wsdlPath = Paths.get(resource.toURI());
         String serviceBody = Files.readString(wsdlPath);
         WIREMOCK.stubFor(get(urlEqualTo(stubUrl))
