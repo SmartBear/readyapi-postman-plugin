@@ -10,7 +10,6 @@ import com.eviware.soapui.support.SoapUIException;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.types.StringToStringsMap;
 import com.eviware.soapui.support.xml.XmlUtils;
-import com.smartbear.ready.plugin.postman.VariableUtils;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.Request;
 import org.apache.xmlbeans.XmlException;

@@ -8,7 +8,6 @@ import com.eviware.soapui.impl.graphql.GraphQLService;
 import com.eviware.soapui.impl.graphql.support.GraphQLImporter;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
-import com.smartbear.ready.plugin.postman.VariableUtils;
 import com.smartbear.ready.plugin.postman.collection.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

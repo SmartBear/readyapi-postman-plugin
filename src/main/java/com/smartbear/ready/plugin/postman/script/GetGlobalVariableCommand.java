@@ -17,7 +17,7 @@
 package com.smartbear.ready.plugin.postman.script;
 
 import com.eviware.soapui.support.StringUtils;
-import com.smartbear.ready.plugin.postman.VariableUtils;
+import com.smartbear.ready.plugin.postman.utils.VariableUtils;
 
 public class GetGlobalVariableCommand implements ScriptCommand {
     private static final String NAME = "[";
