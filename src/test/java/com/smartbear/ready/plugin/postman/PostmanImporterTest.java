@@ -71,7 +71,6 @@ public class PostmanImporterTest {
     public static final String REST_GET_COLLECTION_2_0_PATH = "/REST_Get_Collection.postman_collection_v2.0";
     public static final String REST_GET_COLLECTION_2_1_PATH = "/REST_Get_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_2_0_PATH = "/REST_Post_Collection.postman_collection_v2.0";
-    public static final String REST_POST_COLLECTION_2_0_CHAI_PATH = "/REST_Post_Collection.postman_collection_v2.0_chai";
     public static final String REST_POST_COLLECTION_CHAI_MIXED_2_1_PATH = "/REST_Post_Collection.postman_collection_chai_mixed_v2.1.json";
     public static final String REST_POST_COLLECTION_CHAI_2_1_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1.json";
     public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_1_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_1.txt";

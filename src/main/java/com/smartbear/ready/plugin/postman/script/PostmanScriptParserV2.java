@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import static com.smartbear.ready.plugin.postman.script.ScriptContext.CHAI_SCRIPTS;
 import static com.smartbear.ready.plugin.postman.script.ScriptContext.POSTMAN_OBJECT;
+import static com.smartbear.ready.plugin.postman.utils.VariableUtils.DYNAMIC_VARIABLE_NAME_PREFIX;
 
 public class PostmanScriptParserV2 {
     private final ScriptContext context;
@@ -28,6 +29,8 @@ public class PostmanScriptParserV2 {
     private static final String OLD_TEST_SYNTAX = "tests[";
     private static final Pattern SET_GLOBAL_VARIABLE_REGEX_PATTERN = Pattern.compile("pm.globals.set\\(\"(.*?)\", \"(.*?)\"\\);");
     private static final Map<Pattern, String> SYNTAX_TRANSLATION_MAP = new LinkedHashMap<>();
+    private static final Map<Pattern, String> VAULT_VARIABLE_TRANSLATION_MAP = new LinkedHashMap<>();
+    private static final Map<Pattern, String> DYNAMIC_VARIABLE_TRANSLATION_MAP = new LinkedHashMap<>();
 
     static {
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.code"), "messageExchange.response.getStatusCode()");
@@ -53,6 +56,9 @@ public class PostmanScriptParserV2 {
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.cookies.get\\((.*?)\\)"), "String(messageExchange.cookies.get($1))");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.test"), "ready.test");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.expect"), "chai.expect");
+
+        VAULT_VARIABLE_TRANSLATION_MAP.put(Pattern.compile("await pm.vault.get\\((.*?)\\)"), "String(context.expand(\"\\${#Project#\" + `\\${$1}` + \"}\"))");
+        DYNAMIC_VARIABLE_TRANSLATION_MAP.put(Pattern.compile("pm.variables.replaceIn\\(['\"]\\{\\{\\$(.*?)}}['\"]\\)"), "String(context.expand(\"\\${#Project#dynamic-variable-$1}\"))");
     }
 
     public PostmanScriptParserV2(ScriptContext context) {
@@ -65,6 +71,8 @@ public class PostmanScriptParserV2 {
 
     public void parse(String script, String requestName) {
         this.requestName = requestName;
+
+        script = mapAndAddDynamicVariables(mapSyntax(script, VAULT_VARIABLE_TRANSLATION_MAP));
 
         CompilerEnvirons env = new CompilerEnvirons();
         env.setRecordingLocalJsDocComments(true);
@@ -90,20 +98,31 @@ public class PostmanScriptParserV2 {
         return testsV1.toString();
     }
 
-    private String mapSyntax(String assertionBody) {
-        for(Map.Entry<Pattern, String> entry : SYNTAX_TRANSLATION_MAP.entrySet()){
-            Matcher matcher = entry.getKey().matcher(assertionBody);
+    private String mapSyntax(String script, Map<Pattern, String> syntaxMap) {
+        for(Map.Entry<Pattern, String> entry : syntaxMap.entrySet()){
+            Matcher matcher = entry.getKey().matcher(script);
             if (matcher.find()) {
-                assertionBody = matcher.replaceAll(entry.getValue());
+                script = matcher.replaceAll(entry.getValue());
             }
         }
-        return assertionBody;
+        return script;
+    }
+
+    private String mapAndAddDynamicVariables(String script) {
+        for(Map.Entry<Pattern, String> entry : DYNAMIC_VARIABLE_TRANSLATION_MAP.entrySet()){
+            Matcher matcher = entry.getKey().matcher(script);
+            if (matcher.find()) {
+                addGlobalVariable(DYNAMIC_VARIABLE_NAME_PREFIX + matcher.group(1), "");
+                script = matcher.replaceAll(entry.getValue());
+            }
+        }
+        return script;
     }
 
     private void addChaiAssertion(String assertionBody) {
         if (context.getObject(CHAI_SCRIPTS) != null) {
             AddChaiAssertionCommand chaiAssertion = (AddChaiAssertionCommand) context.getObject(CHAI_SCRIPTS).getCommand(AddChaiAssertionCommand.NAME);
-            chaiAssertion.addArgument(null, mapSyntax(assertionBody).trim());
+            chaiAssertion.addArgument(null, mapSyntax(assertionBody, SYNTAX_TRANSLATION_MAP).trim());
             chaiAssertion.addAssertionName(POSTMAN_IMPORTED_COLLECTION_NAME + requestName);
             chaiAssertion.execute();
         }
@@ -111,6 +130,15 @@ public class PostmanScriptParserV2 {
 
     public String getPrescriptV1() {
         return prescriptV1;
+    }
+
+    private void addGlobalVariable(String key, String value) {
+        if (context.getObject(POSTMAN_OBJECT) != null) {
+            SetGlobalVariableCommand setGlobalVariableCommand =
+                    (SetGlobalVariableCommand) context.getObject(POSTMAN_OBJECT).getCommand(SetGlobalVariableCommand.NAME);
+            setGlobalVariableCommand.addVariable(key, value);
+            setGlobalVariableCommand.execute();
+        }
     }
 
     private class SplitTestsNodeVisitor implements NodeVisitor {
@@ -143,15 +171,6 @@ public class PostmanScriptParserV2 {
                 }
             }
             return astNode.depth() <= 1;
-        }
-
-        private void addGlobalVariable(String key, String value) {
-            if (context.getObject(POSTMAN_OBJECT) != null) {
-                SetGlobalVariableCommand setGlobalVariableCommand =
-                        (SetGlobalVariableCommand) context.getObject(POSTMAN_OBJECT).getCommand(SetGlobalVariableCommand.NAME);
-                setGlobalVariableCommand.addVariable(key, value);
-                setGlobalVariableCommand.execute();
-            }
         }
     }
 }

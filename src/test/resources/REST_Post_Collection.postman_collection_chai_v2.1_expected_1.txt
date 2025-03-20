@@ -73,6 +73,10 @@ ready.test("Object is contained", () => {
   chai.expect(JSON.parse(messageExchange.response.contentAsString)).to.deep.include(expectedObject);
 });
 
+ready.test("Dynamic values", function() {
+  chai.expect(String(context.expand("${#Project#dynamic-variable-randomFirstName}"))).to.be.eql("name");
+});
+
 // Delimiter checks
 const val = 5 / 5;
 
