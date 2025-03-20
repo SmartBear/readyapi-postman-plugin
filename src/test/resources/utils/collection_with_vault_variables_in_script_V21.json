@@ -1,0 +1,47 @@
+{
+	"info": {
+		"_postman_id": "dcd2bc96-3078-47c8-a829-51b877d2b568",
+		"name": "Collection with vault variables in script",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40257918"
+	},
+	"item": [
+		{
+			"name": "sampleRequest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var vault_pass = await pm.vault.get(\"ntlm password\");",
+							"",
+							"pm.test(\"Vault\", function () {",
+							"  pm.expect(vault_pass).to.be.eql(\"pass\");",
+							"});",
+							"await pm.vault.get(\"form-data-vault\");",
+							"await pm.vault.get(\"basic_user\");",
+							"await pm.vault.get(\"basic_password\");",
+							"await pm.vault.get(\"the secret key\");",
+							"await pm.vault.get(\"ntlm username\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8088",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8088"
+				}
+			},
+			"response": []
+		}
+	]
+}

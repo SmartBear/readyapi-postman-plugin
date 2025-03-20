@@ -32,7 +32,7 @@ public class VariableUtils {
     private static final String ESCAPING_PREFIX = "\\";
     private static final String VAULT_PREFIX = "vault:";
     private static final String DYNAMIC_VARIABLE_PREFIX = "$";
-    private static final String DYNAMIC_VARIABLE_NAME_PREFIX = "dynamic-variable-";
+    public static final String DYNAMIC_VARIABLE_NAME_PREFIX = "dynamic-variable-";
 
     private VariableUtils() {}
 
