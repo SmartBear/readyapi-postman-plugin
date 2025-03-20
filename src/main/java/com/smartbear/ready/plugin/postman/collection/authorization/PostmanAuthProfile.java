@@ -2,7 +2,7 @@ package com.smartbear.ready.plugin.postman.collection.authorization;
 
 import com.eviware.soapui.config.AuthEntryTypeConfig;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
-import com.smartbear.ready.plugin.postman.VariableUtils;
+import com.smartbear.ready.plugin.postman.utils.VariableUtils;
 
 import java.util.Optional;
 import java.util.function.Consumer;
