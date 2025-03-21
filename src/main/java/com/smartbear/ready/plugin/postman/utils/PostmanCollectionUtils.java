@@ -8,6 +8,7 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -17,7 +18,10 @@ public class PostmanCollectionUtils {
     public static final String VERSION_2 = "v2.0.0";
     public static final String VERSION_2_1 = "v2.1.0";
     private static final String SCHEMA = "schema";
-    private static final Pattern VAULT_VARIABLE_REGEX = Pattern.compile("\\{\\{vault:([^}]*)}}");
+    private static final List<Pattern> VAULT_VARIABLE_REGEXES = List.of(
+        Pattern.compile("\\{\\{vault:([^}]*)}}"),
+        Pattern.compile("await pm.vault.get\\(\"(.*?)\"\\)")
+    );
 
     private PostmanCollectionUtils() {}
 
@@ -49,9 +53,11 @@ public class PostmanCollectionUtils {
             } else if (currentNode instanceof JSONArray jsonArray) {
                 collectionNodesQueue.addAll(jsonArray);
             } else if (currentNode instanceof String string) {
-                Matcher matcher = VAULT_VARIABLE_REGEX.matcher(string);
-                while (matcher.find()) {
-                    vaultVariables.add(matcher.group(1).trim());
+                for (Pattern vaultVariablePattern: VAULT_VARIABLE_REGEXES) {
+                    Matcher matcher = vaultVariablePattern.matcher(string);
+                    while (matcher.find()) {
+                        vaultVariables.add(matcher.group(1).trim());
+                    }
                 }
             }
         }

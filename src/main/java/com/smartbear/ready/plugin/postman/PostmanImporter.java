@@ -116,6 +116,7 @@ public class PostmanImporter {
                     String uri = request.getUrl();
                     String preRequestScript = request.getPreRequestScript();
                     String tests = request.getTests();
+                    String requestName = request.getName();
                     RequestAuthProfile authProfile = request.getAuthProfileWithName();
 
                     if (StringUtils.hasContent(preRequestScript)) {

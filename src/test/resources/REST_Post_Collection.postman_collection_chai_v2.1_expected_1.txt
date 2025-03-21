@@ -1,0 +1,87 @@
+ready.test("Status code is 201 - new", () => {
+  chai.expect(messageExchange.response.getStatusCode()).to.eql(201);
+});
+
+ready.test("Status code is 201", function() {
+  // comment
+  chai.expect(String(messageExchange.responseHeaders.get("#status#"))).to.include(201);
+  chai.expect(String(messageExchange.response.contentAsString)).to.have.lengthOf(4);
+});
+
+ready.test("The response has all properties", () => {
+  const responseJson = JSON.parse(messageExchange.response.contentAsString);
+  chai.expect(responseJson.name).to.eql('Jane');  //comment
+  chai.expect(responseJson.name).to.be.a('string');  /* comment */
+
+  chai.expect(responseJson.name).to.have.lengthOf(4);
+});
+
+ready.test("Body contains string", () => {
+  chai.expect(String(messageExchange.response.contentAsString)).to.include('me": "Ja');
+});
+
+ready.test("Successful POST request", () => {
+  // comment
+  chai.expect(messageExchange.response.getStatusCode()).to.be.oneOf([201, 202]);
+});
+
+ready.test("Status code name has string", () => {
+  chai.expect(String(messageExchange.responseHeaders.get("#status#"))).to.include("Created");
+});
+
+ready.test("Content-Type header is present", () => {
+  chai.expect(messageExchange.responseHeaders.hasValues("Content-Type")).to.be.true;
+});
+
+ready.test("Content-Type header is application/json", () => {
+  chai.expect(String(messageExchange.responseHeaders.get('Content-Type'))).to.include('application/json');
+});
+
+ready.test("Response time is less than 200ms", () => {
+  chai.expect(messageExchange.response.timeTaken).to.be.below(200);
+});
+
+const jsonData = JSON.parse(messageExchange.response.contentAsString);
+
+ready.test("Test data type of the response", () => {
+  chai.expect(jsonData).to.be.an("object");
+  chai.expect(jsonData.name).to.be.a("string");
+  chai.expect(jsonData.age).to.be.a("number");
+  chai.expect(jsonData.hobbies).to.be.an("array");
+  chai.expect(jsonData.website).to.be.undefined;
+  chai.expect(jsonData.email).to.be.null;
+});
+
+ready.test("Value is in valid list", () => {
+  chai.expect(JSON.parse(messageExchange.response.contentAsString).name).to.be.oneOf(["Jane", "Mary", "Julia"]);
+});
+
+ready.test("Response property matches globals variable", function() {
+  chai.expect(JSON.parse(messageExchange.response.contentAsString).name).to.eql(String(context.expand("${#Project#name}")));
+  let nameVar = "name";
+  chai.expect(JSON.parse(messageExchange.response.contentAsString).name).to.eql(String(context.expand("${#Project#" + `${nameVar}` + "}")));
+});
+
+ready.test("Response property matches environment variable", function() {
+  chai.expect(String(JSON.parse(messageExchange.response.contentAsString).age)).to.eql(String(context.expand("${#Project#ageEnv}")));
+});
+
+ready.test("Object is contained", () => {
+  const expectedObject = {
+  'name': 'Jane', 
+  'hobbies': ['skating', 'painting']};
+  chai.expect(JSON.parse(messageExchange.response.contentAsString)).to.deep.include(expectedObject);
+});
+
+ready.test("Dynamic values", function() {
+  chai.expect(String(context.expand("${#Project#dynamic-variable-randomFirstName}"))).to.be.eql("name");
+});
+
+// Delimiter checks
+const val = 5 / 5;
+
+const tab = [a, b, c];
+
+A = 5;
+
+B = 10;

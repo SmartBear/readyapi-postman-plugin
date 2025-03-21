@@ -1,0 +1,22 @@
+chai.expect({
+  a: 1, 
+  b: 2}).to.have.all.keys('a', 'b');
+
+chai.expect({
+  a: 1, 
+  b: 2}).to.have.any.keys('a', 'b');
+
+chai.expect({
+  a: 1, 
+  b: 2}).to.not.have.any.keys('c', 'd');
+
+chai.expect({
+  a: 1}).to.have.property('a');
+
+chai.expect({
+  a: 1, 
+  b: 2}).to.be.a('object').that.has.all.keys('a', 'b');
+
+ready.test("Body is string", function() {
+  chai.expect(String(messageExchange.response.contentAsString)).to.eql("{\"type\": \"array\", \"arrays\": 5}");
+});
