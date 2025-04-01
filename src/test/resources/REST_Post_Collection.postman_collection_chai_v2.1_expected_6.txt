@@ -18,5 +18,10 @@ ready.test('Schema is valid - tv4 - 2', function() {
 });
 
 ready.test('Response is valid', function() {
+      ajv.validate(schema, JSON.parse(messageExchange.response.contentAsString));
   chai.expect(ajv.validate(schema, JSON.parse(String(messageExchange.response.contentAsString)))).to.be.true;
 });
+
+ajv.validate(schema, JSON.parse(messageExchange.response.contentAsString));
+
+ajv.validate(schema, JSON.parse(messageExchange.response.contentAsString));

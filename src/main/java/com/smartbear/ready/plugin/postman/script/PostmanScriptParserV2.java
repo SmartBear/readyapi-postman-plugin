@@ -27,7 +27,8 @@ public class PostmanScriptParserV2 {
 
     private static final String POSTMAN_IMPORTED_COLLECTION_NAME = "Postman imported chai assertions - ";
     private static final String OLD_TEST_SYNTAX = "tests[";
-    private static final Pattern SET_GLOBAL_VARIABLE_REGEX_PATTERN = Pattern.compile("pm.globals.set\\(\"(.*?)\", \"(.*?)\"\\);");
+    private static final Pattern SET_GLOBAL_VARIABLE_REGEX_PATTERN = Pattern.compile("pm.globals.set\\(['\"](.*?)['\"], ['\"](.*?)['\"]\\)");
+    private static final Pattern AJV_REGEX = Pattern.compile("(var|let|const) (.*?) = require\\(['\"]ajv['\"]\\);\n*");
     private static final Map<Pattern, String> SYNTAX_TRANSLATION_MAP = new LinkedHashMap<>();
     private static final Map<Pattern, String> VAULT_VARIABLE_TRANSLATION_MAP = new LinkedHashMap<>();
     private static final Map<Pattern, String> DYNAMIC_VARIABLE_TRANSLATION_MAP = new LinkedHashMap<>();
@@ -44,14 +45,18 @@ public class PostmanScriptParserV2 {
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.body"), "messageExchange.response.contentAsString");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.headers"), "messageExchange.response.responseHeaders");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.responseTime"), "messageExchange.response.timeTaken");
-        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.(environment|globals).get\\(['\"](.*?)['\"]\\)"), "String(context.expand(\"\\${#Project#$2}\"))");
-        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.(environment|globals).get\\((.*?)\\)"), "String(context.expand(\"\\${#Project#\" + `\\${$2}` + \"}\"))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.(collectionVariables|environment|globals).get\\(['\"](.*?)['\"]\\)"), "String(context.expand(\"\\${#Project#$2}\"))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.(collectionVariables|environment|globals).get\\((.*?)\\)"), "String(context.expand(\"\\${#Project#\" + `\\${$2}` + \"}\"))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.variables.get\\(['\"](.*?)['\"]\\)"), "String(context.expand(\"\\${#TestCase#$1}\"))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.variables.get\\((.*?)\\)"), "String(context.expand(\"\\${#TestCase#\" + `\\${$1}` + \"}\"))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.(collectionVariables|environment|globals).set\\((.*?), (.*?)\\)"), "context.testCase.testSuite.project.setPropertyValue($2, $3)");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.variables.set\\((.*?), (.*?)\\)"), "context.testCase.setPropertyValue($1, $2)");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("require\\(['\"]xml2js['\"]\\)"), "xml2js");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("([^|\n].*?)xml2Json\\((.*?)\\)"), "var xml2jsResult;\nxml2js.parseString($2, function (err, result) {\n xml2jsResult = result;\n});\n$1xml2jsResult");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("messageExchange.response.contentAsString"), "String(messageExchange.response.contentAsString)");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.response.json(\\(\\))*"), "JSON.parse(messageExchange.response.contentAsString)");
-        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("console.(error|debug)\\((.*?)\\)"), "log.$1(String($2))");
-        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("console.(log|info)\\((.*?)\\)"), "log.info(String($2))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("console.(warn|debug|error)\\((.*?)\\)"), "log.$1(String($2))");
+        SYNTAX_TRANSLATION_MAP.put(Pattern.compile("console.(info|log)\\((.*?)\\)"), "log.info(String($2))");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.cookies.has\\((.*?)\\)"), "messageExchange.cookies.get($1) != null");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.cookies.get\\((.*?)\\)"), "String(messageExchange.cookies.get($1))");
         SYNTAX_TRANSLATION_MAP.put(Pattern.compile("pm.test"), "ready.test");
@@ -99,7 +104,7 @@ public class PostmanScriptParserV2 {
     }
 
     private String mapSyntax(String script, Map<Pattern, String> syntaxMap) {
-        for(Map.Entry<Pattern, String> entry : syntaxMap.entrySet()){
+        for(Map.Entry<Pattern, String> entry : syntaxMap.entrySet()) {
             Matcher matcher = entry.getKey().matcher(script);
             if (matcher.find()) {
                 script = matcher.replaceAll(entry.getValue());
@@ -109,7 +114,7 @@ public class PostmanScriptParserV2 {
     }
 
     private String mapAndAddDynamicVariables(String script) {
-        for(Map.Entry<Pattern, String> entry : DYNAMIC_VARIABLE_TRANSLATION_MAP.entrySet()){
+        for(Map.Entry<Pattern, String> entry : DYNAMIC_VARIABLE_TRANSLATION_MAP.entrySet()) {
             Matcher matcher = entry.getKey().matcher(script);
             if (matcher.find()) {
                 addGlobalVariable(DYNAMIC_VARIABLE_NAME_PREFIX + matcher.group(1), "");
@@ -119,10 +124,36 @@ public class PostmanScriptParserV2 {
         return script;
     }
 
+    private String mapExternalAjvUsage(String script) {
+        Matcher matcherRequireLib = AJV_REGEX.matcher(script);
+        while (matcherRequireLib.find()) {
+            String libraryNameInScript = matcherRequireLib.group(2);
+            script = script.replace(matcherRequireLib.group(0), "");
+
+            Matcher matcherForInit = getPatternForLibraryInitialization(libraryNameInScript).matcher(script);
+            while (matcherForInit.find()) {
+                libraryNameInScript = matcherForInit.group(2);
+                script = script.replace(matcherForInit.group(0), "").replace(libraryNameInScript, "ajv");
+            }
+        }
+        return script;
+    }
+
+    private Pattern getPatternForLibraryInitialization(String libraryScriptName) {
+        return Pattern.compile("(var|let|const) (.*?) = new " + libraryScriptName + "\\((.|\n)*?\\);\n*");
+    }
+
+    private String translatePostmanSyntax(String postmanScript) {
+        return mapSyntax(
+                mapExternalAjvUsage(postmanScript),
+                SYNTAX_TRANSLATION_MAP
+        ).trim();
+    }
+
     private void addChaiAssertion(String assertionBody) {
         if (context.getObject(CHAI_SCRIPTS) != null) {
             AddChaiAssertionCommand chaiAssertion = (AddChaiAssertionCommand) context.getObject(CHAI_SCRIPTS).getCommand(AddChaiAssertionCommand.NAME);
-            chaiAssertion.addArgument(null, mapSyntax(assertionBody, SYNTAX_TRANSLATION_MAP).trim());
+            chaiAssertion.addArgument(null, translatePostmanSyntax(assertionBody));
             chaiAssertion.addAssertionName(POSTMAN_IMPORTED_COLLECTION_NAME + requestName);
             chaiAssertion.execute();
         }
@@ -144,9 +175,9 @@ public class PostmanScriptParserV2 {
     private class SplitTestsNodeVisitor implements NodeVisitor {
         @Override
         public boolean visit(AstNode astNode) {
-            if (astNode.depth() == 1){
+            if (astNode.depth() == 1) {
                 String jsNodeCode = astNode.toSource();
-                if (jsNodeCode.startsWith(OLD_TEST_SYNTAX)){
+                if (jsNodeCode.startsWith(OLD_TEST_SYNTAX)) {
                     testsV1.append(jsNodeCode);
                 } else {
                     testsV2.append(jsNodeCode);

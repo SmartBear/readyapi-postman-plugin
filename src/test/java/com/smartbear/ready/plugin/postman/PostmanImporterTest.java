@@ -79,6 +79,8 @@ public class PostmanImporterTest {
     public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_4_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_4.txt";
     public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_5_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_5.txt";
     public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_6_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_6.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_7_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_7.txt";
+    public static final String REST_POST_COLLECTION_CHAI_2_1_EXPECTED_8_PATH = "/REST_Post_Collection.postman_collection_chai_v2.1_expected_8.txt";
     public static final String REST_POST_COLLECTION_2_1_PATH = "/REST_Post_Collection.postman_collection_v2.1";
     public static final String REST_POST_COLLECTION_2_1_EVENTS_PATH = "/REST_Post_Collection_events.postman_collection_v2.1";
     public static final String PARAMETERIZED_COLLECTION_2_1_PATH = "/Parameterized_Endpoint_Collection.postman_collection_v2.1";
@@ -426,7 +428,9 @@ public class PostmanImporterTest {
             REST_POST_COLLECTION_CHAI_2_1_EXPECTED_3_PATH,
             REST_POST_COLLECTION_CHAI_2_1_EXPECTED_4_PATH,
             REST_POST_COLLECTION_CHAI_2_1_EXPECTED_5_PATH,
-            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_6_PATH
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_6_PATH,
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_7_PATH,
+            REST_POST_COLLECTION_CHAI_2_1_EXPECTED_8_PATH
         );
 
         WsdlTestSuite testSuite = postmanProject.getTestSuiteAt(0);

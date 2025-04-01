@@ -1,0 +1,7 @@
+log.info(String("INFO"));
+
+log.warn(String("WARN"));
+
+log.error(String("ERROR"));
+
+log.debug(String("DEBUG"));

@@ -400,9 +400,13 @@
               "});",
               "",
               "pm.test('Response is valid', function() {",
+              "  let AjvImporter1 = require('ajv') let ajvImporter1 = new AjvImporter1({code: {es5: true}}) ajvImporter1.validate( schema, pm.response.json())",
               "  pm.response.to.have.jsonSchema(schema);",
               "});",
-              ""
+              "",
+
+              "let AjvImporter2=require('ajv') let ajvImporter2=new AjvImporter2({code: {es5: true}}) ajvImporter2.validate( schema, pm.response.json())",
+              "let AjvImporter3=require('ajv') let ajvImporter3=new AjvImporter3({code: {es5: true}}) ajvImporter3.validate( schema, pm.response.json())"
             ],
             "type": "text/javascript",
             "packages": {}
@@ -433,6 +437,78 @@
           "path": [
             "jane"
           ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logging",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.info(\"INFO\")",
+              "console.warn(\"WARN\")",
+              "console.error(\"ERROR\")",
+              "console.debug(\"DEBUG\")"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Variables",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Variables\", () => {",
+              "    pm.variables.set(\"variableKey\", 'variableVal');",
+              "    pm.expect(pm.variables.get(\"variableKey\")).to.be.eql('variableVal');",
+              "})",
+              "",
+              "pm.test(\"Globals\", () => {",
+              "    pm.globals.set(\"globalKey\", 'globalVal');",
+              "    pm.expect(pm.globals.get(\"globalKey\")).to.be.eql('globalVal');",
+              "})",
+              "",
+              "pm.test(\"Environment\", () => {",
+              "    pm.environment.set(\"environmentKey\", 'environmentVal');",
+              "    pm.expect(pm.environment.get(\"environmentKey\")).to.be.eql('environmentVal');",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088"
         }
       },
       "response": []
