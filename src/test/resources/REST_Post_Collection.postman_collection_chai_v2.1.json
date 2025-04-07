@@ -1,135 +1,517 @@
 {
-	"info": {
-		"_postman_id": "b4c6d94a-7e25-4584-a832-5263b39d4946",
-		"name": "REST Service 1 collection",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-            "name": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-                          " pm . test( \"The response has all properties\" ,( )=>{",
-                          "    const jsonData = pm",
-                          "        .response.json()",
-                          "    /* comment */",
-                          "    pm.expect(jsonData.type).to.eql('vip') /* comment */",
-                          "    pm.expect(jsonData.name).to.be.a('string') //comment",
-                          "    pm.expect(jsonData.id).to.have.lengthOf(1);",
-                          "} ) ",
-                          "",
-                          "pm.test(\"Body contains string\",() => pm.expect(pm.response.text()).to.include(\"customer_id\"));",
-                          "",
-                          "pm.test(\"Successful POST request\", () => {",
-                          "   //comment",
-                          "  pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
-                          "});",
-                          "",
-                          "",
-                          "pm.test(\"Content-Type header is application/json\", () => {",
-                          "  pm.expect(pm.response.headers.get('Content-Type')).to.eql('application/json');",
-                          "});",
-                          "",
-                          "pm.test(\"Response time is less than 200ms\", () => {",
-                          "  pm.expect(pm.response.responseTime).to.be.below(200);",
-                          "});",
-                          "",
-                          "pm.test(\"Response property matches environment variable\", function ( ) {",
-                          "  pm.expect(pm.response.json().name).to.eql(pm.environment.get(\"name\"));",
-                          "});",
-                          "",
-                          "const jsonData = pm.response.json();",
-                          "pm.test(\"Test data type of the response\", () => {",
-                          "  pm.expect(jsonData).to.be.an(\"object\");",
-                          "  // comment",
-                          "  pm.expect(jsonData.name).to.be.a(\"string\");",
-                          "  pm.expect(jsonData.age).to.be.a(\"number\");",
-                          "  pm.expect(jsonData.hobbies).to.be.an(\"array\");",
-                          "  pm.expect(jsonData.website).to.be.undefined;",
-                          "  pm.expect(jsonData.email).to.be.null;  }",
-                          "   )",
-                          "",
-                          "pm.test(\"Test array properties\", () => {",
-                          "  pm.expect(jsonData.errors).to.be.empty;",
-                          "  pm.expect(jsonData.areas).to.include(\"goods\");",
-                          "  const notificationSettings = jsonData.settings.find",
-                          "      (m => m.type === \"notification\");",
-                          "  pm.expect(notificationSettings)",
-                          "    .to.be.an(\"object\", \"Could not find the setting\");",
-                          "  pm.expect(notificationSettings.detail).to.include(\"sms\");",
-                          "  pm.expect(notificationSettings.detail).",
-                          "    to.have.members([\"email\", \"sms\"]);",
-                          "});",
-                          "",
-                          "pm.test(\"Test object\", () => {",
-                          "  pm.expect({a: 1, b: 2}).to.have.all.keys('a', 'b');",
-                          "  pm.expect({a: 1, b: 2}).to.have.any.keys('a', 'b');",
-                          "  pm.expect({a: 1, b: 2}).to.not.have.any.keys('c', 'd');",
-                          "  pm.expect({a: 1}).to.have.property('a');",
-                          "  pm.expect({a: 1, b: 2}).to.be.a('object')",
-                          "    .that.has.all.keys('a', 'b');",
-                          "});",
-                          "",
-                          "pm.test(\"Value is in valid list\", function() {",
-                          "  pm.expect(pm.response.json().type)",
-                          "    .to.be.oneOf([\"Subscriber\", \"Customer\", \"User\"]",
-                          ");",
-                          "});",
-                          "",
-                          "pm.test(\"Object is contained\", ( ) => {",
-                          "   const expectedObject = {",
-                          "     \"created\": true,",
-                          "     \"errors\": []",
-                          "   };",
-                          "   pm.expect(pm.response.json()).to.deep.include(expectedObject);",
-                          "});",
-                          "",
-                          "pm.test('Response is valid', function() {",
-                          "  pm.response.to.have.jsonSchema(schema);",
-                          "});",
-                          "",
-                          "// Delimiter checks",
-                          "const val =",
-                          "5",
-                          "/",
-                          "5",
-                          "",
-                          "const tab = [",
-                          "  a,",
-                          "  b,",
-                          "  c",
-                          "]",
-                          "",
-                          "A = 5",
-                          "B = 10"
-                        ],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-                "method": "POST",
-                "header": [
-                    {
-                        "key": "Content-Type",
-                        "value": "application/json"
-                    },
-                    {
-                        "key": "Authorization",
-                        "value": "Basic Og=="
-                    }
-                ],
-                "body": {
-                    "mode": "raw",
-                    "raw": "{\"assd\":\"qwe\"}"
-                },
-                "url": "http://rapis02.aqa.com.ru/WCFREST/Service.svc/testComplexClass",
-                "description": "Request 2"
-            },
-            "response": []
-		}
-	]
+  "info": {
+    "_postman_id": "62660807-e98b-4cd8-9efe-edd773d8b8e5",
+    "name": "TestCollection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40257918"
+  },
+  "item": [
+    {
+      "name": "Jane",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "postman.setGlobalVariable(\"old_key\", \"old_value\");",
+              "pm .globals .set(\"new_key\", \"new_value\");",
+              "pm.globals.set(\"name\", \"Jane\");"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm . test(\"Status code is 201 - new\", ( ) => {pm.expect(pm.response.code).to.eql(201)});",
+              "",
+              "pm.test(\"Status code is 201\", function () {",
+              "  // comment",
+              "  pm.response.to.have.status(201);",
+              "  pm.expect(pm.response.body).to.have.lengthOf(4)",
+              "});",
+              "",
+              "tests[ \"Status code is 201 - old\"] = responseCode.code === 201;",
+              "",
+              "pm.test(\"The response has all properties\",()=>{",
+              "    const responseJson = pm.response.json()",
+              "    pm.expect(responseJson.name).to.eql('Jane') //comment",
+              "    pm.expect(responseJson.name).to.be.a('string') /* comment */",
+              "    pm.expect(responseJson.name).to.have.lengthOf(4)",
+              "})",
+              "",
+              "pm.test(\"Body contains string\",() => {",
+              "  pm.expect(pm.response.text()).to.include('me\": \"Ja');",
+              "})",
+              "",
+              "pm.test(\"Successful POST request\", () => {",
+              "  // comment",
+              "  pm.expect(pm.response.code).to.be.oneOf([201,202]);",
+              "});",
+              "",
+              "pm.test(\"Status code name has string\", () => {",
+              "  pm.response.to.have.status(\"Created\")",
+              "})",
+              "",
+              "pm.test(\"Content-Type header is present\", () => {",
+              "  pm.response.to.have.header(\"Content-Type\")",
+              "})",
+              "",
+              "pm.test(\"Content-Type header is application/json\", () => {",
+              "  pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');",
+              "});",
+              "",
+              "pm.test(\"Response time is less than 200ms\", () => {",
+              "  pm.expect(pm.response.responseTime).to.be.below(200);",
+              "});",
+              "",
+              "const jsonData = pm.response.json();",
+              "pm.test(\"Test data type of the response\", () => {",
+              "  pm.expect(jsonData).to.be.an(\"object\");",
+              "  pm.expect(jsonData.name).to.be.a(\"string\");",
+              "  pm.expect(jsonData.age).to.be.a(\"number\")",
+              "  pm.expect(jsonData.hobbies).to.be.an(\"array\");",
+              "  pm.expect(jsonData.website).to.be.undefined;",
+              "  pm.expect(jsonData.email).to.be.null;",
+              "});",
+              "",
+              "pm.test(\"Value is in valid list\", () => {",
+              "  pm.expect(pm.response.json().name)",
+              "    .to.be.oneOf([\"Jane\", \"Mary\", \"Julia\"]);",
+              "});",
+              "",
+              "pm.test(\"Response property matches globals variable\", function ( ) {",
+              "  pm.expect(pm.response.json().name).to.eql(pm.globals.get(\"name\"));",
+              "  let nameVar = \"name\"",
+              "  pm.expect(pm.response.json().name).to.eql(pm.globals.get(nameVar));",
+              "});",
+              "",
+              "pm.test(\"Response property matches environment variable\", function () {",
+              "  pm.expect(String(pm.response.json().age)).to.eql(pm.environment.get(\"ageEnv\"));",
+              "});",
+              "",
+              "pm.test(\"Object is contained\", () => {",
+              "  const expectedObject = {",
+              "    'name': 'Jane',",
+              "    'hobbies': [",
+              "        'skating',",
+              "        'painting'",
+              "    ]",
+              "  };",
+              "  pm.expect(pm.response.json()).to.deep.include(expectedObject);",
+              "});",
+              "",
+              "pm.test(\"Dynamic values\", function () {",
+              "  pm.expect(pm.variables.replaceIn('{{$randomFirstName}}')).to.be.eql(\"name\");",
+              "});",
+              "",
+              "// Delimiter checks",
+              "const val =",
+              "5",
+              "/",
+              "5",
+              "",
+              "const tab = [",
+              "  a,",
+              "  b,",
+              "  c",
+              "]",
+              "",
+              "A = 5",
+              "B = 10"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088/jane",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088",
+          "path": [
+            "jane"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "arrays",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const jsonData = pm.response.json();",
+              "pm.test(\"Test array properties\", () => {",
+              "    //errors array is empty",
+              "  pm.expect(jsonData.errors).to.be.empty;",
+              "    //areas array includes \"goods\"",
+              "  pm.expect(jsonData.areas).to.include(\"goods\");",
+              "    //get the notification settings object",
+              "  const notificationSettings = jsonData.settings.find",
+              "      (m => m.type === \"notification\");",
+              "  pm.expect(notificationSettings)",
+              "    .to.be.an(\"object\", \"Could not find the setting\");",
+              "    //detail array must include \"sms\"",
+              "  pm.expect(notificationSettings.detail).to.include(\"sms\");",
+              "    //detail array must include all listed",
+              "  pm.expect(notificationSettings.detail)",
+              "    .to.have.members([\"email\", \"sms\"]);",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "postman.setGlobalVariable(\"key\", \"value\");",
+              "pm.globals.set(\"variable_key\", \"variable_value\");"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088/arrays",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088",
+          "path": [
+            "arrays"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "object",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.expect({a: 1, b: 2}).to.have.all.keys('a', 'b');",
+              "pm.expect({a: 1, b: 2}).to.have.any.keys('a', 'b');",
+              "pm.expect({a: 1, b: 2}).to.not.have.any.keys('c', 'd');",
+              "pm.expect({a: 1}).to.have.property('a');",
+              "pm.expect({a: 1, b: 2}).to.be.a('object')",
+              "  .that.has.all.keys('a', 'b');",
+              "",
+              "pm.test(\"Body is string\", function () {",
+              "  pm.response.to.have.body(\"{\\\"type\\\": \\\"array\\\", \\\"arrays\\\": 5}\");",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "postman.setGlobalVariable(\"key\", \"value\");",
+              "pm.globals.set(\"variable_key\", \"variable_value\");"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "cookies",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Cookie isLoggedIn is present\", () => {",
+              "  pm.expect(pm.cookies.has('isLoggedIn')).to.be.true;",
+              "});",
+              "",
+              "pm.test(\"Cookie isLoggedIn has value 1\", () => {",
+              "  pm.expect(pm.cookies.get(\"isLoggedIn\")).to.eql('1');",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Set-Cookie",
+            "value": "sessionId=235436",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:8089/cookies",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8089",
+          "path": [
+            "cookies"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "xml",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const responseJson1 = xml2Json(pm.response.text());",
+              "console.log(responseJson1);",
+              "console.log(responseJson1.query);",
+              "console.log(xml2Json(pm.response.text()).query);",
+              "",
+              "pm.test(\"XML1 - old syntax\", () => {",
+              "    pm.expect(Number(xml2Json(pm.response.text()).query.incomes)).to.be.eql(1000);",
+              "    pm.expect(Number(responseJson1[\"query\"][\"incomes\"])).to.be.eql(1000);",
+              "})",
+              "",
+              "var parse = require(\"xml2js\");",
+              "let responseJson2;",
+              "parse.parseString(pm.response.text(), function (err, result) {",
+              "    responseJson2 = result;",
+              "})",
+              "",
+              "pm.test(\"XML2 - external library\", () => {",
+              "    pm.expect(Number(responseJson2.query.incomes)).to.be.eql(1000);",
+              "    pm.expect(Number(responseJson2[\"query\"][\"incomes\"])).to.be.eql(1000);",
+              "})",
+              "",
+              "let responseJson3;",
+              "require('xml2js').parseString(pm.response.text(), function (err, result) {",
+              "    responseJson3 = result;",
+              "})",
+              "",
+              "pm.test(\"XML3 - external library\", () => {",
+              "    pm.expect(Number(responseJson3.query.incomes)).to.be.eql(1000);",
+              "    pm.expect(Number(responseJson3[\"query\"][\"incomes\"])).to.be.eql(1000);",
+              "})",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "postman.setGlobalVariable(\"key\", \"value\");",
+              "pm.globals.set(\"variable_key\", \"variable_value\");"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8089/xml",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8089",
+          "path": [
+            "xml"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "schemaValidation",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const schema = {",
+              "    properties: {",
+              "    name: {type: \"string\"},",
+              "    age: {type: \"integer\"},",
+              "    hobbies: {type: \"array\"},",
+              "    email: {type: [\"string\", \"null\"]},",
+              "    }",
+              "}",
+              "",
+              "pm.test('Schema is valid - tv4 - 1', function() {",
+              "  pm.expect(tv4.validate(pm.response.json, schema)).to.be.true;",
+              "});",
+              "",
+              "pm.test('Schema is valid - tv4 - 2', function() {",
+              "  pm.expect(tv4.validate(pm.response.json(), schema)).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response is valid', function() {",
+              "  let AjvImporter1 = require('ajv') let ajvImporter1 = new AjvImporter1({code: {es5: true}}) ajvImporter1.validate( schema, pm.response.json())",
+              "  pm.response.to.have.jsonSchema(schema);",
+              "});",
+              "",
+
+              "let AjvImporter2=require('ajv') let ajvImporter2=new AjvImporter2({code: {es5: true}}) ajvImporter2.validate( schema, pm.response.json())",
+              "let AjvImporter3=require('ajv') let ajvImporter3=new AjvImporter3({code: {es5: true}}) ajvImporter3.validate( schema, pm.response.json())"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "postman.setGlobalVariable(\"key\", \"value\");",
+              "pm.globals.set(\"variable_key\", \"variable_value\");"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088/jane",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088",
+          "path": [
+            "jane"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Logging",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.info(\"INFO\")",
+              "console.warn(\"WARN\")",
+              "console.error(\"ERROR\")",
+              "console.debug(\"DEBUG\")"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Variables",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Variables\", () => {",
+              "    pm.variables.set(\"variableKey\", 'variableVal');",
+              "    pm.expect(pm.variables.get(\"variableKey\")).to.be.eql('variableVal');",
+              "})",
+              "",
+              "pm.test(\"Globals\", () => {",
+              "    pm.globals.set(\"globalKey\", 'globalVal');",
+              "    pm.expect(pm.globals.get(\"globalKey\")).to.be.eql('globalVal');",
+              "})",
+              "",
+              "pm.test(\"Environment\", () => {",
+              "    pm.environment.set(\"environmentKey\", 'environmentVal');",
+              "    pm.expect(pm.environment.get(\"environmentKey\")).to.be.eql('environmentVal');",
+              "})"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8088",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8088"
+        }
+      },
+      "response": []
+    }
+  ]
 }

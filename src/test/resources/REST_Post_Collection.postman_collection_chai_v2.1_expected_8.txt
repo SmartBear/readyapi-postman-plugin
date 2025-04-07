@@ -1,0 +1,14 @@
+ready.test("Variables", () => {
+  context.testCase.setPropertyValue("variableKey", 'variableVal');
+  chai.expect(String(context.expand("${#TestCase#variableKey}"))).to.be.eql('variableVal');
+});
+
+ready.test("Globals", () => {
+  context.testCase.testSuite.project.setPropertyValue("globalKey", 'globalVal');
+  chai.expect(String(context.expand("${#Project#globalKey}"))).to.be.eql('globalVal');
+});
+
+ready.test("Environment", () => {
+  context.testCase.testSuite.project.setPropertyValue("environmentKey", 'environmentVal');
+  chai.expect(String(context.expand("${#Project#environmentKey}"))).to.be.eql('environmentVal');
+});

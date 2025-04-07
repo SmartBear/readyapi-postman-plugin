@@ -18,6 +18,7 @@ class PostmanCollectionUtilsTest {
 
     private static final String COLLECTION_WITH_VAULT_V20 = "/utils/collection_with_vault_variables_V20.json";
     private static final String COLLECTION_WITH_VAULT_V21 = "/utils/collection_with_vault_variables_V21.json";
+    private static final String COLLECTION_WITH_VAULT_IN_SCRIPT_V21 = "/utils/collection_with_vault_variables_in_script_V21.json";
     private static final String COLLECTION_WITH_UNSUPPORTED_VERSION = "/utils/collection_with_unsupported_version.json";
 
     private static final Set<String> EXPECTED_VAULT_VARIABLES = Set.of(
@@ -50,6 +51,11 @@ class PostmanCollectionUtilsTest {
     @Test
     void vaultVariableExtractUtilExtractsCorrectValuesV21() throws Exception {
         verifyVaultVariablesExtractedCorrectly(COLLECTION_WITH_VAULT_V21);
+    }
+
+    @Test
+    void vaultVariableExtractUtilExtractsCorrectValuesInScriptV21() throws Exception {
+        verifyVaultVariablesExtractedCorrectly(COLLECTION_WITH_VAULT_IN_SCRIPT_V21);
     }
 
     private void verifyCollectionVersionExtractedCorrectly(String pathToCollection, String version) throws Exception {
