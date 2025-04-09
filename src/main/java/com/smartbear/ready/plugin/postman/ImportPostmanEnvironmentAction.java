@@ -3,7 +3,9 @@ package com.smartbear.ready.plugin.postman;
 import com.eviware.soapui.impl.wsdl.WsdlProjectPro;
 import com.eviware.soapui.impl.wsdl.actions.environment.AbstractNewEnvironmentAction;
 
+import com.eviware.soapui.model.environment.DefaultEnvironment;
 import com.eviware.soapui.model.environment.Environment;
+import com.eviware.soapui.model.environment.EnvironmentUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.x.form.XFormDialog;
 import com.eviware.x.form.support.ADialogBuilder;
@@ -47,9 +49,10 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
                 .setFileFilter(new FileChooser.ExtensionFilter("JSON file", "json"));
         if (dialog.show()) {
             String filePath = dialog.getFormField(LoadPostmanFile.FILE).getValue();
+            boolean cloneEnvironment = dialog.getBooleanValue(LoadPostmanFile.CLONE);
             try {
                 PostmanEnvModel postmanEnvModel = loadFromFile(filePath);
-                addEnvironmentAndPopulateProperties(postmanEnvModel);
+                addEnvironmentAndPopulateProperties(postmanEnvModel, cloneEnvironment);
                 sendAnalyticsAction(postmanEnvModel.name());
             } catch (Exception e) {
                 UISupport.getDialogs().showErrorMessage("Cannot import Postman environment.\n" + e.getMessage());
@@ -67,6 +70,10 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
     }
 
     protected void addEnvironmentAndPopulateProperties(PostmanEnvModel postmanEnvModel) {
+        addEnvironmentAndPopulateProperties(postmanEnvModel, false);
+    }
+
+    protected void addEnvironmentAndPopulateProperties(PostmanEnvModel postmanEnvModel, boolean cloneEnvironment) {
         if (project.getEnvironmentByName(postmanEnvModel.name()) != null) {
             UISupport.getDialogs().showErrorMessage(
                     String.format("An environment with the name %s already exists.", postmanEnvModel.name()));
@@ -94,7 +101,13 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
         if (newPropertiesMap.isEmpty()) {
             UISupport.getDialogs().showErrorMessage("No variables found in provided Postman environment.");
         } else {
-            addEnvironment(project, postmanEnvModel.name(), newPropertiesMap);
+            boolean environmentAdded = addEnvironment(project, postmanEnvModel.name(), newPropertiesMap);
+            if(environmentAdded && cloneEnvironment) {
+                Environment environment = project.getEnvironmentByName(postmanEnvModel.name());
+                if(environment != null) {
+                    EnvironmentUtils.raiseCloneEnvironmentNotification(project, DefaultEnvironment.ID, environment.getId());
+                }
+            }
         }
     }
 
@@ -109,5 +122,7 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
     private interface LoadPostmanFile {
         @AField(name = "File", description = "The environment file to load", type = AField.AFieldType.FILE)
         String FILE = "File";
+        @AField(name = "Copy authorization", description = "Copy authorization from 'No Environment' to newly created Environment", type = AField.AFieldType.BOOLEAN)
+        String CLONE = "Clone";
     }
 }
