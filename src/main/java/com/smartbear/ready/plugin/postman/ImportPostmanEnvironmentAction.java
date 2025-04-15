@@ -100,16 +100,14 @@ public class ImportPostmanEnvironmentAction extends AbstractNewEnvironmentAction
 
         if (newPropertiesMap.isEmpty()) {
             UISupport.getDialogs().showErrorMessage("No variables found in provided Postman environment.");
-        } else {
-            if (addEnvironment(project, postmanEnvModel.name(), newPropertiesMap)) {
-                if (copyEndopoints) {
-                    copyEndpoints(project, postmanEnvModel.name());
-                }
-                if (copyAuthorization) {
-                    Environment environment = project.getEnvironmentByName(postmanEnvModel.name());
-                    if (environment != null) {
-                        EnvironmentUtils.raiseCloneEnvironmentNotification(project, DefaultEnvironment.ID, environment.getId());
-                    }
+        } else if (addEnvironment(project, postmanEnvModel.name(), newPropertiesMap)) {
+            if (copyEndopoints) {
+                copyEndpoints(project, postmanEnvModel.name());
+            }
+            if (copyAuthorization) {
+                Environment environment = project.getEnvironmentByName(postmanEnvModel.name());
+                if (environment != null) {
+                    EnvironmentUtils.raiseCloneEnvironmentNotification(project, DefaultEnvironment.ID, environment.getId());
                 }
             }
         }

@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-public class PostmanImportWithEnvironmentTest {
+class PostmanImportWithEnvironmentTest {
 
     private static final String AUTH_PROFILES_CLONE_ENVIRONMENT = "/import/environment_auth_profiles_clone.postman_environment.json";
     private static final String AUTH_PROFILES_CLONE_COLLECTION = "/import/collection_auth_profiles_clone.json";
@@ -44,7 +44,7 @@ public class PostmanImportWithEnvironmentTest {
     private ImportPostmanEnvironmentAction importPostmanEnvironmentAction;
 
     @BeforeAll
-    public static void setUp() throws IOException, XmlException, ExecutionException, InterruptedException {
+    static void setUp() throws IOException, XmlException, ExecutionException, InterruptedException {
         workspaceFile = new File(TEST_WORKSPACE_FILE_PATH);
         workspace = new WorkspaceImpl(workspaceFile.getAbsolutePath(), null);
 
@@ -68,17 +68,17 @@ public class PostmanImportWithEnvironmentTest {
         HashMap<AuthProfileHolderContainer, List<String>> authProfiles = new HashMap<>();
 
         projectWithCollection.getInterfaceList().forEach(i -> {
-            logAuth(authProfiles, i);
+            collectAuthProfiles(authProfiles, i);
         });
 
         projectWithCollection.setActiveEnvironment("Test_1");
 
         projectWithCollection.getInterfaceList().forEach(i -> {
-            logAuth(authProfiles, i);
+            collectAuthProfiles(authProfiles, i);
         });
 
-        authProfiles.forEach((k, v) -> {
-            assertEquals(v.get(0), v.get(1));
+        authProfiles.forEach((authProfileHolderContainer, authProfileNameList) -> {
+            assertEquals(authProfileNameList.get(0), authProfileNameList.get(1));
         });
     }
 
@@ -87,16 +87,16 @@ public class PostmanImportWithEnvironmentTest {
         return importPostmanEnvironmentAction.loadFromFile(file.getPath());
     }
 
-    private void logAuth(HashMap<AuthProfileHolderContainer, List<String>> authProfiles, ModelItem modelItem) {
+    private void collectAuthProfiles(HashMap<AuthProfileHolderContainer, List<String>> authProfiles, ModelItem modelItem) {
         if (modelItem instanceof AuthProfileHolderContainer container) {
-            authProfiles.compute(container, (k, v) -> {
-                if (v == null) {
-                    v = new ArrayList<>();
+            authProfiles.compute(container, (authProfileHolderContainer, authProfileNameList) -> {
+                if (authProfileNameList == null) {
+                    authProfileNameList = new ArrayList<>();
                 }
-                v.add(modelItem.getName());
-                return v;
+                authProfileNameList.add(modelItem.getName());
+                return authProfileNameList;
             });
         }
-        modelItem.getChildren().forEach(i -> this.logAuth(authProfiles, i));
+        modelItem.getChildren().forEach(i -> collectAuthProfiles(authProfiles, i));
     }
 }
