@@ -29,7 +29,7 @@ public class PostmanImportEnvFactory implements ImportEnvironmentFactory {
 
         @Override
         public String getButtonIconPath() {
-            return SVGCollectionManager.DOWNLOAD_PATH;
+            return SVGCollectionManager.LOAD_FROM_FILE_PATH;
         }
 
         @Override
