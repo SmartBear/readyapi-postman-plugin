@@ -1,0 +1,722 @@
+{
+	"info": {
+		"_postman_id": "54fde65a-ad46-40e9-a3da-d2eecf8fd6b6",
+		"name": "test-auth-profiles",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "24605597"
+	},
+	"item": [
+		{
+			"name": "folder 1 [Digest]",
+			"item": [
+				{
+					"name": "folder 2",
+					"item": [
+						{
+							"name": "request in folder",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://google.com",
+									"protocol": "https",
+									"host": [
+										"google",
+										"com"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "digest",
+				"digest": [
+					{
+						"key": "realm",
+						"value": "testrealm@example.com",
+						"type": "string"
+					},
+					{
+						"key": "password",
+						"value": "digest-password",
+						"type": "string"
+					},
+					{
+						"key": "username",
+						"value": "digest-user",
+						"type": "string"
+					},
+					{
+						"key": "algorithm",
+						"value": "MD5",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "requests with the same name",
+			"item": [
+				{
+					"name": "different profile",
+					"item": [
+						{
+							"name": "same name",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "pass-2",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "user-2",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:1234",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "1234"
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "same name",
+							"request": {
+								"auth": {
+									"type": "ntlm",
+									"ntlm": [
+										{
+											"key": "password",
+											"value": "ntlm-1",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "ntlm-1",
+											"type": "string"
+										},
+										{
+											"key": "workstation",
+											"value": "TEST_WORKSTATION",
+											"type": "string"
+										},
+										{
+											"key": "domain",
+											"value": "testdomain.com",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://localhost:1234",
+									"protocol": "https",
+									"host": [
+										"localhost"
+									],
+									"port": "1234"
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "same profile",
+					"item": [
+						{
+							"name": "same profile",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "same-password",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "same-username",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://google.pl",
+									"protocol": "https",
+									"host": [
+										"google",
+										"pl"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "same profile",
+							"request": {
+								"auth": {
+									"type": "basic",
+									"basic": [
+										{
+											"key": "password",
+											"value": "same-password",
+											"type": "string"
+										},
+										{
+											"key": "username",
+											"value": "same-username",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "https://google.pl",
+									"protocol": "https",
+									"host": [
+										"google",
+										"pl"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "property expansions",
+			"item": [
+				{
+					"name": "basic with vault",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{vault:vault var}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{vault:basicAuthUsername}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/basic",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"basic"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "basic with globals",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{global_password}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{global_username}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": "http://localhost:8080/basicglobals"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "unsupported profile",
+			"request": {
+				"auth": {
+					"type": "jwt",
+					"jwt": [
+						{
+							"key": "payload",
+							"value": "{\"test\" : \"test\"}",
+							"type": "string"
+						},
+						{
+							"key": "secret",
+							"value": "test-test-test",
+							"type": "string"
+						},
+						{
+							"key": "isSecretBase64Encoded",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "algorithm",
+							"value": "HS256",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "queryParamKey",
+							"value": "token",
+							"type": "string"
+						},
+						{
+							"key": "header",
+							"value": "{}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:8080",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8080"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "aws request",
+			"request": {
+				"auth": {
+					"type": "awsv4",
+					"awsv4": [
+						{
+							"key": "sessionToken",
+							"value": "session-token",
+							"type": "string"
+						},
+						{
+							"key": "service",
+							"value": "s3",
+							"type": "string"
+						},
+						{
+							"key": "region",
+							"value": "us-east-1",
+							"type": "string"
+						},
+						{
+							"key": "secretKey",
+							"value": "secret-key",
+							"type": "string"
+						},
+						{
+							"key": "accessKey",
+							"value": "access-key",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:8080",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8080"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "oauth1",
+			"request": {
+				"auth": {
+					"type": "oauth1",
+					"oauth1": [
+						{
+							"key": "addParamsToHeader",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "callback",
+							"value": "https://callback-url.com",
+							"type": "string"
+						},
+						{
+							"key": "timestamp",
+							"value": "timestamptest",
+							"type": "string"
+						},
+						{
+							"key": "includeBodyHash",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "addEmptyParamsToSign",
+							"value": true,
+							"type": "boolean"
+						},
+						{
+							"key": "realm",
+							"value": "sometest@realm.com",
+							"type": "string"
+						},
+						{
+							"key": "nonce",
+							"value": "NonceTest",
+							"type": "string"
+						},
+						{
+							"key": "verifier",
+							"value": "verifier-value",
+							"type": "string"
+						},
+						{
+							"key": "tokenSecret",
+							"value": "token-secret-value",
+							"type": "string"
+						},
+						{
+							"key": "token",
+							"value": "access-token",
+							"type": "string"
+						},
+						{
+							"key": "consumerSecret",
+							"value": "consumer-secret-value",
+							"type": "string"
+						},
+						{
+							"key": "consumerKey",
+							"value": "consumer-key-value",
+							"type": "string"
+						},
+						{
+							"key": "signatureMethod",
+							"value": "HMAC-SHA1",
+							"type": "string"
+						},
+						{
+							"key": "version",
+							"value": "1.0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:8080",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8080"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "oauth2",
+			"request": {
+				"auth": {
+					"type": "oauth2",
+					"oauth2": [
+						{
+							"key": "client_authentication",
+							"value": "header",
+							"type": "string"
+						},
+						{
+							"key": "code_verifier",
+							"value": "some-verifier",
+							"type": "string"
+						},
+						{
+							"key": "grant_type",
+							"value": "authorization_code_with_pkce",
+							"type": "string"
+						},
+						{
+							"key": "addTokenTo",
+							"value": "queryParams",
+							"type": "string"
+						},
+						{
+							"key": "refreshTokenUrl",
+							"value": "http://refreshurl.com",
+							"type": "string"
+						},
+						{
+							"key": "state",
+							"value": "test-state",
+							"type": "string"
+						},
+						{
+							"key": "scope",
+							"value": "scope:email",
+							"type": "string"
+						},
+						{
+							"key": "clientSecret",
+							"value": "some-client-secret",
+							"type": "string"
+						},
+						{
+							"key": "clientId",
+							"value": "some-client-id",
+							"type": "string"
+						},
+						{
+							"key": "accessTokenUrl",
+							"value": "http://accesstokenurl",
+							"type": "string"
+						},
+						{
+							"key": "authUrl",
+							"value": "http://authurl",
+							"type": "string"
+						},
+						{
+							"key": "useBrowser",
+							"value": false,
+							"type": "boolean"
+						},
+						{
+							"key": "redirect_uri",
+							"value": "http://test.test",
+							"type": "string"
+						},
+						{
+							"key": "tokenName",
+							"value": "some name",
+							"type": "string"
+						},
+						{
+							"key": "headerPrefix",
+							"value": "Bearer",
+							"type": "string"
+						},
+						{
+							"key": "refreshRequestParams",
+							"value": [
+								{
+									"key": "refresh_req_param",
+									"value": "refresh_req_val",
+									"enabled": true,
+									"send_as": "request_body"
+								}
+							],
+							"type": "any"
+						},
+						{
+							"key": "authRequestParams",
+							"value": [
+								{
+									"key": "auth_req_param",
+									"value": "auth_req_val",
+									"enabled": true,
+									"send_as": "request_url"
+								}
+							],
+							"type": "any"
+						},
+						{
+							"key": "tokenRequestParams",
+							"value": [
+								{
+									"key": "token_request_test_param",
+									"value": "token_req_val",
+									"enabled": true,
+									"send_as": "request_body"
+								}
+							],
+							"type": "any"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:8081",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "8081"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "no auth",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:222",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "222"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ntlm",
+			"request": {
+				"auth": {
+					"type": "ntlm",
+					"ntlm": [
+						{
+							"key": "workstation",
+							"value": "sample-workstatiom",
+							"type": "string"
+						},
+						{
+							"key": "domain",
+							"value": "sampledomain.com",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "ntlm-pass",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "ntlm-user",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:1234",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "1234"
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "collection-password",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "collection-name",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
