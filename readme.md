@@ -9,7 +9,7 @@ This repository contains source code files for the Postman Plugin for ReadyAPI. 
 
 ## Requirements
 
-The plugin requires ReadyAPI version 3.60 or later.
+The plugin requires ReadyAPI version 3.64 or later.
 
 ## Working With the Plugin
 
