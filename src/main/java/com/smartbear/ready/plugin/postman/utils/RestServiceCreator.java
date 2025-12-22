@@ -71,7 +71,13 @@ public class RestServiceCreator extends RestServiceBuilder {
 
     public RestRequest createRestServiceFromPostman(Request request) throws MalformedURLException {
         RestResource restResource;
-        RestURIParser uriParser = new RestURIParserImpl(uri);
+        RestURIParser uriParser;
+        try {
+            uriParser = new RestURIParserImpl(uri);
+        } catch (MalformedURLException e) {
+            logger.warn("Exception during parsing URI: {}, will try to parse with RestURIPostmanParser", e.getMessage());
+            uriParser = new RestURIPostmanParser(uri);
+        }
         String endpoint = StringUtils.hasContent(uriParser.getScheme())
                 ? uriParser.getEndpoint()
                 : uriParser.getAuthority();
