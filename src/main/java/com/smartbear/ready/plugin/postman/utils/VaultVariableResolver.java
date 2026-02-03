@@ -5,6 +5,7 @@ import com.eviware.soapui.support.CommonJScrollPane;
 import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.swing.JTableFactory;
+import com.smartbear.ready.ui.components.designkit.tables.TableCellSize;
 import net.sf.json.JSONObject;
 
 import javax.swing.BorderFactory;
@@ -65,7 +66,7 @@ public class VaultVariableResolver {
             @Override
             protected Component buildContent() {
                 JPanel panel = new JPanel(new BorderLayout());
-                table = JTableFactory.getInstance().makeJTable(vaultVariablesTableModel);
+                table = JTableFactory.getInstance().makeSBTable(TableCellSize.MEDIUM, vaultVariablesTableModel);
                 table.setRowHeight(table.getRowHeight() + 2);
                 panel.add(new CommonJScrollPane(table), BorderLayout.CENTER);
                 panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
