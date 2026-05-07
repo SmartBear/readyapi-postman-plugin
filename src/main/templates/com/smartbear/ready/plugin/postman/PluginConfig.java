@@ -30,7 +30,7 @@ import com.eviware.soapui.impl.wsdl.actions.environment.ImportEnvironmentFactory
     autoDetect = true,
     description = "${project.description}",
     infoUrl = "${project.url}",
-    minimumReadyApiVersion = "${ready-api-version}")
+    minimumReadyApiVersion = "4.0.0")
 public class PluginConfig extends PluginAdapter {
 
     public PluginConfig() {
