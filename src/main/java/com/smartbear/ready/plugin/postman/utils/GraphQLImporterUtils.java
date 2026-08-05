@@ -6,7 +6,6 @@ import com.eviware.soapui.impl.graphql.GraphQLOperationGroup;
 import com.eviware.soapui.impl.graphql.GraphQLRequest;
 import com.eviware.soapui.impl.graphql.GraphQLService;
 import com.eviware.soapui.impl.graphql.support.GraphQLImporter;
-import com.eviware.soapui.impl.support.params.ImportParamsFactory;
 import com.eviware.soapui.impl.wsdl.WsdlProject;
 import com.eviware.soapui.support.StringUtils;
 import com.smartbear.ready.plugin.postman.collection.Request;
@@ -83,7 +82,7 @@ public class GraphQLImporterUtils {
             try {
                 GraphQLImporter importer = new GraphQLImporter(project);
                 GraphQLService graphQLService = importer.importDefinition(
-                        ImportParamsFactory.createGraphQLParams(url).withDefaultOperations(false).build());
+                        url, params -> params.withDefaultOperations(false));
                 graphQLService.setDefinitionUrl(url);
                 graphQLService.addEndpoint(url);
                 graphQLService.addNewOperationGroup(GraphQLOperationGroupEnumConfig.MUTATION.toString());
