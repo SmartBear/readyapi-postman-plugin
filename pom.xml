@@ -22,7 +22,7 @@
     </repositories>
 
     <properties>
-        <ready-api-version>4.2.0-SNAPSHOT</ready-api-version>
+        <ready-api-version>4.3.0-SNAPSHOT</ready-api-version>
         <java.version>21</java.version>
     </properties>
 
