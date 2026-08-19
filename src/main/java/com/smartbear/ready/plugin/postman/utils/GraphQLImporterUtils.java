@@ -81,7 +81,8 @@ public class GraphQLImporterUtils {
         } else {
             try {
                 GraphQLImporter importer = new GraphQLImporter(project);
-                GraphQLService graphQLService = importer.importGraphQL(url, false);
+                GraphQLService graphQLService = importer.importDefinition(
+                        url, params -> params.withDefaultOperations(false));
                 graphQLService.setDefinitionUrl(url);
                 graphQLService.addEndpoint(url);
                 graphQLService.addNewOperationGroup(GraphQLOperationGroupEnumConfig.MUTATION.toString());
