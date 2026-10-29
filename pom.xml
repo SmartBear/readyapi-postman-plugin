@@ -22,8 +22,8 @@
     </repositories>
 
     <properties>
-        <ready-api-version>4.3.0</ready-api-version>
-        <java.version>21</java.version>
+        <ready-api-version>4.4.0-SNAPSHOT</ready-api-version>
+        <java.version>25.0.5</java.version>
         <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
     </properties>
 
@@ -145,10 +145,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.15.0</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>25</source>
+                    <target>25</target>
                 </configuration>
             </plugin>
             <plugin>
