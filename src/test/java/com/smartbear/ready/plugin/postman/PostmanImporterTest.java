@@ -440,7 +440,7 @@ public class PostmanImporterTest {
         for (TestStep testStep: testCase.getTestStepList()) {
             String expectedChaiTests = FileUtils.readFileToString(
                 new File(getClass().getResource(expectedResults.get(requestCounter++)).getPath()),
-                StandardCharsets.UTF_8).trim();
+                StandardCharsets.UTF_8).replace("\r\n", "\n").trim();
 
             assertEquals(expectedChaiTests, ((ChaiAssertion) ((RestTestRequestStep) testStep).getAssertionAt(0)).getScriptText());
         }
