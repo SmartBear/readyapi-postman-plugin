@@ -1,7 +1,6 @@
 package com.smartbear.ready.plugin.postman.collection;
 
 import com.smartbear.ready.plugin.postman.utils.PostmanCollectionUtils;
-import com.smartbear.ready.plugin.postman.utils.PostmanJsonUtil;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +33,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
 
     public PostmanCollectionV2(JSONObject postmanCollection) {
         super(postmanCollection);
-        this.info = postmanCollection.optJSONObject(INFO);
+        this.info = postmanCollection.getJSONObject(INFO);
         this.version = PostmanCollectionUtils.getCollectionVersionFromInfo(info).orElse("");
     }
 
@@ -51,14 +50,14 @@ public class PostmanCollectionV2 extends PostmanCollection {
     @Override
     public List<Request> getRequests() {
         ArrayList<Request> requestList = new ArrayList<>();
-        extractRequestsFromItems(PostmanJsonUtil.getJsonArraySafely(postmanCollection, ITEM), requestList, DirectoryInfo.createRoot(getName()));
+        extractRequestsFromItems(postmanCollection.getJSONArray(ITEM), requestList, DirectoryInfo.createRoot(getName()));
         return requestList;
     }
 
     @Override
     public List<JSONObject> getFolders() {
         ArrayList<JSONObject> foldersList = new ArrayList<>();
-        extractFoldersFromItems(PostmanJsonUtil.getJsonArraySafely(postmanCollection, ITEM), foldersList);
+        extractFoldersFromItems(postmanCollection.getJSONArray(ITEM), foldersList);
         return foldersList;
     }
 
@@ -75,7 +74,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
 
     @Override
     public String getAuth() {
-        return postmanCollection.has(AUTH_PROFILE) ? postmanCollection.optString(AUTH_PROFILE) : "";
+        return postmanCollection.has(AUTH_PROFILE) ? postmanCollection.get(AUTH_PROFILE).toString() : "";
     }
 
     @Override
@@ -91,12 +90,12 @@ public class PostmanCollectionV2 extends PostmanCollection {
         for (Object itemObject : items) {
             if (itemObject instanceof JSONObject item) {
                 if (isFolder(item)) {
-                    extractRequestsFromItems(PostmanJsonUtil.getJsonArraySafely(item, ITEM), requestList,
+                    extractRequestsFromItems(item.getJSONArray(ITEM), requestList,
                             new DirectoryInfo(
-                                    item.optString(NAME),
-                                    item.has(DESCRIPTION) ? item.optString(DESCRIPTION) : "",
+                                    item.get(NAME).toString(),
+                                    item.has(DESCRIPTION) ? item.get(DESCRIPTION).toString() : "",
                                     directoryInfo,
-                                    item.has(AUTH_PROFILE) ? item.optString(AUTH_PROFILE) : ""));
+                                    item.has(AUTH_PROFILE) ? item.get(AUTH_PROFILE).toString() : ""));
                 } else {
                     requestList.add(new RequestV2(item, directoryInfo));
                 }
@@ -108,7 +107,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
         for (Object itemObject : items) {
             if (itemObject instanceof JSONObject item && isFolder(item)) {
                 foldersList.add(item);
-                extractFoldersFromItems(PostmanJsonUtil.getJsonArraySafely(item, ITEM), foldersList);
+                extractFoldersFromItems(item.getJSONArray(ITEM), foldersList);
             }
         }
     }

@@ -151,10 +151,10 @@ class RequestV2 implements Request {
             JSONArray dataArray = (JSONArray) dataJson;
             for (Object element : dataArray) {
                 if (element instanceof JSONObject data) {
-                    String key = data.optString("key");
-                    String type = data.optString("type");
+                    String key = data.get("key").toString();
+                    String type = data.get("type").toString();
 
-                    String value = data.optString(typeToValue.get(type));
+                    String value = data.get(typeToValue.get(type)).toString();
                     parameters.add(new FormDataParameter(stringToFormDataType.get(type), key, value));
                 }
             }

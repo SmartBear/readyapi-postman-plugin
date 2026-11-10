@@ -50,7 +50,7 @@ public abstract class PostmanCollection {
                 if (!StringUtils.sameString(listen, scriptType.getListenType())) {
                     continue;
                 }
-                JSONObject script = event.optJSONObject(SCRIPT);
+                JSONObject script = event.isNull(SCRIPT) ? null : event.getJSONObject(SCRIPT);
                 if (script != null) {
                     StringBuilder scriptBuilder = new StringBuilder();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
