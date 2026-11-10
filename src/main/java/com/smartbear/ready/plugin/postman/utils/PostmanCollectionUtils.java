@@ -1,9 +1,7 @@
 package com.smartbear.ready.plugin.postman.utils;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
-
+import org.json.JSONArray;
+import org.json.JSONObject;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,7 +25,7 @@ public class PostmanCollectionUtils {
 
     public static Optional<String> getCollectionVersionFromInfo(Object infoObject) {
         if (infoObject != null) {
-            Object schemaField = ((JSONObject) infoObject).get(SCHEMA);
+            Object schemaField = ((JSONObject) infoObject).opt(SCHEMA);
             if (schemaField instanceof String schemaString) {
                 return Arrays.stream(schemaString.split("/"))
                         .filter(schemaPart -> (VERSION_2.equals(schemaPart) || VERSION_2_1.equals(schemaPart)))
@@ -37,7 +35,7 @@ public class PostmanCollectionUtils {
         return Optional.empty();
     }
 
-    public static Set<String> extractVaultVariables(JSONObject collectionJson) throws JSONException {
+    public static Set<String> extractVaultVariables(JSONObject collectionJson) {
         Set<String> vaultVariables = new HashSet<>();
         ArrayDeque<Object> collectionNodesQueue = new ArrayDeque<>();
         collectionNodesQueue.add(collectionJson);
@@ -45,13 +43,13 @@ public class PostmanCollectionUtils {
         while (!collectionNodesQueue.isEmpty()) {
             Object currentNode = collectionNodesQueue.poll();
 
-            if (currentNode instanceof JSONObject jsonObject && !jsonObject.isNullObject()) {
+            if (currentNode instanceof JSONObject jsonObject) {
                 Iterator<String> keys = jsonObject.keys();
                 while (keys.hasNext()) {
-                    collectionNodesQueue.add(jsonObject.get(keys.next()));
+                    collectionNodesQueue.add(jsonObject.opt(keys.next()));
                 }
             } else if (currentNode instanceof JSONArray jsonArray) {
-                collectionNodesQueue.addAll(jsonArray);
+                collectionNodesQueue.addAll(PostmanJsonUtil.toList(jsonArray));
             } else if (currentNode instanceof String string) {
                 for (Pattern vaultVariablePattern: VAULT_VARIABLE_REGEXES) {
                     Matcher matcher = vaultVariablePattern.matcher(string);

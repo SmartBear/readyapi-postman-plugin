@@ -1,13 +1,13 @@
 package com.smartbear.ready.plugin.postman.utils;
 
-import com.eviware.soapui.support.JsonUtil;
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import net.sf.json.JsonConfig;
-import net.sf.json.groovy.JsonSlurper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONException;
+import org.json.JSONTokener;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PostmanJsonUtil {
     static final String WHILE_1 = "while(1);";
@@ -23,15 +23,15 @@ public class PostmanJsonUtil {
             return false;
         }
         try {
-            new JsonSlurper().parseText(content);
-            return true;
+            Object parsed = parseJson(content);
+            return parsed instanceof JSONObject || parsed instanceof JSONArray;
         } catch (Exception e) {
             return false;
         }
     }
 
     public static JSONArray getJsonArraySafely(JSONObject node, String arrayNodeName) {
-        Object jsonObject = node.get(arrayNodeName);
+        Object jsonObject = node.opt(arrayNodeName);
         if (jsonObject instanceof JSONArray) {
             return (JSONArray) jsonObject;
         } else {
@@ -39,14 +39,30 @@ public class PostmanJsonUtil {
         }
     }
 
-    public JSON parseTrimmedText(String text) {
+    public Object parseTrimmedText(String text) {
         if (text == null) {
             return null;
         }
         String trimmedText = removeVulnerabilityTokens(text).trim();
-        JsonConfig config = new JsonConfig();
-        config.setIgnoreDefaultExcludes(true);
-        return JSONSerializer.toJSON(trimmedText, config);
+        return parseJson(trimmedText);
+    }
+
+    private static Object parseJson(String text) {
+        try {
+            return new JSONTokener(text).nextValue();
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Invalid JSON: " + e.getMessage(), e);
+        }
+    }
+
+    public static List<Object> toList(JSONArray array) {
+        List<Object> list = new ArrayList<>();
+        if (array != null) {
+            for (int i = 0; i < array.length(); i++) {
+                list.add(array.opt(i));
+            }
+        }
+        return list;
     }
 
     String removeVulnerabilityTokens(String inputJsonString) {

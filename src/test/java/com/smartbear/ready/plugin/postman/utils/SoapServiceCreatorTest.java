@@ -12,8 +12,7 @@ import com.github.tomakehurst.wiremock.WireMockServer;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.apache.xmlbeans.XmlException;
 import org.junit.jupiter.api.AfterAll;
@@ -178,7 +177,7 @@ class SoapServiceCreatorTest {
                 StandardCharsets.UTF_8
         );
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
-            JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
+            Object json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject) {
                 PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection((JSONObject) json);
 

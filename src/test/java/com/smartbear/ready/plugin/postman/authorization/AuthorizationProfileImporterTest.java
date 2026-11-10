@@ -12,7 +12,7 @@ import com.smartbear.ready.plugin.postman.DummyTestCreator;
 import com.smartbear.ready.plugin.postman.PostmanImporter;
 import com.smartbear.ready.plugin.postman.exceptions.PostmanCollectionUnsupportedVersionException;
 import com.smartbear.ready.plugin.postman.utils.VaultVariableResolver;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 import org.apache.xmlbeans.XmlException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

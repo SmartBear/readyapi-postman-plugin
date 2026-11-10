@@ -3,8 +3,8 @@ package com.smartbear.ready.plugin.postman.collection;
 import com.eviware.soapui.support.StringUtils;
 import com.smartbear.ready.plugin.postman.ScriptType;
 import com.smartbear.ready.plugin.postman.utils.PostmanJsonUtil;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,17 +44,17 @@ public abstract class PostmanCollection {
         Pattern continuationInCurrentLinePattern = Pattern.compile("^ *[!-/:-@\\[-`{-~].*");
         Pattern continuationInNextLinePattern = Pattern.compile(".*[!-(*-/:-@\\[-`{-~] *$");
 
-        for (Object eventObject : events) {
+        for (Object eventObject : PostmanJsonUtil.toList(events)) {
             if (eventObject instanceof JSONObject event) {
                 String listen = getValue(event, LISTEN);
                 if (!StringUtils.sameString(listen, scriptType.getListenType())) {
                     continue;
                 }
-                JSONObject script = event.getJSONObject(SCRIPT);
+                JSONObject script = event.optJSONObject(SCRIPT);
                 if (script != null) {
                     StringBuilder scriptBuilder = new StringBuilder();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
-                    for (Object scriptLine : scriptLines) {
+                    for (Object scriptLine : PostmanJsonUtil.toList(scriptLines)) {
                         String line = scriptLine.toString();
                         removeSemicolonFromPreviousLineIfNeeded(
                             line,
@@ -135,7 +135,7 @@ public abstract class PostmanCollection {
 
     protected static String getValue(JSONObject jsonObject, String field, String defaultValue) {
         final String NULL_STRING = "null";
-        Object value = jsonObject.get(field);
+        Object value = jsonObject.opt(field);
         if (value != null) {
             String valueString = value.toString();
             if (!valueString.equals(NULL_STRING)) {
@@ -146,7 +146,7 @@ public abstract class PostmanCollection {
     }
 
     protected static String getValueFromObjectOrString(JSONObject jsonObject, String firstLevelField, String secondLevelField) {
-        Object firstLevelObject = jsonObject.get(firstLevelField);
+        Object firstLevelObject = jsonObject.opt(firstLevelField);
         if (firstLevelObject instanceof JSONObject) {
             return getValue((JSONObject) firstLevelObject, secondLevelField);
         } else if (firstLevelObject != null) {

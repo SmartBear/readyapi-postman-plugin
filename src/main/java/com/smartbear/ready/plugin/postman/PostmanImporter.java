@@ -56,8 +56,7 @@ import com.smartbear.ready.plugin.postman.utils.RestServiceCreator;
 import com.smartbear.ready.plugin.postman.utils.SoapServiceCreator;
 import com.smartbear.ready.plugin.postman.utils.VaultVariableResolver;
 import com.smartbear.ready.plugin.postman.utils.VariableUtils;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +92,7 @@ public class PostmanImporter {
         WsdlProject project = null;
         String postmanJson = getPostmanImporterWorker(filePath).getPostmanJson();
         if (PostmanJsonUtil.seemsToBeJson(postmanJson)) {
-            JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
+            Object json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
             if (json instanceof JSONObject jsonCollection) {
                 PostmanCollection postmanCollection = PostmanCollectionFactory.getCollection(jsonCollection);
                 String collectionName = postmanCollection.getName();
