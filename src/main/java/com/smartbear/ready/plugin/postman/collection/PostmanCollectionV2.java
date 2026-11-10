@@ -88,7 +88,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     }
 
     private void extractRequestsFromItems(JSONArray items, List<Request> requestList, DirectoryInfo directoryInfo) {
-        for (Object itemObject : PostmanJsonUtil.toList(items)) {
+        for (Object itemObject : items) {
             if (itemObject instanceof JSONObject item) {
                 if (isFolder(item)) {
                     extractRequestsFromItems(PostmanJsonUtil.getJsonArraySafely(item, ITEM), requestList,
@@ -105,7 +105,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     }
 
     private void extractFoldersFromItems(JSONArray items, List<JSONObject> foldersList) {
-        for (Object itemObject : PostmanJsonUtil.toList(items)) {
+        for (Object itemObject : items) {
             if (itemObject instanceof JSONObject item && isFolder(item)) {
                 foldersList.add(item);
                 extractFoldersFromItems(PostmanJsonUtil.getJsonArraySafely(item, ITEM), foldersList);
@@ -114,7 +114,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     }
 
     private void extractVariablesFromItems(JSONArray items, List<Variable> variablesList) {
-        for (Object itemObject : PostmanJsonUtil.toList(items)) {
+        for (Object itemObject : items) {
             if (itemObject instanceof JSONObject item) {
                 variablesList.add(new VariableImpl(item));
             }

@@ -75,7 +75,7 @@ class RequestV2 implements Request {
             if (headersObject instanceof JSONArray) {
                 ArrayList<PostmanCollection.Header> headerList = new ArrayList<>();
                 JSONArray headers = (JSONArray) headersObject;
-                for (Object header : PostmanJsonUtil.toList(headers)) {
+                for (Object header : headers) {
                     if (header instanceof JSONObject) {
                         JSONObject headerObject = (JSONObject) header;
                         headerList.add(new PostmanCollection.Header(PostmanCollection.getValue(headerObject, PostmanCollectionV2.KEY), PostmanCollection.getValue(headerObject, PostmanCollectionV2.VALUE)));
@@ -149,7 +149,7 @@ class RequestV2 implements Request {
 
         if (dataJson instanceof JSONArray) {
             JSONArray dataArray = (JSONArray) dataJson;
-            for (Object element : PostmanJsonUtil.toList(dataArray)) {
+            for (Object element : dataArray) {
                 if (element instanceof JSONObject data) {
                     String key = data.optString("key");
                     String type = data.optString("type");

@@ -2,12 +2,8 @@ package com.smartbear.ready.plugin.postman.utils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONException;
 import org.json.JSONTokener;
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PostmanJsonUtil {
     static final String WHILE_1 = "while(1);";
@@ -23,7 +19,7 @@ public class PostmanJsonUtil {
             return false;
         }
         try {
-            Object parsed = parseJson(content);
+            Object parsed = new JSONTokener(content).nextValue();
             return parsed instanceof JSONObject || parsed instanceof JSONArray;
         } catch (Exception e) {
             return false;
@@ -44,25 +40,7 @@ public class PostmanJsonUtil {
             return null;
         }
         String trimmedText = removeVulnerabilityTokens(text).trim();
-        return parseJson(trimmedText);
-    }
-
-    private static Object parseJson(String text) {
-        try {
-            return new JSONTokener(text).nextValue();
-        } catch (JSONException e) {
-            throw new IllegalArgumentException("Invalid JSON: " + e.getMessage(), e);
-        }
-    }
-
-    public static List<Object> toList(JSONArray array) {
-        List<Object> list = new ArrayList<>();
-        if (array != null) {
-            for (int i = 0; i < array.length(); i++) {
-                list.add(array.opt(i));
-            }
-        }
-        return list;
+        return new JSONTokener(trimmedText).nextValue();
     }
 
     String removeVulnerabilityTokens(String inputJsonString) {

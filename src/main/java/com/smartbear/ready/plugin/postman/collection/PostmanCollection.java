@@ -44,7 +44,7 @@ public abstract class PostmanCollection {
         Pattern continuationInCurrentLinePattern = Pattern.compile("^ *[!-/:-@\\[-`{-~].*");
         Pattern continuationInNextLinePattern = Pattern.compile(".*[!-(*-/:-@\\[-`{-~] *$");
 
-        for (Object eventObject : PostmanJsonUtil.toList(events)) {
+        for (Object eventObject : events) {
             if (eventObject instanceof JSONObject event) {
                 String listen = getValue(event, LISTEN);
                 if (!StringUtils.sameString(listen, scriptType.getListenType())) {
@@ -54,7 +54,7 @@ public abstract class PostmanCollection {
                 if (script != null) {
                     StringBuilder scriptBuilder = new StringBuilder();
                     JSONArray scriptLines = PostmanJsonUtil.getJsonArraySafely(script, EXEC);
-                    for (Object scriptLine : PostmanJsonUtil.toList(scriptLines)) {
+                    for (Object scriptLine : scriptLines) {
                         String line = scriptLine.toString();
                         removeSemicolonFromPreviousLineIfNeeded(
                             line,

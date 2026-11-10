@@ -49,7 +49,7 @@ public class PostmanCollectionUtils {
                     collectionNodesQueue.add(jsonObject.opt(keys.next()));
                 }
             } else if (currentNode instanceof JSONArray jsonArray) {
-                collectionNodesQueue.addAll(PostmanJsonUtil.toList(jsonArray));
+                jsonArray.forEach(collectionNodesQueue::add);
             } else if (currentNode instanceof String string) {
                 for (Pattern vaultVariablePattern: VAULT_VARIABLE_REGEXES) {
                     Matcher matcher = vaultVariablePattern.matcher(string);
