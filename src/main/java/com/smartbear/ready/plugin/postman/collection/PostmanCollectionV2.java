@@ -1,9 +1,9 @@
 package com.smartbear.ready.plugin.postman.collection;
 
 import com.smartbear.ready.plugin.postman.utils.PostmanCollectionUtils;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONException;
-import net.sf.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +83,7 @@ public class PostmanCollectionV2 extends PostmanCollection {
     }
 
     private boolean isFolder(JSONObject item) {
-        return item.containsKey(ITEM);
+        return item.has(ITEM);
     }
 
     private void extractRequestsFromItems(JSONArray items, List<Request> requestList, DirectoryInfo directoryInfo) {
@@ -92,10 +92,10 @@ public class PostmanCollectionV2 extends PostmanCollection {
                 if (isFolder(item)) {
                     extractRequestsFromItems(item.getJSONArray(ITEM), requestList,
                             new DirectoryInfo(
-                                    item.getString(NAME),
-                                    item.has(DESCRIPTION) ? item.getString(DESCRIPTION) : "",
+                                    item.get(NAME).toString(),
+                                    item.has(DESCRIPTION) ? item.get(DESCRIPTION).toString() : "",
                                     directoryInfo,
-                                    item.has(AUTH_PROFILE) ? item.getString(AUTH_PROFILE) : ""));
+                                    item.has(AUTH_PROFILE) ? item.get(AUTH_PROFILE).toString() : ""));
                 } else {
                     requestList.add(new RequestV2(item, directoryInfo));
                 }

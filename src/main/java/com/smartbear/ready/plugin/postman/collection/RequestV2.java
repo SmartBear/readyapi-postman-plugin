@@ -3,14 +3,12 @@ package com.smartbear.ready.plugin.postman.collection;
 import com.eviware.soapui.impl.wsdl.support.soap.SoapVersion;
 import com.smartbear.ready.plugin.postman.ScriptType;
 import com.smartbear.ready.plugin.postman.utils.PostmanJsonUtil;
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.apache.xmlbeans.XmlError;
 import org.apache.xmlbeans.XmlOptions;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -26,7 +24,7 @@ class RequestV2 implements Request {
 
     public RequestV2(JSONObject item, DirectoryInfo directoryInfo) {
         this.item = item;
-        Object requestObject = item.get(PostmanCollectionV2.REQUEST);
+        Object requestObject = item.opt(PostmanCollectionV2.REQUEST);
         if (requestObject instanceof JSONObject) {
             request = (JSONObject) requestObject;
         } else {
@@ -73,7 +71,7 @@ class RequestV2 implements Request {
     @Override
     public List<PostmanCollection.Header> getHeaders() {
         if (request != null) {
-            Object headersObject = request.get(PostmanCollectionV2.HEADER);
+            Object headersObject = request.opt(PostmanCollectionV2.HEADER);
             if (headersObject instanceof JSONArray) {
                 ArrayList<PostmanCollection.Header> headerList = new ArrayList<>();
                 JSONArray headers = (JSONArray) headersObject;
@@ -110,7 +108,7 @@ class RequestV2 implements Request {
 
     @Override
     public String getGraphQlQuery() {
-        Object body = request.get(PostmanCollectionV2.BODY);
+        Object body = request.opt(PostmanCollectionV2.BODY);
         if (body instanceof JSONObject) {
             return PostmanCollection.getValueFromObjectOrString((JSONObject) body, getMode(), PostmanCollectionV2.GRAPHQL_QUERY);
         }
@@ -120,7 +118,7 @@ class RequestV2 implements Request {
 
     @Override
     public String getGraphQlVariables() {
-        Object body = request.get(PostmanCollectionV2.BODY);
+        Object body = request.opt(PostmanCollectionV2.BODY);
         if (body instanceof JSONObject) {
             return PostmanCollection.getValueFromObjectOrString((JSONObject) body, getMode(), PostmanCollectionV2.GRAPHQL_VARIABLES);
         }
@@ -139,7 +137,7 @@ class RequestV2 implements Request {
     @Override
     public List<FormDataParameter> getFormDataParameters() {
         List<FormDataParameter> parameters = new LinkedList<>();
-        JSON dataJson = new PostmanJsonUtil().parseTrimmedText(getBody());
+        Object dataJson = new PostmanJsonUtil().parseTrimmedText(getBody());
 
         Map<String, String> typeToValue = new HashMap<>();
         typeToValue.put("file", "src");
@@ -151,16 +149,15 @@ class RequestV2 implements Request {
 
         if (dataJson instanceof JSONArray) {
             JSONArray dataArray = (JSONArray) dataJson;
-            Arrays.stream(dataArray.toArray())
-                    .filter(JSONObject.class::isInstance)
-                    .map(d -> (JSONObject) d)
-                    .forEach(data -> {
-                        String key = data.getString("key");
-                        String type = data.getString("type");
+            for (Object element : dataArray) {
+                if (element instanceof JSONObject data) {
+                    String key = data.get("key").toString();
+                    String type = data.get("type").toString();
 
-                        String value = data.getString(typeToValue.get(type));
-                        parameters.add(new FormDataParameter(stringToFormDataType.get(type), key, value));
-                    });
+                    String value = data.get(typeToValue.get(type)).toString();
+                    parameters.add(new FormDataParameter(stringToFormDataType.get(type), key, value));
+                }
+            }
         }
         return parameters;
     }

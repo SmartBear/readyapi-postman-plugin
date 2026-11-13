@@ -7,8 +7,7 @@ import com.eviware.soapui.impl.wsdl.WsdlProjectFactory;
 import com.google.common.collect.ImmutableMap;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -93,7 +92,7 @@ class RestServiceCreatorTest {
                 collectionUrl,
                 StandardCharsets.UTF_8
         );
-        JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
+        Object json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
         return PostmanCollectionFactory.getCollection((JSONObject) json);
     }
 }

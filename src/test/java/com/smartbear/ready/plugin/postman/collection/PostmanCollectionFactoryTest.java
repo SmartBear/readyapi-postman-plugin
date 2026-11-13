@@ -2,8 +2,7 @@ package com.smartbear.ready.plugin.postman.collection;
 
 import com.smartbear.ready.plugin.postman.exceptions.PostmanCollectionUnsupportedVersionException;
 import com.smartbear.ready.plugin.postman.utils.PostmanJsonUtil;
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +53,7 @@ public class PostmanCollectionFactoryTest {
 
     private PostmanCollection getCollectionFromFile(String collectionFilePath) throws Exception {
         String postmanJson = FileUtils.readFileToString(new File(collectionFilePath), StandardCharsets.UTF_8);
-        JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
+        Object json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
         return PostmanCollectionFactory.getCollection((JSONObject) json);
     }
 

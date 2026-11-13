@@ -6,7 +6,7 @@ import com.eviware.soapui.support.StringUtils;
 import com.eviware.soapui.support.UISupport;
 import com.eviware.soapui.support.swing.JTableFactory;
 import com.smartbear.ready.ui.components.designkit.tables.TableCellSize;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;

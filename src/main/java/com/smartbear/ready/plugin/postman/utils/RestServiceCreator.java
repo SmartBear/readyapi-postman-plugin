@@ -24,7 +24,7 @@ import com.eviware.soapui.support.StringUtils;
 import com.smartbear.ready.plugin.postman.collection.FormDataParameter;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.Request;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

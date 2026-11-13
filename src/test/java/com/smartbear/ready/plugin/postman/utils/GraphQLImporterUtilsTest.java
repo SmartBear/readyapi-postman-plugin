@@ -8,8 +8,7 @@ import com.smartbear.ready.plugin.postman.collection.PostmanCollection;
 import com.smartbear.ready.plugin.postman.collection.PostmanCollectionFactory;
 import com.smartbear.ready.plugin.postman.collection.Request;
 
-import net.sf.json.JSON;
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -108,7 +107,7 @@ public class GraphQLImporterUtilsTest {
 
     private PostmanCollection getCollectionFromFile(String collectionFilePath) throws Exception {
         String postmanJson = FileUtils.readFileToString(new File(collectionFilePath), StandardCharsets.UTF_8);
-        JSON json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
+        Object json = new PostmanJsonUtil().parseTrimmedText(postmanJson);
         return PostmanCollectionFactory.getCollection((JSONObject) json);
     }
 

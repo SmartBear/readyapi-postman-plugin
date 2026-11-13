@@ -1,12 +1,8 @@
 package com.smartbear.ready.plugin.postman.utils;
 
-import com.eviware.soapui.support.JsonUtil;
-import net.sf.json.JSON;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import net.sf.json.JSONSerializer;
-import net.sf.json.JsonConfig;
-import net.sf.json.groovy.JsonSlurper;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.apache.commons.lang3.StringUtils;
 
 public class PostmanJsonUtil {
@@ -23,15 +19,15 @@ public class PostmanJsonUtil {
             return false;
         }
         try {
-            new JsonSlurper().parseText(content);
-            return true;
+            Object parsed = new JSONTokener(content).nextValue();
+            return parsed instanceof JSONObject || parsed instanceof JSONArray;
         } catch (Exception e) {
             return false;
         }
     }
 
     public static JSONArray getJsonArraySafely(JSONObject node, String arrayNodeName) {
-        Object jsonObject = node.get(arrayNodeName);
+        Object jsonObject = node.opt(arrayNodeName);
         if (jsonObject instanceof JSONArray) {
             return (JSONArray) jsonObject;
         } else {
@@ -39,14 +35,12 @@ public class PostmanJsonUtil {
         }
     }
 
-    public JSON parseTrimmedText(String text) {
+    public Object parseTrimmedText(String text) {
         if (text == null) {
             return null;
         }
         String trimmedText = removeVulnerabilityTokens(text).trim();
-        JsonConfig config = new JsonConfig();
-        config.setIgnoreDefaultExcludes(true);
-        return JSONSerializer.toJSON(trimmedText, config);
+        return new JSONTokener(trimmedText).nextValue();
     }
 
     String removeVulnerabilityTokens(String inputJsonString) {

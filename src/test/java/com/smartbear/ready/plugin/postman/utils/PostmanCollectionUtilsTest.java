@@ -1,6 +1,6 @@
 package com.smartbear.ready.plugin.postman.utils;
 
-import net.sf.json.JSONObject;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -76,7 +76,7 @@ class PostmanCollectionUtilsTest {
 
     private JSONObject getCollectionFromFile(String filePath) throws Exception{
         File file = new File(PostmanCollectionUtilsTest.class.getResource(filePath).toURI());
-        return JSONObject.fromObject(Files.readString(file.toPath(), StandardCharsets.UTF_8));
+        return new JSONObject(Files.readString(file.toPath(), StandardCharsets.UTF_8));
     }
 
 }
